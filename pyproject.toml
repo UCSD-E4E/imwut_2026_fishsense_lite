@@ -9,6 +9,7 @@ dependencies = [
     "ipykernel>=7.1.0",
     "ipympl>=0.9.8",
     "matplotlib>=3.10.7",
+    "scipy>=1.16.3",
     "tqdm>=4.67.1",
 ]
 

@@ -350,6 +350,7 @@ dependencies = [
     { name = "ipykernel" },
     { name = "ipympl" },
     { name = "matplotlib" },
+    { name = "scipy" },
     { name = "tqdm" },
 ]
 
@@ -359,6 +360,7 @@ requires-dist = [
     { name = "ipykernel", specifier = ">=7.1.0" },
     { name = "ipympl", specifier = ">=0.9.8" },
     { name = "matplotlib", specifier = ">=3.10.7" },
+    { name = "scipy", specifier = ">=1.16.3" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
