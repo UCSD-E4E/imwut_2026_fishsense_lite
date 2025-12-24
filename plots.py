@@ -49,40 +49,64 @@ def plot_position_percent_error(
     return fig
 
 
-# for std, arrays, arrays_reconstructed, _, _ in calibrations_by_stds:
-#     percent_error = np.abs(
-#         (np.array(arrays) - np.tile(laser_params, (len(arrays), 1)))
-#         / np.tile(laser_params, (len(arrays), 1))
-#         * 100
-#     )
-#     percent_error_reconstructed = np.abs(
-#         (
-#             np.array(arrays_reconstructed)
-#             - np.tile(laser_params, (len(arrays_reconstructed), 1))
-#         )
-#         / np.tile(laser_params, (len(arrays_reconstructed), 1))
-#         * 100
-#     )
+def plot_mean_reconstruction_error(
+    calibrations_dict: Dict[str, Tuple[float, str, List[np.ndarray]]],
+    inverted_camera_intrinsics: np.ndarray,
+    image_points: np.ndarray,
+    world_points: np.ndarray,
+    step_count: int,
+    type: str,
+    start: int = None,
+    end: int = None,
+) -> None:
+    if start is None:
+        start = 2
+    if end is None:
+        end = step_count
 
-#     direction_percent_error = percent_error[:,][:, 0:3]
-#     position_percent_error = np.mean(percent_error[:,][:, 3:5], axis=1)
+    fig, ax = plt.subplots()
 
-#     direction_percent_error_reconstructed = percent_error_reconstructed[:,][:, 0:3]
-#     position_percent_error_reconstructed = np.mean(
-#         percent_error_reconstructed[:,][:, 3:5], axis=1
-#     )
+    for key, calibrations_by_std in calibrations_dict.items():
+        name, linestyle = key.split("/")
 
-#     # plt.plot(np.arange(2, STEP_COUNT), position_percent_error, label=f'Std {std} Position Percent Error')
-#     plt.plot(
-#         np.arange(2, STEP_COUNT)[100:],
-#         position_percent_error_reconstructed[100:],
-#         linestyle="dashed",
-#         label=f"Std {std} Position Percent Error (Reconstructed)",
-#     )
+        for std, arrays in calibrations_by_std:
+            mean_errors_noisy = []
 
-# plt.title(
-#     "Position Percent Error vs Number of Points Used for Calibration (Continuous)"
-# )
-# plt.xlabel("Number of Points Used for Calibration")
-# plt.ylabel("Percent Error")
-# plt.legend()
+            for calibration_noisy in arrays:
+                laser_axis_noisy = calibration_noisy[0:3]
+
+                laser_origin_noisy = np.zeros((3,))
+                laser_origin_noisy[0:2] = calibration_noisy[3:5]
+                laser_origin_noisy[2] = 0.0
+
+                projected_points = inverted_camera_intrinsics @ image_points
+                norms = np.linalg.norm(projected_points, axis=0)
+                final_laser_axis = -projected_points / norms
+
+                point_constants_noisy = (
+                    (final_laser_axis.T @ laser_origin_noisy)
+                    - (laser_axis_noisy.T @ laser_origin_noisy)
+                    * (laser_axis_noisy.T @ final_laser_axis)
+                ) / (1 - (laser_axis_noisy.T @ final_laser_axis) ** 2)
+                world_points_noisy = (
+                    np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
+                )
+                mean_error_noisy = np.mean(
+                    np.sqrt(np.sum((world_points_noisy - world_points) ** 2, axis=1))
+                )
+
+                mean_errors_noisy.append(mean_error_noisy)
+
+            ax.plot(
+                np.arange(start, end),
+                mean_errors_noisy[start - 2 : end - 2],
+                label=f"Std {std} Mean Reconstruction Error ({name})",
+                linestyle=linestyle,
+            )
+
+    ax.set_title(
+        f"Mean Reconstruction Error vs Number of Points Used for Calibration ({type})"
+    )
+    ax.set_xlabel("Number of Points Used for Calibration")
+    ax.set_ylabel("Mean Reconstruction Error (m)")
+    ax.legend()
