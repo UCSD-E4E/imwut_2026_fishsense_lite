@@ -281,6 +281,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "fishsense-imwut"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "fishsense-meta" },
+    { name = "ipykernel" },
+    { name = "ipympl" },
+    { name = "matplotlib" },
+    { name = "scipy" },
+    { name = "tqdm" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "black" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fishsense-meta", git = "https://github.com/UCSD-E4E/fishsense-core.git" },
+    { name = "ipykernel", specifier = ">=7.1.0" },
+    { name = "ipympl", specifier = ">=0.9.8" },
+    { name = "matplotlib", specifier = ">=3.10.7" },
+    { name = "scipy", specifier = ">=1.16.3" },
+    { name = "tqdm", specifier = ">=4.67.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "black", specifier = ">=25.12.0" }]
+
+[[package]]
 name = "fishsense-meta"
 version = "0.1.0"
 source = { git = "https://github.com/UCSD-E4E/fishsense-core.git#e4167bfe7060096f39300c003fd5283922d1405c" }
@@ -379,37 +410,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/a3/6f/606be632e37bf8d05
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fb/fe/301e0936b79bcab4cacc7548bf2853fc28dced0a578bab1f7ef53c9aa75b/imageio-2.37.2-py3-none-any.whl", hash = "sha256:ad9adfb20335d718c03de457358ed69f141021a333c40a53e57273d8a5bd0b9b", size = 317646, upload-time = "2025-11-04T14:29:37.948Z" },
 ]
-
-[[package]]
-name = "imwut-2026-fishsense-lite"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "fishsense-meta" },
-    { name = "ipykernel" },
-    { name = "ipympl" },
-    { name = "matplotlib" },
-    { name = "scipy" },
-    { name = "tqdm" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "black" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fishsense-meta", git = "https://github.com/UCSD-E4E/fishsense-core.git" },
-    { name = "ipykernel", specifier = ">=7.1.0" },
-    { name = "ipympl", specifier = ">=0.9.8" },
-    { name = "matplotlib", specifier = ">=3.10.7" },
-    { name = "scipy", specifier = ">=1.16.3" },
-    { name = "tqdm", specifier = ">=4.67.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "black", specifier = ">=25.12.0" }]
 
 [[package]]
 name = "ipykernel"

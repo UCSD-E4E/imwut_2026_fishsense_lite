@@ -1,5 +1,5 @@
 [project]
-name = "imwut-2026-fishsense-lite"
+name = "fishsense_imwut"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -20,3 +20,11 @@ fishsense-meta = { git = "https://github.com/UCSD-E4E/fishsense-core.git" }
 dev = [
     "black>=25.12.0",
 ]
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "fishsense_imwut"
