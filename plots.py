@@ -110,3 +110,66 @@ def plot_mean_reconstruction_error(
     ax.set_xlabel("Number of Points Used for Calibration")
     ax.set_ylabel("Mean Reconstruction Error (m)")
     ax.legend()
+
+
+def plot_mean_z_percent_error(
+    calibrations_dict: Dict[str, Tuple[float, str, List[np.ndarray]]],
+    inverted_camera_intrinsics: np.ndarray,
+    image_points: np.ndarray,
+    world_points: np.ndarray,
+    step_count: int,
+    type: str,
+    start: int = None,
+    end: int = None,
+) -> None:
+    if start is None:
+        start = 2
+    if end is None:
+        end = step_count
+
+    fig, ax = plt.subplots()
+
+    for key, calibrations_by_std in calibrations_dict.items():
+        name, linestyle = key.split("/")
+
+        for std, arrays in calibrations_by_std:
+            mean_errors_noisy = []
+
+            for calibration_noisy in arrays:
+                laser_axis_noisy = calibration_noisy[0:3]
+
+                laser_origin_noisy = np.zeros((3,))
+                laser_origin_noisy[0:2] = calibration_noisy[3:5]
+                laser_origin_noisy[2] = 0.0
+
+                projected_points = inverted_camera_intrinsics @ image_points
+                norms = np.linalg.norm(projected_points, axis=0)
+                final_laser_axis = -projected_points / norms
+
+                point_constants_noisy = (
+                    (final_laser_axis.T @ laser_origin_noisy)
+                    - (laser_axis_noisy.T @ laser_origin_noisy)
+                    * (laser_axis_noisy.T @ final_laser_axis)
+                ) / (1 - (laser_axis_noisy.T @ final_laser_axis) ** 2)
+                world_points_noisy = (
+                    np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
+                )
+                mean_error_noisy = (
+                    np.mean(np.abs((world_points_noisy - world_points)[2, :])) * 100
+                )
+
+                mean_errors_noisy.append(mean_error_noisy)
+
+            ax.plot(
+                np.arange(start, end),
+                mean_errors_noisy[start - 2 : end - 2],
+                label=f"Std {std} Mean Z Percent Error ({name})",
+                linestyle=linestyle,
+            )
+
+        ax.set_title(
+            f"Mean Z Percent Error vs Number of Points Used for Calibration ({type})"
+        )
+        ax.set_xlabel("Number of Points Used for Calibration")
+        ax.set_ylabel("Mean Z Percent Error (%)")
+        ax.legend()
