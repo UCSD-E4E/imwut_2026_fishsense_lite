@@ -155,7 +155,11 @@ def plot_mean_z_percent_error(
                     np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
                 )
                 mean_error_noisy = (
-                    np.mean(np.abs((world_points_noisy - world_points)[2, :])) * 100
+                    np.mean(
+                        np.abs((world_points_noisy - world_points)[2, :])
+                        / world_points[2, :]
+                    )
+                    * 100
                 )
 
                 mean_errors_noisy.append(mean_error_noisy)
