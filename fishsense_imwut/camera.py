@@ -22,3 +22,22 @@ def calculate_normals(points: np.ndarray) -> np.ndarray:
 
     normals = np.array(normals)
     return normals
+
+
+def reconstruct_points(
+    image_points: np.ndarray,
+    inverted_camera_intrinsics: np.ndarray,
+    laser_origin: np.ndarray,
+    laser_axis: np.ndarray,
+) -> np.ndarray:
+    projected_points = inverted_camera_intrinsics @ image_points
+    norms = np.linalg.norm(projected_points, axis=0)
+    final_laser_axis = -projected_points / norms
+
+    point_constants_noisy = (
+        (final_laser_axis.T @ laser_origin)
+        - (laser_axis.T @ laser_origin) * (laser_axis.T @ final_laser_axis)
+    ) / (1 - (laser_axis.T @ final_laser_axis) ** 2)
+    world_points = np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
+
+    return world_points

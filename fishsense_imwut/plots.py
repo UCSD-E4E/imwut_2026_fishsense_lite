@@ -3,8 +3,10 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
+from fishsense_imwut.camera import reconstruct_points
 
-def plot_position_percent_error(
+
+def calibration_plot_position_percent_error(
     calibrations_dict: Dict[str, Tuple[float, str, List[np.ndarray]]],
     laser_params: np.ndarray,
     step_count: int,
@@ -49,7 +51,7 @@ def plot_position_percent_error(
     return fig
 
 
-def plot_mean_reconstruction_error(
+def calibration_plot_mean_reconstruction_error(
     calibrations_dict: Dict[str, Tuple[float, str, List[np.ndarray]]],
     inverted_camera_intrinsics: np.ndarray,
     image_points: np.ndarray,
@@ -79,17 +81,11 @@ def plot_mean_reconstruction_error(
                 laser_origin_noisy[0:2] = calibration_noisy[3:5]
                 laser_origin_noisy[2] = 0.0
 
-                projected_points = inverted_camera_intrinsics @ image_points
-                norms = np.linalg.norm(projected_points, axis=0)
-                final_laser_axis = -projected_points / norms
-
-                point_constants_noisy = (
-                    (final_laser_axis.T @ laser_origin_noisy)
-                    - (laser_axis_noisy.T @ laser_origin_noisy)
-                    * (laser_axis_noisy.T @ final_laser_axis)
-                ) / (1 - (laser_axis_noisy.T @ final_laser_axis) ** 2)
-                world_points_noisy = (
-                    np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
+                world_points_noisy = reconstruct_points(
+                    image_points,
+                    inverted_camera_intrinsics,
+                    laser_origin_noisy,
+                    laser_axis_noisy,
                 )
                 mean_error_noisy = np.mean(
                     np.sqrt(np.sum((world_points_noisy - world_points) ** 2, axis=1))
@@ -112,7 +108,7 @@ def plot_mean_reconstruction_error(
     ax.legend()
 
 
-def plot_mean_z_percent_error(
+def calibration_plot_mean_z_percent_error(
     calibrations_dict: Dict[str, Tuple[float, str, List[np.ndarray]]],
     inverted_camera_intrinsics: np.ndarray,
     image_points: np.ndarray,
@@ -142,17 +138,11 @@ def plot_mean_z_percent_error(
                 laser_origin_noisy[0:2] = calibration_noisy[3:5]
                 laser_origin_noisy[2] = 0.0
 
-                projected_points = inverted_camera_intrinsics @ image_points
-                norms = np.linalg.norm(projected_points, axis=0)
-                final_laser_axis = -projected_points / norms
-
-                point_constants_noisy = (
-                    (final_laser_axis.T @ laser_origin_noisy)
-                    - (laser_axis_noisy.T @ laser_origin_noisy)
-                    * (laser_axis_noisy.T @ final_laser_axis)
-                ) / (1 - (laser_axis_noisy.T @ final_laser_axis) ** 2)
-                world_points_noisy = (
-                    np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
+                world_points_noisy = reconstruct_points(
+                    image_points,
+                    inverted_camera_intrinsics,
+                    laser_origin_noisy,
+                    laser_axis_noisy,
                 )
                 mean_error_noisy = (
                     np.mean(
