@@ -81,7 +81,7 @@ def calibration_plot_mean_reconstruction_error(
                 laser_origin_noisy[0:2] = calibration_noisy[3:5]
                 laser_origin_noisy[2] = 0.0
 
-                world_points_noisy = reconstruct_points(
+                world_points_noisy, _ = reconstruct_points(
                     image_points,
                     inverted_camera_intrinsics,
                     laser_origin_noisy,
@@ -138,7 +138,7 @@ def calibration_plot_mean_z_percent_error(
                 laser_origin_noisy[0:2] = calibration_noisy[3:5]
                 laser_origin_noisy[2] = 0.0
 
-                world_points_noisy = reconstruct_points(
+                world_points_noisy, _ = reconstruct_points(
                     image_points,
                     inverted_camera_intrinsics,
                     laser_origin_noisy,

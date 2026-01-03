@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 
@@ -29,7 +31,7 @@ def reconstruct_points(
     inverted_camera_intrinsics: np.ndarray,
     laser_origin: np.ndarray,
     laser_axis: np.ndarray,
-) -> np.ndarray:
+) -> Tuple[np.ndarray, float]:
     projected_points = inverted_camera_intrinsics @ image_points
     norms = np.linalg.norm(projected_points, axis=0)
     final_laser_axis = -projected_points / norms
@@ -40,4 +42,8 @@ def reconstruct_points(
     ) / (1 - (laser_axis.T @ final_laser_axis) ** 2)
     world_points = np.tile(point_constants_noisy, (3, 1)) * final_laser_axis
 
-    return world_points
+    L = laser_axis / np.linalg.norm(laser_axis)
+    dot = (L.reshape(1, 3) @ final_laser_axis).ravel()
+    denom = 1 - dot**2
+
+    return world_points, denom
