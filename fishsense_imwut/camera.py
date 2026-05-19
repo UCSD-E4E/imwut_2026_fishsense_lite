@@ -2,6 +2,31 @@ from typing import Tuple
 
 import numpy as np
 
+from fishsense_imwut.constants import (
+    FOCAL_LENGTH_PX,
+    IMAGE_HEIGHT,
+    IMAGE_WIDTH,
+)
+
+
+def make_camera_intrinsics(
+    image_width: int = IMAGE_WIDTH,
+    image_height: int = IMAGE_HEIGHT,
+    focal_length_px: float = FOCAL_LENGTH_PX,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return (K, K^-1) for a centered-principal-point pinhole camera.
+
+    Defaults match the reference FishCamera hardware (Section 3.3).
+    """
+    K = np.array(
+        [
+            [focal_length_px, 0, image_width / 2],
+            [0, focal_length_px, image_height / 2],
+            [0, 0, 1],
+        ]
+    )
+    return K, np.linalg.inv(K)
+
 
 def point_to_plane(point: np.ndarray, std: float = 0.1) -> np.ndarray:
     random_normal = np.random.normal(0, std, (3,))
