@@ -309,25 +309,27 @@ The polish fits tightly — median |residual| **0.15 pp** over 30 dives × 7 mod
 two additive terms remain the whole story at corpus scale.
 
 Result, pinned as `cal.CORPUS_ACCURACY_DIVES` and by `tests/test_calibration.py`:
-**59, 61, 84, 491, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522** — three August
-dives plus twelve 2025 pool dives (checkerboard self-calibration or a same-rig borrow).
+**59, 61, 84, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522** — three August dives
+plus eleven 2025 pool dives (checkerboard self-calibration or a same-rig borrow). Re-pulled
+2026-09-12 after dive 490's fish frames became dive 527 (§7.4): with 490's −13.8 gone the
+corpus median moved ~0.3 pp, so 491 (−2.73) and 527 (+2.95) both sit just outside the band.
 
 ### 7.2 Headline
 
 | cohort | dives | n | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| **rule: \|dive effect\| ≤ 2.5 pp** | 15 | 842 | −2.37 % | **+0.02 %** | 4.04 % |
+| **rule: \|dive effect\| ≤ 2.5 pp** | 14 | 814 | −2.27 % | **+0.04 %** | 3.95 % |
 | August five (58/59/60/61/84) | 5 | 335 | −1.51 % | +1.41 % | 3.00 % |
-| every dive not held out by design | 23 | 1192 | −3.15 % | +0.19 % | 5.02 % |
-| everything except the angle experiment | 27 | 1499 | −3.84 % | +0.04 % | 6.18 % |
-| everything | 32 | 2927 | −6.24 % | −0.68 % | 9.72 % |
+| every dive not held out by design | 24 | 1254 | −3.00 % | +0.29 % | 4.89 % |
+| everything except the angle experiment | 27 | 1499 | −3.48 % | +0.16 % | 5.15 % |
+| everything | 32 | 2927 | −5.91 % | −0.59 % | 9.20 % |
 
 Every widening beyond the rule makes the numbers worse — that is the cost of not
 cherry-picking — and $p_{90}$ stays within ±0.7 % of zero in every row. Threshold
-sensitivity: 1.5 → 3.5 pp moves membership from 8 to 19 dives and $p_{90}$ between −0.45 %
-and +0.02 %.
+sensitivity: 1.5 → 3.5 pp moves membership from 9 to 20 dives and $p_{90}$ between −0.42 %
+and +0.13 %.
 
-Ladder on the cohort ($p_{90}$): Box −0.24, Purple Angel +0.85, Weasly Fish −1.89, Grouper
+Ladder on the cohort ($p_{90}$): Box −0.15, Purple Angel +0.85, Weasly Fish −1.89, Grouper
 +0.29, Snook −0.94, Shark +4.29.
 
 ### 7.3 Model effects
@@ -345,8 +347,8 @@ Ladder on the cohort ($p_{90}$): Box −0.24, Purple Angel +0.85, Weasly Fish �
 Snook's August effect (−2.36) shrinks to −0.57 once the angle experiment contributes its
 best-presented frames — the August number was pose, as §3.2 suspected. Shark's grows. The
 Shark is not on hand to caliper (only the Box and Weasly Fish are, and both are already
-within 0.4 pp), and it is 25 of 842 cohort frames: dropping it moves the cohort $p_{90}$
-from +0.02 % to −0.28 %; re-referencing it at 620 mm gives −0.19 %. Reported as-is with
+within 0.4 pp), and it is 25 of 814 cohort frames: dropping it moves the cohort $p_{90}$
+from +0.04 % to −0.24 %; re-referencing it at 620 mm gives about −0.2 %. Reported as-is with
 the model effect stated.
 
 ### 7.4 Dives the rule rejects
@@ -354,10 +356,12 @@ the model effect stated.
 | dive | effect (pp) | what it is |
 |---|---|---|
 | 490 | −13.8 | **Resolved 2026-09-12**: the laser rotated 0.82° in-plane between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error. Prod fixed 2026-09-12: its fish frames are now dive 527, borrowing 489; corpus not yet re-pulled. See `post_labeling_analysis/HANDOFF.md` §5. |
-| 492 | −5.5 | borrows 490 |
-| 494 | −3.2 | borrows 493 |
-| 509 | −2.5 | self-calibrated, just outside |
-| 504 / 58 / 506 | +3.0 / +3.4 / +4.3 | positive side; 58 is the August dive §3.2 flagged |
+| 492 | −5.8 | borrows 490's row, shot 25 min before either of that rig's bursts; 0.25° from its true state |
+| 494 | −3.5 | borrows 493 |
+| 509 | −2.8 | self-calibrated, just outside |
+| 491 | −2.7 | borrows 490's row across a 0.2° laser movement; was inside the band before the re-pull |
+| 527 | +2.9 | 490's fish frames under 489's calibration: −1.7 % median, $p_{90}$ +1.3 %, i.e. it reads like the 2023 slate dives, which sit ~1.8 pp above the checkerboard-dominated corpus median |
+| 504 / 58 / 506 | +2.7 / +3.1 / +4.0 | positive side; 58 is the August dive §3.2 flagged |
 
 ### 7.5 Foreshortening (Figure 8)
 

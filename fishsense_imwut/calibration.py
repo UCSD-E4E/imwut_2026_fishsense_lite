@@ -282,10 +282,15 @@ def to_frame(rows: Sequence[dict]):
 ANGLE_TEST_DIVES = (87, 94, 103, 107, 114)
 ANGLE_TEST_KNOWN_M = 0.455
 
-# Dive 490 measures its own checkerboard correctly, its labels are verified on
-# the raw pixels, and every model on it still reads ~14 % short. Unresolved;
-# the rule excludes it on its own (dive effect -13.8 pp) and it is reported.
-UNRESOLVED_DIVES = (490,)
+# Dive 490 read every model ~14 % short with verified labels and a clean board
+# fit. Resolved 2026-09-12: its fish frames were shot nine seconds after the
+# PRECEDING board burst (dive 489) and five minutes before its own, and the
+# laser had rotated 0.82 deg in-plane in between. The fish frames were split
+# into dive 527 (borrows 489) and re-measured at -1.7 % median; 490 now holds
+# only its board burst and no measurements. Nothing is unresolved any more, so
+# this is empty; it stays so the notebook's status column keeps its vocabulary.
+UNRESOLVED_DIVES: tuple[int, ...] = ()
+SPLIT_DIVES = {490: 527}  # original -> the dive its fish frames became
 
 # Dives held out of the accuracy cohort BY DESIGN, decided before any corpus
 # number was looked at, so the threshold below cannot be tuned around them:
@@ -308,8 +313,11 @@ MAX_DIVE_EFFECT_PP = 2.5
 POLISH_MIN_FRAMES = 5
 
 # What the rule selects on the corpus, pinned as data so a change is a diff.
+# 2026-09-12, after the 490 -> 527 split: 491 (-2.73) and 527 (+2.95) both sit
+# just outside the band; with 490's -13.8 gone the corpus median moved ~0.3 pp
+# and took 491 with it. The rule is not tuned to keep them.
 CORPUS_ACCURACY_DIVES = (
-    59, 61, 84, 491, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522,
+    59, 61, 84, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522,
 )
 
 

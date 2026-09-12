@@ -141,25 +141,27 @@ frames, fitted on all 30 polishable dives. Cell = overall + dive effect + model 
 residual; median |residual| **0.15 pp** — the additive model is essentially exact. Keep
 |dive effect| ≤ 2.5 pp. Held out by design (`DESIGN_EXCLUDED_DIVES`), fixed before any
 number was computed: the angle dives (single-object; pose-dominated), 60 and 76 (August
-repairs), 66 (disputed). Dive 490 is *not* on that list and falls out on its own (−13.8).
+repairs), 66 (disputed).
 
-Result: **59, 61, 84, 491, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522** —
-n = 842, median −2.37 %, $p_{90}$ +0.02 %, mean |err| 4.04 %; 74 % of frames within 5 %,
-95 % within 10 %, 99 % within 15 %. Threshold sweep 1.5→3.5 pp: 8→19 dives, $p_{90}$
-−0.45…+0.02 %. Sub-populations inside the cohort: 2023 slate-borrow (3 dives, n = 207)
-median −1.17 / $p_{90}$ +1.29; 2025 checkerboard (12 dives, n = 635) median −3.01 /
-$p_{90}$ −0.43. That 1.8-point gap between the two calibration methods is real and
-unexplained (§6.3).
+Result on the corpus as re-pulled 2026-09-12 after the 490 → 527 split (§5):
+**59, 61, 84, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522** — n = 814, median
+−2.27 %, $p_{90}$ +0.04 %, mean |err| 3.95 %; 76 % of frames within 5 %, 96 % within 10 %,
+99 % within 15 %. Threshold sweep 1.5→3.5 pp: 9→20 dives, $p_{90}$ −0.42…+0.13 %. With
+490's −13.8 outlier gone the corpus median moved ~0.3 pp: 491 (−2.73) fell out and 527
+(+2.95) did not come in — 527 reads −1.7 % median / +1.3 % $p_{90}$, i.e. like the three
+2023 slate dives (n = 207, median −1.17, $p_{90}$ +1.29), which sit ~1.8 pp above the
+eleven checkerboard dives (n = 607, median −2.82, $p_{90}$ −0.42). That gap is real and
+unexplained (§6.3); the rule is not tuned around it.
 
-Ladder ($p_{90}$ per model on the cohort): Box −0.24, Purple Angel +0.85, Weasly −1.89,
+Ladder ($p_{90}$ per model on the cohort): Box −0.15, Purple Angel +0.85, Weasly −1.89,
 Grouper +0.29, Snook −0.94, Shark +4.29.
 
 Model effects (pp): Snook −0.57, Box −0.38, Weasly −0.38, Grouper 0.00, Ruler +0.08,
 Purple Angel +1.21, **Shark +3.23**. Snook's August effect (−2.36) shrank once the angle
 dives contributed best-presented frames — it was pose. Shark's grew.
 
-Range (Figure 3): binned median flat at −1.9…−2.3 % from 0.8 to 4.7 m; **below 0.8 m the
-median is −5.8 %** (108 frames, all Box + Weasly). Unexplained; see §6.4.
+Range (Figure 3): binned median flat at about −2 % from 0.8 to 4.7 m; **below 0.8 m the
+median is −5.9 %** (102 frames, all Box + Weasly). Unexplained; see §6.4.
 
 ### 3.2 The foreshortening curve (Figure 8)
 
@@ -243,12 +245,12 @@ Consequences:
   ("LaserCalibration3 fish", borrows 489). A re-link was not possible — borrow resolution
   is single-hop, so deleting row 39 would have stranded 491/492. 527's 62 measurements
   named extrinsics 39 at the time of the split; the depth and stage-14 cohorts re-derive
-  on that mismatch. **Re-pull `corpus.csv` after that** (`sql/extract_corpus.sql`): 490
-  will drop to 0 measurements, 527 will appear at ~−1.7 % median and is expected to enter
-  the accuracy cohort on the rule; re-run the notebook and the pinned cohort test will
-  need updating.
-- 491 is in the accuracy cohort on the rule (dive effect −2.44) while borrowing across a
-  laser movement of ~0.2°. The rule is honest about it; a reviewer may still ask.
+  on that mismatch. Both parents were fired by hand at 23:0x UTC and drained 527: 62
+  measurements now name extrinsics 37, median −1.70 %, $p_{90}$ +1.28 % — the offline
+  prediction to the decimal. `corpus.csv` was re-pulled: 490 has 0 rows, 527 has 62. 527
+  does **not** enter the cohort (+2.95 pp; §3.1).
+- After the re-pull 491 (−2.73) is out of the cohort and 527 (+2.95) is not in it; both are
+  within half a point of the band. 491 borrows 490's row across a ~0.2° laser movement.
 - The general detector — the range trend of a rigid object's length, scale-free — now
   exists in fishsense-lite as `range_trend.py` (branch
   `chore/checkerboard-scale-audit-script`). On this corpus it flags exactly 490, 494, 509,
@@ -361,35 +363,35 @@ $p_{90}$ cells; `cal_src` = dive that owns the extrinsics actually used, `self` 
 
 | dive | n | cal_src | models | range (m) | median % | p90 % | dive effect (pp) | status |
 |---|---|---|---|---|---|---|---|---|
-| 490 | 62 | self | Weasly Fish | 0.54–2.93 | -27.88 | -15.74 | -13.80 | out: |effect| > 2.5 |
-| 492 | 20 | 490 | Weasly Fish | 0.37–3.15 | -9.10 | -7.48 | -5.54 | out: |effect| > 2.5 |
-| 103 | 197 | 83 | Snook | 1.85–2.03 | -15.63 | -5.51 | -3.39 | held out: angle experiment |
-| 494 | 41 | 493 | Box | 0.28–3.45 | -12.72 | -5.12 | -3.18 | out: |effect| > 2.5 |
-| 76 | 91 | 63 | Grouper, Purple Angel, Shark, Snook | 0.86–2.49 | -7.70 | -3.95 | -3.14 | held out: August repair |
-| 509 | 162 | self | Box, Weasly Fish | 0.30–3.68 | -7.32 | -3.28 | -2.53 | out: |effect| > 2.5 |
-| 491 | 28 | 490 | Box | 0.32–2.84 | -5.90 | -4.38 | -2.44 | **ACCURACY** |
-| 66 | 51 | 83 | Grouper, Purple Angel, Ruler, Shark, Snook | 1.08–3.13 | -5.34 | -1.08 | -2.18 | held out: disputed |
-| 520 | 40 | 518 | Weasly Fish | 0.39–2.80 | -4.26 | -3.73 | -1.79 | **ACCURACY** |
-| 522 | 157 | self | Box, Weasly Fish | 0.36–3.06 | -3.74 | -0.81 | -0.93 | **ACCURACY** |
-| 60 | 103 | 65 | Grouper, Purple Angel, Ruler, Shark, Snook | 0.63–2.16 | -3.46 | +0.51 | -0.87 | held out: August repair |
-| 94 | 335 | self | Snook | 1.95–4.77 | -9.07 | -2.94 | -0.81 | held out: angle experiment |
-| 114 | 341 | self | Snook | 1.85–5.06 | -11.01 | -2.85 | -0.73 | held out: angle experiment |
-| 107 | 180 | self | Snook | 1.96–2.06 | -10.77 | -2.54 | -0.41 | held out: angle experiment |
-| 501 | 42 | self | Weasly Fish | 0.27–4.35 | -5.67 | -2.21 | -0.26 | **ACCURACY** |
-| 87 | 375 | self | Snook | 1.89–5.47 | -10.04 | -1.86 | +0.26 | held out: angle experiment |
-| 498 | 35 | self | Weasly Fish | 0.32–4.08 | -6.89 | -1.62 | +0.32 | **ACCURACY** |
-| 495 | 28 | 493 | Weasly Fish | 0.40–3.49 | -3.37 | -1.09 | +0.85 | **ACCURACY** |
-| 61 | 69 | 80 | Grouper, Purple Angel, Snook | 1.21–2.46 | -1.28 | -0.29 | +0.97 | **ACCURACY** |
-| 521 | 79 | self | Box, Weasly Fish | 0.41–4.06 | -2.36 | -0.73 | +1.04 | **ACCURACY** |
-| 84 | 52 | 62 | Grouper, Purple Angel, Shark, Snook | 0.89–2.51 | -1.02 | +1.14 | +1.05 | **ACCURACY** |
-| 503 | 43 | 502 | Box | 0.25–3.86 | -8.09 | -0.75 | +1.20 | **ACCURACY** |
-| 519 | 51 | 518 | Box | 0.29–2.67 | -1.21 | -0.39 | +1.56 | **ACCURACY** |
-| 500 | 50 | 499 | Box | 0.36–4.71 | -1.34 | +0.09 | +2.03 | **ACCURACY** |
-| 507 | 40 | 505 | Weasly Fish | 0.30–3.43 | -2.60 | +0.20 | +2.15 | **ACCURACY** |
-| 59 | 86 | 77 | Grouper, Purple Angel, Shark, Snook | 0.89–2.78 | -0.82 | +2.08 | +2.33 | **ACCURACY** |
-| 497 | 42 | 496 | Box | 0.38–4.30 | -1.15 | +0.43 | +2.37 | **ACCURACY** |
-| 504 | 50 | 502 | Weasly Fish | 0.25–5.30 | -6.67 | +1.06 | +3.00 | out: |effect| > 2.5 |
-| 58 | 25 | 71 | Grouper, Purple Angel, Shark | 1.26–2.72 | +2.14 | +4.82 | +3.44 | out: |effect| > 2.5 |
-| 506 | 49 | 505 | Box | 0.31–4.75 | +0.10 | +2.32 | +4.27 | out: |effect| > 2.5 |
+| 492 | 20 | 490 | Weasly Fish | 0.37–3.15 | -9.10 | -7.48 | -5.83 | out: |effect| > 2.5 |
+| 103 | 197 | 83 | Snook | 1.85–2.03 | -15.63 | -5.51 | -3.68 | held out: angle experiment |
+| 494 | 41 | 493 | Box | 0.28–3.45 | -12.72 | -5.12 | -3.47 | out: |effect| > 2.5 |
+| 76 | 91 | 63 | Grouper, Purple Angel, Shark, Snook | 0.86–2.49 | -7.70 | -3.95 | -3.44 | held out: August repair |
+| 509 | 162 | self | Box, Weasly Fish | 0.30–3.68 | -7.32 | -3.28 | -2.83 | out: |effect| > 2.5 |
+| 491 | 28 | 490 | Box | 0.32–2.84 | -5.90 | -4.38 | -2.73 | out: |effect| > 2.5 |
+| 66 | 51 | 83 | Grouper, Purple Angel, Ruler, Shark, Snook | 1.08–3.13 | -5.34 | -1.08 | -2.47 | held out: disputed |
+| 520 | 40 | 518 | Weasly Fish | 0.39–2.80 | -4.26 | -3.73 | -2.08 | **ACCURACY** |
+| 522 | 157 | self | Box, Weasly Fish | 0.36–3.06 | -3.74 | -0.81 | -1.22 | **ACCURACY** |
+| 60 | 103 | 65 | Grouper, Purple Angel, Ruler, Shark, Snook | 0.63–2.16 | -3.46 | +0.51 | -1.16 | held out: August repair |
+| 94 | 335 | self | Snook | 1.95–4.77 | -9.07 | -2.94 | -1.11 | held out: angle experiment |
+| 114 | 341 | self | Snook | 1.85–5.06 | -11.01 | -2.85 | -1.02 | held out: angle experiment |
+| 107 | 180 | self | Snook | 1.96–2.06 | -10.77 | -2.54 | -0.70 | held out: angle experiment |
+| 501 | 42 | self | Weasly Fish | 0.27–4.35 | -5.67 | -2.21 | -0.56 | **ACCURACY** |
+| 87 | 375 | self | Snook | 1.89–5.47 | -10.04 | -1.86 | -0.03 | held out: angle experiment |
+| 498 | 35 | self | Weasly Fish | 0.32–4.08 | -6.89 | -1.62 | +0.03 | **ACCURACY** |
+| 495 | 28 | 493 | Weasly Fish | 0.40–3.49 | -3.37 | -1.09 | +0.56 | **ACCURACY** |
+| 61 | 69 | 80 | Grouper, Purple Angel, Snook | 1.21–2.46 | -1.28 | -0.29 | +0.68 | **ACCURACY** |
+| 521 | 79 | self | Box, Weasly Fish | 0.41–4.06 | -2.36 | -0.73 | +0.75 | **ACCURACY** |
+| 84 | 52 | 62 | Grouper, Purple Angel, Shark, Snook | 0.89–2.51 | -1.02 | +1.14 | +0.75 | **ACCURACY** |
+| 503 | 43 | 502 | Box | 0.25–3.86 | -8.09 | -0.75 | +0.90 | **ACCURACY** |
+| 519 | 51 | 518 | Box | 0.29–2.67 | -1.21 | -0.39 | +1.26 | **ACCURACY** |
+| 500 | 50 | 499 | Box | 0.36–4.71 | -1.34 | +0.09 | +1.74 | **ACCURACY** |
+| 507 | 40 | 505 | Weasly Fish | 0.30–3.43 | -2.60 | +0.20 | +1.85 | **ACCURACY** |
+| 59 | 86 | 77 | Grouper, Purple Angel, Shark, Snook | 0.89–2.78 | -0.82 | +2.08 | +2.04 | **ACCURACY** |
+| 497 | 42 | 496 | Box | 0.38–4.30 | -1.15 | +0.43 | +2.08 | **ACCURACY** |
+| 504 | 50 | 502 | Weasly Fish | 0.25–5.30 | -6.67 | +1.06 | +2.71 | out: |effect| > 2.5 |
+| 527 | 62 | 489 | Weasly Fish | 0.59–5.04 | -1.70 | +1.30 | +2.95 | out: |effect| > 2.5 (490's fish frames, borrows 489) |
+| 58 | 25 | 71 | Grouper, Purple Angel, Shark | 1.26–2.72 | +2.14 | +4.82 | +3.14 | out: |effect| > 2.5 |
+| 506 | 49 | 505 | Box | 0.31–4.75 | +0.10 | +2.32 | +3.97 | out: |effect| > 2.5 |
 | 436 | 1 | self | Yellow Anthias | 1.73–1.73 | -8.69 | -8.69 | — | no cell with ≥5 frames |
 | 505 | 2 | self | Weasly Fish | 4.41–4.59 | -2.04 | -1.73 | — | no cell with ≥5 frames |

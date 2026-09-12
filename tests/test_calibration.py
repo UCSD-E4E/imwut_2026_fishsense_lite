@@ -112,7 +112,8 @@ def test_accuracy_cohort_holds_out_named_dives_but_still_polishes_them():
 def test_design_exclusions_are_fixed_before_any_corpus_number():
     assert set(cal.ANGLE_TEST_DIVES) <= set(cal.DESIGN_EXCLUDED_DIVES)
     assert {60, 76, 66} <= set(cal.DESIGN_EXCLUDED_DIVES)
-    assert 490 not in cal.DESIGN_EXCLUDED_DIVES  # falls out on its own effect
+    assert 490 not in cal.DESIGN_EXCLUDED_DIVES  # was never a design call
+    assert cal.SPLIT_DIVES == {490: 527}
 
 
 def test_accuracy_cohort_ignores_cells_below_min_frames():
@@ -133,7 +134,7 @@ def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
     assert cal.CORPUS_ACCURACY_DIVES == (
-        59, 61, 84, 491, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522
+        59, 61, 84, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522
     )
 
 
@@ -141,6 +142,8 @@ def test_corpus_is_a_superset_of_the_august_export():
     """Every August frame reappears in the corpus with the same length."""
     aug = cal.to_frame(cal.load_rows(DATA / "all.csv"))
     corpus = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert 490 not in set(corpus.dive_id)  # split into 527 on 2026-09-12
+    assert (corpus.dive_id == 527).sum() == 62
     key = ["dive_id", "model_name", "length_m"]
     missing = aug.merge(corpus[key].drop_duplicates(), on=key, how="left", indicator=True)
     assert (missing["_merge"] == "both").all()
