@@ -203,28 +203,56 @@ and deliberately **not** ingested — it adds frames of the two targets already 
 
 ---
 
-## 5. Dive 490 — the open contradiction
+## 5. Dive 490 — RESOLVED 2026-09-12: the laser moved between its fish frames and its board burst
 
-Self-calibrated from its checkerboard (`calibration_target_id` set). Verified, in order:
+This section originally read "irreducible contradiction". It is not. The read-only prod
+timeline for rig FSL-02D on 2023-08-14 (`image.taken_datetime`):
 
-1. The laser labels are correct: on the 16-bit raw the dot is at the label (R = 65535,
-   G = 0) and there is nothing at the position the board geometry would imply.
-2. The calibration reprojects the board dots correctly; the fitted baseline is plausible.
-3. On the board frames, plane-from-corners length recovery and laser length recovery agree
-   to 0.3 %, constant across range.
-4. Every target on the dive reads ~14 % short (dive effect −13.8 pp); 62 frames.
-5. **Dives 491 and 492 borrow 490's extrinsics verbatim** (`calibration_dive_id = 490`)
-   and read −2.4 pp and −5.5 pp. Same ℓ, same α, different outcome — so whatever is wrong
-   is in 490's *frames*, not its calibration row.
+| when (UTC) | what | dive | extrinsics |
+|---|---|---|---|
+| 18:33–18:37 | George (Weasly Fish) | 492 | borrows 490 |
+| 18:38–18:39 | Box | 491 | borrows 490 |
+| 18:59:20–19:00:40 | `LaserCalibration2` board burst | 489 | id 37, own |
+| **19:00:49–19:02** | **490's 68 Weasly Fish frames** | 490 | measured under id 39 |
+| 19:07:25–19:08:53 | `LaserCalibration3` board burst | 490 | id 39, own |
 
-No relabelling is possible (the labels are right). Earlier claims from the session that
-were wrong and should not be repeated: that 490's far frames had no fish (misread of a
-downscaled render); that 490 had two laser states. The dive is reported as unresolved. A
-fresh look should start from item 5: what differs between 490's target frames and 491's —
-range distribution, which target, time within the session, whether the fish frames and the
-board frames were shot with the same laser state despite the board frames calibrating.
+Extrinsics 37 (489) and 39 (490) differ by **0.823° in-plane**, 0.06° out-of-plane,
+baselines 10.33 / 10.24 cm. Re-measuring 490's fish frames under 489's row (nine seconds
+older than the first fish frame): median −1.70 %, $p_{90}$ +1.28 %, residual φ +0.02°,
+Spearman ρ(depth, error) from −0.985 to +0.50 with the binned medians flat at −5.4 (near)
+→ 0.3 (far) — i.e. the corpus-wide near-range bias and nothing else. So the laser rotated
+between 19:02 and 19:07: **after** the fish frames and **before** the board burst that
+calibrated them. The fish frames belong to the calibration that precedes them.
 
----
+Why the earlier evidence was not exculpatory: "the board dots reproject correctly" and
+"plane-from-corners agrees with laser depth on the board frames" are exactly what a φ error
+looks like, because φ is invisible to reprojection (§3.3). The 23-point range trend in the
+error (−15 % at 0.5 m → −38 % at 2.9 m) was the tell: a baseline-scale error is range-flat,
+a pointing error grows with range at φ/b per metre.
+
+491/492 (shot 25 minutes before either burst) fit **neither** row — 0.21° from 39, 0.65°
+from 37 — so the laser was in a third state then. Their contemporaneous burst,
+`LaserCalibration1` (dive 488), is parked for pool caustics with its checkerboard species
+labels lost when its LS projects were deleted; its 28 laser labels survive.
+
+Consequences:
+- 490's ~14 % error is a **pointing** error, fully explained; it is not evidence about the
+  checkerboard producer or about labels. It stays out of the accuracy cohort (its stored
+  measurements are still wrong) until prod is fixed: split its fish frames into their own
+  dive borrowing 489, or drop extrinsics 39 and link 490 → 489 (own-wins resolution means
+  the row must go). Stage 14 re-measures on provenance mismatch. User's write; not done.
+- 491 is in the accuracy cohort on the rule (dive effect −2.44) while borrowing across a
+  laser movement of ~0.2°. The rule is honest about it; a reviewer may still ask.
+- The general detector — the range trend of a rigid object's length, scale-free — now
+  exists in fishsense-lite as `range_trend.py` (branch
+  `chore/checkerboard-scale-audit-script`). On this corpus it flags exactly 490, 494, 509,
+  491, 492 and no cohort cell; only its negative side is signal (§6.4's close-range
+  under-read produces positive slopes on good dives); it is blind to range-flat baseline
+  errors (506/507 via 505); and no wild-fish dive in prod has the range spread it needs.
+
+Earlier claims from the session that were wrong and should not be repeated: that 490's far
+frames had no fish (misread of a downscaled render); that the folder held two laser states
+in the sense of the fish frames coming *after* the board (they came before).
 
 ## 6. Other open questions
 
@@ -303,10 +331,9 @@ consistent direction; range is not the variable.
 Deliberately not conclusions — things the record leaves open and a fresh pair of eyes
 could settle with the data already in `data/`.
 
-- **490 vs 491/492** (§5): identical extrinsics, three outcomes. Compare the three dives'
-  frames on every axis in `corpus.csv` (`depth_m`, `dot` position, model, time order via
-  the `image` table). If 490's fish frames sit on a different laser state than its board
-  frames, the polish's assumption (one calibration per dive) is what broke.
+- **490** is resolved (§5). The open piece is 491/492: neither burst fits them, and their
+  own burst (488) has laser labels but no board labels. Re-labelling 488's board frames
+  would give the three dives a contemporaneous calibration.
 - **The near-range bin** (§6.4): plot error vs. range per target for Box and Weasly
   separately; check whether the bias is in `depth_m` (laser) or in the pixel span
   (labels) by comparing the box's pixel length × depth / f against 150 mm.
