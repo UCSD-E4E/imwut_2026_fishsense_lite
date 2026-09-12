@@ -259,6 +259,9 @@ def to_frame(rows: Sequence[dict]):
             "known_length_m": [float(r["known_length_m"]) for r in rows],
             "length_m": [float(r["length_m"]) for r in rows],
             "depth_m": [float(r["depth_m"]) for r in rows],
+            "baseline_m": [
+                float(np.hypot(*json.loads(r["pos"])[:2])) for r in rows
+            ],
         }
     )
     df["error_m"] = df.length_m - df.known_length_m
@@ -312,12 +315,29 @@ DESIGN_EXCLUDED_DIVES = ANGLE_TEST_DIVES + tuple(REPAIR_PHI_DEG) + DISPUTED_DIVE
 MAX_DIVE_EFFECT_PP = 2.5
 POLISH_MIN_FRAMES = 5
 
+# The scale-free pre-filter. A rigid object must read the same length at every
+# range; an in-plane calibration error eps makes it read (1 + eps z / b) long,
+# linear in range. The Theil-Sen slope of length against laser depth (frames at
+# >= 0.8 m, >= 8 frames over a >= 2x spread) estimates eps with NO known length,
+# so it is not circular and is applied before the polish. Both signs count: a
+# rotated axis reads negative; a short fitted baseline paired with the
+# compensating angle the least-squares fit gives it reads positive, and that
+# second kind (dives 503/504 at 8.90 cm, 498 at 9.51) is invisible to the
+# polish because its flat scale error and its ramp cancel where the p90 sits.
+# Ported from fishsense-lite's `range_trend.py` so the two agree to the decimal.
+RANGE_TREND_FLAG_PCT_PER_M = 2.0
+RANGE_TREND_MIN_FRAMES = 8
+RANGE_TREND_MIN_RATIO = 2.0
+RANGE_TREND_MIN_DEPTH_M = 0.8
+
 # What the rule selects on the corpus, pinned as data so a change is a diff.
-# 2026-09-12, after the 490 -> 527 split: 491 (-2.73) and 527 (+2.95) both sit
-# just outside the band; with 490's -13.8 gone the corpus median moved ~0.3 pp
-# and took 491 with it. The rule is not tuned to keep them.
+# 2026-09-12, after the 490 -> 527 split and the range-trend pre-filter: 503
+# is removed by the pre-filter (+5.3 %/m on an 8.90 cm baseline); 491 (-2.73)
+# and 527 (+2.95) sit just outside the polish band. 498 (9.51 cm, +2.8 %/m)
+# stays: its interval [+2.0, +3.8] does not clear the threshold. The rule is
+# not tuned to keep or drop any of them.
 CORPUS_ACCURACY_DIVES = (
-    59, 61, 84, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522,
+    59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 520, 521, 522,
 )
 
 
@@ -378,24 +398,87 @@ def cell_p90_grid(df, min_frames: int = POLISH_MIN_FRAMES):
     )
 
 
+def theil_sen(x, y) -> tuple[float, float, float]:
+    """Theil-Sen slope with Sen's 95 % interval (median of pairwise slopes)."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = x.size
+    if n < 3 or y.size != n:
+        raise ValueError("theil_sen needs at least three (x, y) pairs")
+    i, j = np.triu_indices(n, k=1)
+    dx = x[j] - x[i]
+    keep = dx != 0
+    slopes = np.sort((y[j] - y[i])[keep] / dx[keep])
+    m = slopes.size
+    sigma = np.sqrt(n * (n - 1) * (2 * n + 5) / 18.0)
+    c = 1.96 * sigma
+    lo = min(max(int(round((m - c) / 2.0)), 0), m - 1)
+    hi = min(max(int(round((m + c) / 2.0)) - 1, 0), m - 1)
+    return float(np.median(slopes)), float(slopes[lo]), float(slopes[hi])
+
+
+def range_trend(depths_m, lengths_m, baseline_m: float) -> dict | None:
+    """Relative slope of length against depth for one rigid object, in %/m,
+    with Sen's interval and the implied in-plane angle. None when the frames
+    beyond RANGE_TREND_MIN_DEPTH_M are too few or too narrow in range."""
+    z = np.asarray(depths_m, dtype=float)
+    length = np.asarray(lengths_m, dtype=float)
+    keep = z >= RANGE_TREND_MIN_DEPTH_M
+    z, length = z[keep], length[keep]
+    if z.size < RANGE_TREND_MIN_FRAMES or z.max() / z.min() < RANGE_TREND_MIN_RATIO:
+        return None
+    slope, lo, hi = theil_sen(z, length)
+    intercept = float(np.median(length - slope * z))
+    if intercept <= 0:
+        return None
+    pct = 100.0 / intercept
+    thr = RANGE_TREND_FLAG_PCT_PER_M
+    return {
+        "n": int(z.size),
+        "slope_pct_per_m": slope * pct,
+        "ci_pct_per_m": (lo * pct, hi * pct),
+        "eps_deg": float(np.degrees(slope / intercept * baseline_m)),
+        "flagged": bool(hi * pct < -thr or lo * pct > thr),
+    }
+
+
+def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> tuple[int, ...]:
+    """Dives with at least one rigid-object cell whose range trend flags.
+
+    The angle sessions are excluded: a single object at deliberately oblique
+    poses is positive even broadside-only, and that is pose, not calibration.
+    """
+    out = set()
+    for (dive, _model), g in df[~df.dive_id.isin(exclude)].groupby(["dive_id", "model_name"]):
+        t = range_trend(g.depth_m.values, g.length_m.values, float(g.baseline_m.iloc[0]))
+        if t is not None and t["flagged"]:
+            out.add(int(dive))
+    return tuple(sorted(out))
+
+
 def accuracy_cohort(
     df,
     max_dive_effect_pp: float = MAX_DIVE_EFFECT_PP,
     exclude: Sequence[int] = DESIGN_EXCLUDED_DIVES,
     min_frames: int = POLISH_MIN_FRAMES,
+    range_trend_filter: bool = True,
 ) -> tuple[int, ...]:
     """The dives whose calibration offset is within `max_dive_effect_pp` of
-    the corpus median, less the dives held out by design.
+    the corpus median, less the dives held out by design and, with
+    `range_trend_filter`, less the dives whose own rigid targets show a
+    range trend (a scale-free calibration failure the polish cannot see).
 
-    The polish is fitted on every dive, `exclude` included, and the hold-out is
-    applied to the result: the held-out dives contribute cells to the model
-    effects but cannot themselves qualify. Returned sorted, as a tuple, so it
+    The polish is fitted on every dive, `exclude` included, and both
+    hold-outs are applied to the result. Returned sorted, as a tuple, so it
     compares directly to CORPUS_ACCURACY_DIVES.
     """
+    dropped = set(exclude)
+    if range_trend_filter:
+        dropped |= set(range_trend_flagged_dives(df))
     fit = median_polish(cell_p90_grid(df, min_frames))
     return tuple(
         int(d) for d in sorted(fit.dive_effect.index)
-        if abs(fit.dive_effect[d]) <= max_dive_effect_pp and int(d) not in set(exclude)
+        if abs(fit.dive_effect[d]) <= max_dive_effect_pp and int(d) not in dropped
     )
 
 

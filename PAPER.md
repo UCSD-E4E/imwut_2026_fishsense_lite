@@ -43,13 +43,20 @@ a Tukey median polish on the $p_{90}$ percent error of each (session, target) ce
 least five frames [Tukey 1977]. The polish fits tightly — median absolute residual
 0.15 percentage points over 30 sessions × 7 targets — so the two terms are the whole story.
 A session enters the accuracy cohort when its calibration offset is within 2.5 percentage
-points of the corpus median. Held out by design, before any number was computed, are the
-five angle-experiment sessions of §4.3 (a single target at deliberately oblique poses) and
-three sessions whose calibration a separate analysis had already repaired or disputed. The
-rule admits 14 sessions and 814 measurements; three of the 14 are slate-calibrated 2023
-sessions and eleven are checkerboard-calibrated 2025 sessions. Sensitivity to the one free
-number is small: moving the threshold from 1.5 to 3.5 points changes membership from 9 to
-20 sessions and the cohort $p_{90}$ by less than half a point.
+points of the corpus median. Two hold-outs precede that test. By design, before any number
+was computed: the five angle-experiment sessions of §4.3 (a single target at deliberately
+oblique poses) and three sessions whose calibration a separate analysis had already
+repaired or disputed. And by a scale-free check that uses no reference length: a rigid
+target must read the same length at every range, so a session whose targets show a length
+trend with range — the Theil–Sen slope over frames beyond 0.8 m, with its 95 % interval
+clear of ±2 % per metre — has a calibration error in the in-plane laser angle that no
+reprojection test can see (§3.3), and is excluded. That check removes seven sessions,
+every one of which the reference lengths independently grade as wrong, including two whose
+median error looked fine because a short fitted baseline and a compensating angle cancel
+at mid-range. The rule admits 13 sessions and 771 measurements; three are slate-calibrated
+2023 sessions and ten are checkerboard-calibrated 2025 sessions. Sensitivity to the one
+free number is small: moving the threshold from 1.5 to 3.5 points changes membership from
+8 to 15 sessions and the cohort $p_{90}$ by less than half a point.
 
 #### 4.2 Accuracy
 
@@ -63,22 +70,21 @@ than the instrument, and a high quantile is the estimator that rejects the pose 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
-Over the cohort the median frame error is −2.3 % and the $p_{90}$ is +0.04 %; 76 % of
-frames are within 5 % of the reference, 96 % within 10 %, and 99 % within 15 %. The
+Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.06 %; 78 % of
+frames are within 5 % of the reference, 98 % within 10 %, and 99 % within 15 %. The
 per-target $p_{90}$ — Box −0.1 %, Purple Angel +0.9 %, Weasly Fish −1.9 %, Grouper +0.3 %,
 Snook −0.9 %, Shark +4.3 % — shows no trend with size across a four-fold range of lengths.
 The polish attributes +3.2 points of the Shark's figure to the target itself rather than to
-any session; the model is no longer available to re-measure, and it is 25 of 814 frames,
-so excluding it moves the cohort $p_{90}$ from +0.04 % to −0.24 %.
+any session; the model is no longer available to re-measure, and it is 25 of 771 frames,
+so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.24 %.
 
 Figure 3 plots error against laser range. Triangulation conditioning degrades as $Z^2$
 (Eq. 5), so a range dependence surviving into the delivered length would appear as a
-widening band; instead the binned median is flat at -2.2 to -1.8 % from 0.8 m to 4.7 m
+widening band; instead the binned median is flat at −2.1 to −1.8 % from 0.8 m to 4.7 m
 with an interquartile range that does not grow. The one departure is the nearest bin: below
-0.8 m the median is −5.9 % (102 frames, all Box and Weasly Fish). At that range the laser
-dot subtends several pixels and the targets fill a large fraction of the frame, so we
-attribute this to label placement rather than to ranging; it is inside the error budget and
-below the working range of a diver measuring wild fish.
+0.8 m the Weasly Fish reads −6.8 % (the Box, at the same ranges, −2.3 %). It is confined to
+one target, so it is a landmark effect on that model at close range rather than ranging;
+it is inside the error budget and below the working range of a diver measuring wild fish.
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. Widening beyond the rule only worsens the figures, which is the cost of not
@@ -86,8 +92,8 @@ choosing sessions by hand; $p_{90}$ stays within ±0.7 % of zero throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 14 | 814 | −2.27 % | +0.04 % | 3.95 % |
-| every session not held out by design | 24 | 1,254 | −3.00 % | +0.29 % | 4.89 % |
+| accuracy cohort (rule) | 13 | 771 | −2.19 % | +0.06 % | 3.71 % |
+| every session not held out (design + range check) | 18 | 910 | −1.94 % | +0.68 % | 3.49 % |
 | every session except the angle experiment | 27 | 1,499 | −3.48 % | +0.16 % | 5.15 % |
 | every session | 32 | 2,927 | −5.91 % | −0.59 % | 9.20 % |
 
@@ -101,8 +107,8 @@ choosing sessions by hand; $p_{90}$ stays within ±0.7 % of zero throughout.
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 14 &   814 & $-2.27$ & $+0.04$ & 3.95 \\
-    not held out by design               & 24 & 1{,}254 & $-3.00$ & $+0.29$ & 4.89 \\
+    accuracy cohort (rule)               & 13 &   771 & $-2.19$ & $+0.06$ & 3.71 \\
+    not held out (design + range check)  & 18 &   910 & $-1.94$ & $+0.68$ & 3.49 \\
     all but the angle experiment         & 27 & 1{,}499 & $-3.48$ & $+0.16$ & 5.15 \\
     every session                        & 32 & 2{,}927 & $-5.91$ & $-0.59$ & 9.20 \\
     \bottomrule
@@ -138,13 +144,15 @@ and the stereo comparison — goes here unchanged.)*
 #### Sessions the rule rejects
 
 *(For the paper's limitations paragraph, or an appendix; Figure A gives every session.)*
-Ten sessions fall outside the 2.5-point band, and every one has an explanation. The
+Ten sessions fall outside the band or the range check, and every one has an explanation. The
 instructive one read 14 % short with correct labels and a calibration that reproduced its
 own checkerboard perfectly: its folder held a board burst shot five minutes *after* its
 target frames, and the laser had rotated 0.82° in the plane that reprojection cannot see.
 Re-measured under the calibration burst that preceded the frames by nine seconds, it reads
-−1.7 %. Three sessions borrow a calibration across such a movement (−5.8, −3.5, −2.7); the
-rest sit within a point of the band on either side (−2.8; +2.7, +2.9, +3.1, +4.0). None is
+−1.7 %. Three sessions borrow a calibration across such a movement (−5.8, −3.5, −2.7); two borrow
+a calibration whose fitted baseline is 14 % short and read −14 % up close rising to zero
+at 4 m, which the range check catches and a median would not; the rest sit within a
+point of the band on either side (−2.8; +2.9, +3.1, +4.0). None is
 a ranging failure the diver could see: an in-plane calibration error is invisible to
 reprojection residual, which is why the calibration procedure of §3.3 photographs the
 target at several ranges, why a calibration is discarded whenever the unit has been
@@ -157,14 +165,14 @@ check that would have caught this in the field.
   measurement leaves the 15 % budget when the fish is more than 30° from broadside
   (Figure 8)."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.04 %.
-  Consider stating the broadside figure directly: "median −2.3 %, $p_{90}$ +0.04 % over 814
-  measurements of six targets at 0.25–4.7 m".
+  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.06 %.
+  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.06 % over 771
+  measurements of six targets at 0.27–4.7 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 
 #### Figure captions
 
-- **Figure 1** — Measured against known length, accuracy cohort (14 sessions, 814 frames).
+- **Figure 1** — Measured against known length, accuracy cohort (13 sessions, 771 frames).
   Six targets separate along the abscissa by their own lengths. Error bars are the
   interquartile range of frames; the diamond is the $p_{90}$.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level

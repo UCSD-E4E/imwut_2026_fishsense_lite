@@ -75,6 +75,8 @@ def _frame(cells):
                     "known_length_m": 0.3,
                     "length_m": 0.3 * (1 + e / 100),
                     "pct_error": e,
+                    "depth_m": 1.0,  # one range: the range-trend filter abstains
+                    "baseline_m": 0.103,
                 }
             )
     return pd.DataFrame(rows)
@@ -134,8 +136,58 @@ def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
     assert cal.CORPUS_ACCURACY_DIVES == (
-        59, 61, 84, 495, 497, 498, 500, 501, 503, 507, 519, 520, 521, 522
+        59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 520, 521, 522
     )
+
+
+# --- range-trend pre-filter ------------------------------------------------
+
+
+def test_theil_sen_is_exact_on_a_line_and_robust_to_one_outlier():
+    x = np.linspace(1, 4, 20)
+    y = 2.0 + 0.5 * x
+    y[3] += 30.0
+    slope, lo, hi = cal.theil_sen(x, y)
+    assert slope == pytest.approx(0.5, abs=1e-9)
+    assert lo <= slope <= hi
+
+
+def test_range_trend_recovers_an_injected_angle_without_a_known_length():
+    z = np.linspace(0.9, 3.0, 40)
+    eps = np.radians(-0.25)
+    lengths = 0.31 * (1 + eps * z / 0.103)
+    trend = cal.range_trend(z, lengths, baseline_m=0.103)
+    assert trend["eps_deg"] == pytest.approx(-0.25, abs=0.01)
+    assert trend["flagged"]
+
+
+def test_range_trend_needs_frames_beyond_0_8_m_over_a_2x_spread():
+    z = np.linspace(0.3, 0.7, 30)
+    assert cal.range_trend(z, np.full(30, 0.31), 0.103) is None
+    z = np.linspace(1.0, 1.5, 30)
+    assert cal.range_trend(z, np.full(30, 0.31), 0.103) is None
+
+
+def test_to_frame_carries_the_dive_baseline():
+    df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert "baseline_m" in df.columns
+    assert df[df.dive_id == 503].baseline_m.iloc[0] == pytest.approx(0.0890, abs=5e-4)
+    assert df[df.dive_id == 500].baseline_m.iloc[0] == pytest.approx(0.1041, abs=5e-4)
+
+
+def test_range_trend_flagged_dives_on_the_corpus():
+    """Both signs, whole interval beyond +-2 %/m, angle dives excluded. The
+    flagged set is every dive already known bad from the known lengths plus
+    the short-baseline dives the median had hidden -- and no sound one."""
+    df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert cal.range_trend_flagged_dives(df) == (76, 491, 492, 494, 503, 504, 509)
+
+
+def test_the_pre_filter_is_what_removes_503():
+    df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    with_filter = cal.accuracy_cohort(df)
+    without = cal.accuracy_cohort(df, range_trend_filter=False)
+    assert set(without) - set(with_filter) == {503}
 
 
 def test_corpus_is_a_superset_of_the_august_export():
