@@ -238,9 +238,15 @@ labels lost when its LS projects were deleted; its 28 laser labels survive.
 Consequences:
 - 490's ~14 % error is a **pointing** error, fully explained; it is not evidence about the
   checkerboard producer or about labels. It stays out of the accuracy cohort (its stored
-  measurements are still wrong) until prod is fixed: split its fish frames into their own
-  dive borrowing 489, or drop extrinsics 39 and link 490 → 489 (own-wins resolution means
-  the row must go). Stage 14 re-measures on provenance mismatch. User's write; not done.
+  measurements are still wrong) until stage 14 revisits. **Prod fix applied 2026-09-12
+  22:5x UTC:** the 70 pre-burst frames and their 13 clusters were split into **dive 527**
+  ("LaserCalibration3 fish", borrows 489). A re-link was not possible — borrow resolution
+  is single-hop, so deleting row 39 would have stranded 491/492. 527's 62 measurements
+  named extrinsics 39 at the time of the split; the depth and stage-14 cohorts re-derive
+  on that mismatch. **Re-pull `corpus.csv` after that** (`sql/extract_corpus.sql`): 490
+  will drop to 0 measurements, 527 will appear at ~−1.7 % median and is expected to enter
+  the accuracy cohort on the rule; re-run the notebook and the pinned cohort test will
+  need updating.
 - 491 is in the accuracy cohort on the rule (dive effect −2.44) while borrowing across a
   laser movement of ~0.2°. The rule is honest about it; a reviewer may still ask.
 - The general detector — the range trend of a rigid object's length, scale-free — now

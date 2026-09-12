@@ -353,7 +353,7 @@ the model effect stated.
 
 | dive | effect (pp) | what it is |
 |---|---|---|
-| 490 | −13.8 | **Resolved 2026-09-12**: the laser rotated 0.82° in-plane between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error; see `post_labeling_analysis/HANDOFF.md` §5. |
+| 490 | −13.8 | **Resolved 2026-09-12**: the laser rotated 0.82° in-plane between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error. Prod fixed 2026-09-12: its fish frames are now dive 527, borrowing 489; corpus not yet re-pulled. See `post_labeling_analysis/HANDOFF.md` §5. |
 | 492 | −5.5 | borrows 490 |
 | 494 | −3.2 | borrows 493 |
 | 509 | −2.5 | self-calibrated, just outside |
