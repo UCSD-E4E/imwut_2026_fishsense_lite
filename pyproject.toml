@@ -22,6 +22,7 @@ fishsense-meta = { git = "https://github.com/UCSD-E4E/fishsense-core.git" }
 [dependency-groups]
 dev = [
     "black>=25.12.0",
+    "pytest>=9.1.1",
 ]
 
 [build-system]
