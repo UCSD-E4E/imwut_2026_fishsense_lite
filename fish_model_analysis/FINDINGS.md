@@ -366,3 +366,11 @@ Pooled median error by designed angle: 0° −3.8 %, 5° −3.5 %, 10° −4.8 %
 is $\cos\theta - 1$ offset by a ~−3.5 % broadside bias; five sessions at two ranges agree
 within the pooled IQR; the 15 % budget is crossed at 30°.
 
+A sixth session exists and is deliberately absent. Dive 526 is the evening FSL05 burst,
+split out of 107 on 2026-09-09: 189 angle frames at 0–45°, fully head/tail labelled, never
+measured. Its 17 slate frames are a 13-second burst at a single distance (laser dot within
+1–3 px), so the 3-D laser line is unconstrained and stage 13 refused the fit at a 2.00 cm
+baseline on 2026-09-12. No other slate frames exist, and borrowing 107's calibration could
+only be validated by the Snook's known length — the quantity the experiment measures — so
+it was parked (`Priority.NONE`, note on the row) on 2026-09-12 rather than included.
+
