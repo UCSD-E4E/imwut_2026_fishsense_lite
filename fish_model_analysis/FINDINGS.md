@@ -597,3 +597,57 @@ satisfies that (the five with ≥5 measurements span at most 1.5×), so field ca
 is currently unvalidatable. A diver-carried reference would supply it, and it is the same
 recommendation §4.2 of the paper already makes from the pool data.
 
+### 8.1 Calibration conditioning — `MIN_LASER_POINTS` counts labels, not observations
+
+The reef dives all carry their own slate and their own stage-13 calibration (no borrows), so
+the obvious question was whether the per-rig scatter above is poor field calibration. The
+answer is no, but asking it exposed a defect.
+
+Stage 13 fits the laser ray from 3-D points, each one the camera ray through a labelled dot
+intersected with the slate plane. What determines the fitted *direction* is the lever arm —
+the depth separation of those points — against the label noise. One pixel of dot-label noise
+at range z is z/f metres of lateral error, so it rotates the fitted ray by about
+(z/f)/lever radians, and the session-measured sensitivity is ~30 % of length per degree at
+2 m. That gives a per-dive conditioning number, **percent of length per pixel of laser-label
+noise**, computable from the fit's own observations with no reference length.
+
+Over all 32 stored calibrations whose observations are recoverable (19 slate, 13
+checkerboard), **29 are well conditioned** at under 1 % per pixel. Three are not:
+
+| dive | source | obs frames | labels | distinct dot pixels | depth range | lever | % length / px |
+|---|---|---|---|---|---|---|---|
+| **347** | slate | **1** | 2 | **1** | 1.20 | 0.00 m | degenerate |
+| **349** | slate | 2 | 2 | 2 | 2.36–2.62 | 0.26 m | 5.8 % |
+| **107** | slate | 16 | 16 | 12 | 1.96–2.02 | 0.06 m | 5.5 % |
+
+Dive 347's calibration is fitted from **one frame carrying a duplicate laser label at the
+identical pixel** (image 102732, both at 1961, 1222). Two coincident points cannot determine
+a line. It passed `MIN_LASER_POINTS = 2` because that gate counts label *rows*. Duplicate
+labels are widespread — 28 of the 32 calibrations have more labels than distinct dot pixels
+(dive 341: 60 labels over 30 frames, 29 distinct pixels), which is the known duplicate-LS-task
+issue and is harmless wherever there are many genuine observations. On 347 it was the whole
+fit.
+
+Dives 349 and 107 are the *single-distance burst* geometry that wedged dive 526: plenty of
+observations in 107's case, but all within 6 cm of one range, so the lever arm is nil. This
+also explains an anomaly CLAUDE.md records as unexplained — dive 107's 12.95 cm baseline, the
+highest in the fleet and previously filed under "healthy extreme, measures correctly". It is
+not healthy; it is an ill-conditioned fit whose baseline happened to land inside the
+plausible range. Dive 526's identical geometry collapsed to 2.00 cm and was refused. Same
+defect, different luck, and neither the baseline gate nor `check_fit_self_consistency` can
+tell them apart.
+
+**It does not explain the field offsets.** The opposite, in fact: dive 341 is the
+best-conditioned calibration in the corpus (30 observations over a 1.55 m lever, 0.1 % per
+pixel) and carries the *largest* negative hogfish offset (−17.4 %), while 347, the degenerate
+one, reads +0.8 %. Conditioning and field offset are unrelated here, which strengthens the
+§8 conclusion that the offsets are sampling noise on 2–10 fish per rig.
+
+**Recommended pipeline change** (not yet made): replace `MIN_LASER_POINTS`'s label count with
+a requirement on the observation geometry — at least two *distinct* dot pixels from at least
+two *distinct* images, plus a minimum lever arm or, better, a conditioning bound of the form
+above. It flags exactly 347, 349 and 107 and passes the other 29, it needs no reference
+length, and it would have caught dive 526 for the right reason rather than by the baseline
+coming out absurd. Remediation for the three is the usual: delete the row so the dive
+re-enters the cohort, and park it if the observations cannot be improved.
+

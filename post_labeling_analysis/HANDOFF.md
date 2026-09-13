@@ -498,6 +498,14 @@ short version, because it is a trap worth not re-entering:
   (ours) vs 19.1 % (stereo).
 - To make it work: more reef fish per rig, and a rigid reference in the water so the
   range-trend check can run on a field dive.
+- **Spun off a real defect (§8.1):** stage 13's `MIN_LASER_POINTS = 2` counts label rows, so
+  dive 347's calibration is fitted from ONE frame with a duplicate label at the identical
+  pixel. Two of 32 stored calibrations are also single-distance bursts with no lever arm
+  (349, and 107 — which explains CLAUDE.md's "healthy extreme" 12.95 cm baseline; it is an
+  ill-conditioned fit, the same geometry that collapsed dive 526). A conditioning number —
+  % length per pixel of label noise ≈ degrees/px × 30 — flags exactly those three and
+  passes the other 29, and needs no reference length. Conditioning does NOT correlate with
+  the field offsets.
 
 ---
 
