@@ -211,8 +211,55 @@ single-image fish-pose estimators are beginning to recover [29].
 
 #### 4.5 Field deployments
 
-*(Existing text — Florida Keys deployments, the red/green laser comparison, Figures 5–6,
-and the stereo comparison — goes here unchanged.)*
+*(The existing narrative text — Florida Keys deployments, the red/green laser comparison,
+Figures 5–6, the mount failures and the in-field recalibration procedure — goes here
+unchanged. What follows replaces the stereo-comparison paragraph, which the data does not
+support; see the note at the end of this subsection.)*
+
+Volunteer divers measured wild fish on seven deployments at one Florida reef, yielding 154
+measurements of 70 individuals across eight species on six camera units. Two of the seven
+calibrations are excluded by the conditioning criterion of §4.2 — one was fitted from a
+single frame, the other from two dots 26 cm apart in range — leaving 91 measurements of 50
+fish. Laser range was 0.71–3.32 m (median 1.48 m), closer than the pool median.
+
+**Repeatability transfers to the field with a measurable penalty.** Where a diver captured
+the same individual in three or more frames we can measure the system's repeatability
+directly, and this is the one field figure that needs nothing external: a calibration error
+is common to all frames of one fish and cancels in a relative spread, as does any error in
+the length convention, and no comparison population is involved. Over 24 such individuals
+the within-fish coefficient of variation is **3.3 % (median; bootstrap 95 % CI 2.4–4.3 %),
+with a $p_{90}$ of 14 %**. The identical statistic on the pool cohort — repeat frames of one
+target in one session, 23 cells — is **1.4 % (95 % CI 1.2–2.2 %), $p_{90}$ 4.5 %**. So a
+repeat measurement of a wild fish varies about 2.4 times more than a repeat measurement of a
+posed model, and its tail is three times worse. That penalty is what the field adds: the
+animal moves between frames, the water is turbid, and the snout and fork are harder to place.
+It is consistent with §4.4 — a few degrees of pose change between frames is worth a few
+percent of length — and it is the number a survey designer should use when deciding how many
+frames per fish to require.
+
+**What this sample cannot do is measure field accuracy**, and we state the limit rather than
+work around it. No known-length reference was in the water on these dives, so the scale-free
+range check of §4.1 cannot be applied to them: it needs one rigid object measured repeatedly
+across a wide range spread, and no wild fish in the set spans more than 1.5× in range. The
+per-unit sample is 4 to 18 fish, and with the observed 19 % between-fish size spread the
+standard error on a unit's median length is 7 % at ten fish and 14 % at three — larger than
+any bias worth detecting. A variance-components fit across the seven units bounds
+unit-to-unit variation in field lengths at **≤ 9 % (95 % upper limit, 34 hogfish)**, with a
+point estimate of 5 % that is not distinguishable from sampling.
+
+**A comparison against stereo video is available and comes out inconclusive.** Our
+collaborators measured the same species at the same reef in the same seasons with a
+calibrated stereo-video rig, 1,120 lengths over ten sites, to the same fork-length
+convention. Per species our medians differ from theirs by −21 % to +9 %, with bootstrap
+intervals spanning zero for three of the five species that have enough of our fish to
+compare, and the offsets vary by as much between our own units as they do against the
+stereo. We therefore report it as a consistency check — our field lengths sit within the
+sampling limits of the independent archive — and not as a bias measurement. Two further
+cautions belong with it: the two systems' spreads are the same (between-fish CV 18.7 %
+against 19.1 %), so no claim of a narrower distribution is supported; and the stereo's
+quoted precision is a propagated click-error (1.0 % of length) rather than a measured
+repeatability, with essentially one measurement per individual in the archive, so it is not
+comparable to the 3.3 % above.
 
 #### Sessions the rule rejects
 

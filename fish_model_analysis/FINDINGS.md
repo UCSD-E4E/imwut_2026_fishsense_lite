@@ -651,3 +651,41 @@ length, and it would have caught dive 526 for the right reason rather than by th
 coming out absurd. Remediation for the three is the usual: delete the row so the dive
 re-enters the cohort, and park it if the observations cannot be improved.
 
+### 8.2 What the field set can actually support (2026-09-13)
+
+No more field data is coming — re-shooting these dives is a full operation — so the question
+is what the 154 existing real-fish measurements establish. Three things, and one of them is
+strong.
+
+**Repeatability (strong, and self-contained).** For fish captured in ≥3 frames, the
+within-fish CV needs nothing external: a calibration error is common to a fish's frames and
+cancels in a relative spread, so do reference and convention errors, and no comparison
+population is involved.
+
+| | cells / fish | CV median | bootstrap 95 % | $p_{90}$ |
+|---|---|---|---|---|
+| pool, repeat frames of one target in one session | 23 cells | **1.36 %** | [1.24, 2.16] | 4.49 % |
+| field, repeat frames of one wild fish | 24 fish | **3.28 %** | [2.36, 4.25] | 14.19 % |
+
+The intervals do not overlap: field repeatability is ~2.4× the pool's, with a 3× worse tail.
+That is the measured cost of the field — the animal moves, the water is turbid, the landmarks
+are harder — and it is consistent with §7.5 (a few degrees of pose change between frames is
+worth a few percent). At ≥2 frames the field figure is 3.14 % median over 40 fish. By species
+(≥3 frames): Black Grouper 1.23 % (n=3), Stoplight 2.36 % (n=3), Hogfish 3.22 % (n=11).
+
+**An upper bound on unit-to-unit calibration spread.** Observed between-rig variance =
+calibration variance + sampling variance, so a one-way variance-components fit on log length
+bounds the first. Hogfish (7 rigs, 34 fish): point estimate 4.9 %, **95 % upper limit 9.2 %**,
+within-rig sd 18.6 % — i.e. not distinguishable from sampling, but bounded. Stoplight (4 rigs,
+14 fish) has a point estimate of 24.6 % against a 6.6 % H0 limit, so it does show a rig effect,
+but on 14 fish across four dives at different dates it is equally consistent with genuine
+population differences. Report the hogfish bound and the stoplight caveat together.
+
+**A deployment demonstration.** All 70 individuals, 8 species, plausible lengths — this is
+Figure 6 and it stands as a demonstration, not an accuracy claim.
+
+**What it cannot support, stated once:** absolute field accuracy. No in-water reference means
+the range check of §7 cannot grade these calibrations, and 4–18 fish per rig against a 19 %
+between-fish size spread puts the standard error on a rig median at 7–14 %. The stereo
+comparison (§8) is a consistency check at best. PAPER.md §4.5 is written to these limits.
+
