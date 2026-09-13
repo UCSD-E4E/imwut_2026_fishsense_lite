@@ -22,8 +22,9 @@ field-deployment text.
 
 #### 4.1 Known-length targets
 
-Six rigid targets were measured: five painted fish models — Purple Angel (192 mm), Weasly
-Fish (310 mm), Grouper (360 mm), Snook (455 mm), Shark (605 mm) — and a 150 mm box. Each
+Six rigid targets were measured: five painted fish models — a purple angelfish (192 mm), a
+stylised rainbow trout (310 mm; "Weasly Fish" in the data), a grouper (360 mm), a snook
+(455 mm), a shark (605 mm) — and a 150 mm box. Each
 target's reference length is the snout-to-tail-fork distance a labeler is asked to click,
 measured with a tape. Targets were photographed in a university pool over 32 sessions
 between 2023 and 2025 at laser ranges of 0.25–4.71 m (median 1.7 m), by several divers on

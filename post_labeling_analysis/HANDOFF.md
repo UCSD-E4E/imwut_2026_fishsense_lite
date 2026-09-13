@@ -120,7 +120,8 @@ highlight_mode=Ignore, gamma=(1,1))`).
 
 ## 2. The corpus
 
-32 dives, 2,927 measurements, 8 targets (Box 150 mm, Purple Angel 192, Weasly Fish 310,
+32 dives, 2,927 measurements, 8 targets (Box 150 mm, Purple Angel 192, Weasly Fish 310 — a
+stylised rainbow trout model; "Ginny"/"George" in folder names,
 Ruler 342.9, Grouper 360, Snook 455, Shark 605, and 2 frames of Yellow Anthias). Laser
 range 0.25–5.47 m.
 
