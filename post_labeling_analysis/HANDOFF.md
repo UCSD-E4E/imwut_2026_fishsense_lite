@@ -479,6 +479,28 @@ could settle with the data already in `data/`.
 
 ---
 
+## 8b. The SMILE stereo archive (added 2026-09-13)
+
+`~/Downloads/SMILE_Archive_LengthData.csv`, our collaborators' EventMeasure export: 1,343
+stereo-video lengths (plus 128 `camtype = FSL` rows that carry no `Range`/`Precision` and are
+**not** to be trusted — pull our side from prod). Full analysis in `FINDINGS.md` §8. The
+short version, because it is a trap worth not re-entering:
+
+- Both sides are fork length (confirmed). Per-species offsets look striking — Hogfish −10.3 %,
+  Stoplight −17.0 %, Rainbow −20.7 %, groupers +2.2 / +9.4 % — and split by caudal shape.
+- **They do not survive splitting by rig.** Hogfish runs −19 to +7 % across seven rigs at
+  2–10 fish each, and the between-rig sd (10.5 %) matches what sampling alone predicts
+  (10.2 %; Kruskal–Wallis p = 0.18). Our whole field corpus is 73 fish, 7 dives, one reef.
+- Ruled out directly: convention (shared), curvature (`No Curve` labels), gross calibration
+  fault (all baselines 9.72–11.80 cm), and a systematic tail-landmark bias (frames
+  re-rectified from NAS raws and inspected; alignment verified on the laser dot to 3–19 px).
+- The paper's "narrower spread than the SOTA" claim is unsupported: between-fish CV 18.7 %
+  (ours) vs 19.1 % (stereo).
+- To make it work: more reef fish per rig, and a rigid reference in the water so the
+  range-trend check can run on a field dive.
+
+---
+
 ## 9. Per-dive table
 
 Generated from `corpus.csv` by notebook cell 9 (`polish` = Tukey median polish over the

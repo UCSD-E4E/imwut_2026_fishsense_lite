@@ -516,3 +516,84 @@ long. The second is testable: the box and the trout appear together on dives 521
 clicks themselves were inspected on six frames from 0.9 to 3.0 m and sit on the snout tip and
 the fork notch; the landmarks are not the problem.
 
+---
+
+## 8. The SMILE stereo-video archive — what a field comparison can and cannot say (2026-09-13)
+
+`~/Downloads/SMILE_Archive_LengthData.csv` is our collaborators' EventMeasure export: 1,471
+lengths from the Florida Keys, 2023–2024, 16 sites. It is the SOTA the paper wants to
+compare against, and it is the only external measurement of the same wild fish we shoot.
+
+**Use the stereo rows only.** 1,343 rows are `camtype = SV` (stereo video). The other 128
+are `camtype = FSL` and carry `Length` but no `Range`, `Precision` or `Direction` — they are
+second-hand entries of unknown provenance, not pipeline output, and the user confirmed they
+should not be trusted. Our side must come from prod.
+
+**Our field corpus is small.** Every real-fish measurement in prod: 154 frames, **73
+individuals, 7 dives, 6 camera rigs, one reef** (Alligator), median 2 frames per fish. The
+stereo has 1,120 rows at the same reef over 10 named sites. Our laser range there is median
+1.48 m (5–95 % 0.71–3.32); the stereo's is 1.97 m (1.05–3.64).
+
+**Both sides are fork length** (confirmed with the collaborators), so the medians are
+comparable in principle. Per species, ours against the stereo's Alligator subset, per fish:
+
+| species | our fish | rigs | stereo n | offset | bootstrap 95 % |
+|---|---|---|---|---|---|
+| Hogfish | 34 | 7 | 96 | −10.3 % | [−19.8, −0.6] |
+| Stoplight Parrotfish | 16 | 6 | 345 | −17.0 % | [−26.3, +8.2] |
+| Rainbow Parrotfish | 5 | 3 | 55 | −20.7 % | [−34.7, −14.7] |
+| Nassau Grouper | 8 | 4 | 7 | +2.2 % | [−14.0, +37.6] |
+| Black Grouper | 6 | 2 | 50 | +9.4 % | [−8.1, +24.3] |
+
+The direction splits by caudal shape — the three lunate/forked-tail species read short, the
+two rounded-tail groupers read long — which is the shape a fork-vs-total convention
+mismatch would make. That explanation is excluded by the convention being shared, and two
+more were excluded directly: the fish are labelled `No Curve` (Hogfish 55 of 68, Stoplight
+25 of 28), and every one of the nine dive-calibration pairs has a baseline of 9.72–11.80 cm,
+inside the tightened gate and mostly at the fleet's 10.2–10.5.
+
+**But the comparison cannot carry a conclusion, and this is the finding.** Split by rig, the
+same species at the same reef gives: Hogfish −19.1, −17.4, −13.6, −13.0, +0.8, +1.3, +7.0 %
+(2–10 fish per rig); Stoplight −43.7, −31.1, −22.3, +4.8, +9.3, +25.2 %. The between-rig
+scatter is as large as the offset it is supposed to support — and it is **not distinguishable
+from small-sample noise**: for Hogfish the observed between-rig sd of offsets is 10.5 %
+against ~10.2 % expected from sampling 2–10 fish at a per-fish CV of 18.7 % (Kruskal–Wallis
+across rigs with ≥3 fish, H = 6.34, p = 0.18). Stoplight is marginal (p = 0.018) on 1–4 fish
+per rig. So the per-species offsets above are ~2 SE effects resting on the assumption that
+our fish and theirs are drawn from one population, which different dates do not guarantee.
+
+**Two things it does settle.**
+
+The draft's SOTA sentence — "we see a narrower spread of results for FishCamera in the same
+environment on the same fish" — is not supported. Between-fish CV is 18.7 % for us and
+19.1 % for the stereo, and in both cases that is mostly the real size spread of the fish
+encountered rather than measurement noise. Cut or rewrite it regardless of how the offset
+resolves.
+
+And the precision figures are not comparable as stated. Ours is empirical: 24 individuals
+with ≥3 frames, within-fish CV median 3.28 %, p90 14.2 %. The stereo's is EventMeasure's
+propagated click-error, median 1.04 % of length, p90 2.98 % — and with essentially one
+measurement per individual (1,260 groups over 1,343 rows) there is no way to check it
+against repeats. Quoting "1 % versus 3.3 %" compares a formal estimate against a measured
+one.
+
+**The landmark check ran and came back negative.** The hypothesis was that our labelers click
+short of the fork on a lunate tail (reading short) and at the trailing edge on a rounded one
+(reading long), which would explain both signs. The processed JPEGs for these dives are gone
+from Garage (`NoSuchKey` under all three prefixes — the retention question), so the frames
+were re-rectified from the NAS raws locally: `rawpy.postprocess` → `cv2.undistort` with the
+dive camera's stored intrinsics, which is what `RectifiedImage` does, so stored label pixels
+land where the labeler put them. **Alignment was verified on the laser dot**: where the dot
+is visible, the stored `laserlabel` sits 3–19 px from the brightest red-excess pixel
+(img 101415: 3 px; img 101368: 19 px, inside the bloom). On the frames inspected the fork
+clicks are *noisy* — at the trailing edge, sometimes past it onto background — not
+systematically forward of the fork. Six frames is weak evidence, but it points away from a
+systematic landmark bias and toward the same conclusion as the rig scatter.
+
+**What would make this comparison work.** More reef fish per rig — tens, not 2–10 — and a
+rigid reference in the water on reef dives. The scale-free range-trend check (§7, `range_trend.py`)
+needs one rigid object measured ≥8 times over a ≥2× range spread; no wild fish in prod
+satisfies that (the five with ≥5 measurements span at most 1.5×), so field calibration state
+is currently unvalidatable. A diver-carried reference would supply it, and it is the same
+recommendation §4.2 of the paper already makes from the pool data.
+
