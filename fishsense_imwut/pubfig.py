@@ -901,3 +901,76 @@ def fig_error_vs_angle(
     ax.legend(fontsize=5.5, ncol=2, frameon=False, loc="lower left")
     fig.tight_layout()
     return fig
+
+
+# --- flat-port refraction -------------------------------------------------
+#
+# The one refraction figure this paper carries: what it costs to ignore the
+# water's refractive index entirely. The corrections -- Pinax, and the in-water
+# single-viewpoint calibration it is compared against -- belong to the WUWNet
+# paper and are deliberately absent from both `fishsense_imwut.refraction` and
+# this figure. See that module's docstring for the scope cut.
+
+
+def fig_flat_port_cost(
+    field_angle_deg: Sequence[float],
+    length_pct_error: Sequence[float],
+    range_pct_error: float | None = None,
+    budget_pct: float = 15.0,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.5),
+) -> plt.Figure:
+    """Length error against field position with no refraction correction.
+
+    The shape is the point. An uncorrected flat port expands the scene
+    transversely by the water index and shortens the laser range by its
+    reciprocal; on the optical axis those cancel almost exactly, so a centred
+    target measures correctly *by accident*. Off axis the angular compression is
+    not a pure scale, the cancellation fails, and the error depends on nothing
+    but where in the frame the target happened to fall -- which is why it cannot
+    be averaged away and why it is easy to miss on axis.
+
+    `range_pct_error` annotates the laser-range error behind the cancellation.
+    """
+    x = np.asarray(field_angle_deg, dtype=float)
+    y = np.asarray(length_pct_error, dtype=float)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="both")
+    _zero_line(ax, orientation="h")
+
+    ax.plot(x, y, color=SERIES_2, linewidth=1.8, zorder=4,
+            label="No refraction correction")
+
+    if budget_pct is not None:
+        ax.axhline(budget_pct, color=INK_MUTED, linestyle=":", linewidth=1.0, zorder=3)
+        crossing = np.interp(budget_pct, y, x) if y[-1] >= budget_pct else None
+        ax.text(
+            x[0] + 0.02 * (x[-1] - x[0]), budget_pct + 0.8,
+            f"{budget_pct:g} % error budget", fontsize=6, color=INK_SECONDARY,
+            va="bottom", ha="left",
+        )
+        if crossing is not None:
+            ax.plot([crossing], [budget_pct], marker="o", markersize=3.5,
+                    color=INK_PRIMARY, zorder=5)
+            ax.annotate(
+                f"crossed at {crossing:.0f}°",
+                xy=(crossing, budget_pct), xytext=(-6, -13),
+                textcoords="offset points", fontsize=6,
+                color=INK_PRIMARY, ha="right", va="top",
+            )
+
+    if range_pct_error is not None:
+        ax.annotate(
+            f"laser range reads {range_pct_error:+.0f} %,\n"
+            "cancelling the transverse error on axis",
+            xy=(x[0], y[0]), xytext=(8, 10), textcoords="offset points",
+            fontsize=6, color=INK_SECONDARY, ha="left", va="bottom",
+        )
+
+    ax.set_xlabel("Target position in frame (degrees off axis)")
+    ax.set_ylabel("Length error (%)")
+    ax.set_xlim(x.min(), x.max())
+    ax.set_ylim(bottom=min(0.0, float(np.min(y))) - 0.5)
+    ax.margins(x=0)
+    fig.tight_layout()
+    return fig
