@@ -416,3 +416,53 @@ baseline on 2026-09-12. No other slate frames exist, and borrowing 107's calibra
 only be validated by the Snook's known length — the quantity the experiment measures — so
 it was parked (`Priority.NONE`, note on the row) on 2026-09-12 rather than included.
 
+### 7.6 The trout's reference, the scan, and half-thickness parallax (2026-09-12, evening)
+
+The Weasly Fish (a stylised rainbow trout model) reference of 310 mm is a number carried from
+the previous version of the paper; nobody can say how it was measured. A dense SfM point cloud
+of the model (`~/fish_models/dense_fish_point_cloud.ply`, scaled on the Box's 150 mm tape
+corner-to-corner span, factor 14.446761277 → cm) gives, on its principal axes:
+
+| | cm |
+|---|---|
+| snout tip → fork, 3D chord | 31.60 |
+| the same chord projected onto the body midplane | 31.60 (lateral offset 0.09) |
+| snout tip → upper caudal lobe tip | 32.63 |
+| body: length × depth × thickness | 32.6 × 12.9 × 7.3 |
+
+So the scan says **315 ± 1 mm** for the pipeline's landmarks, 1.6 % above 310 — and since it
+is scaled on the same tape span the pipeline's Box reference uses, scan and pipeline are ratios
+to one object, and the Box's absolute length cancels from any comparison between them.
+
+Against that reference the pipeline reads the trout short, and a fit of error $= a + b/z$ per
+target on the cohort separates two parts:
+
+| target | $a$ (range-flat) | $b$ (cm, the $1/z$ term) | 95 % CI on $b$ |
+|---|---|---|---|
+| Weasly Fish @ 315 | −5.2 | −1.8 | [−2.4, −1.3] |
+| Box | −1.2 | −0.4 | [−0.8, −0.0] |
+| Snook | −0.9 | −2.4 | [−4.7, −0.1] |
+| Grouper | +1.6 | −5.0 | [−8.0, −2.7] |
+| Purple Angel | −0.1 | −0.7 | [−2.7, +1.4] |
+| Shark | +4.4 | −5.9 | [−9.3, +0.0] |
+
+**The $1/z$ term is half-thickness parallax and it is a property of the method.** The laser dot
+lands on the model's flank; the snout tip and fork lie in the midplane, half a body thickness
+further from the camera; stage 14 back-projects the landmarks at the dot's depth, so a solid
+model reads short by (offset / range). Every fish model shows it and the Box — a tape patch
+on the face the dot hits — does not. The trout's fitted 1.8 cm is about half its 3.6 cm
+half-thickness, consistent with the dot landing above the midline where the body is thinner.
+This is what the "Weasly-only close-range under-read" (§7 above, handoff §6.4) was. For a
+real fish it is small at survey range (a 40 cm fish, 4 cm thick, at 2 m: −1 %), and it is
+one-sided, so it belongs in the paper's error budget as a stated bias.
+
+**What is still open is the range-flat part.** At 315 the trout's $a$ is −5.2 % against the
+Box's −1.2 % on the same dives — a 4 pp gap no parallax explains; at 310 it would be 2.5 pp.
+Three candidates, not yet separable: the scan's scale (the tape "corner to corner" span must
+be the same pair of corners the 150 mm reference names); a consistent yaw of the model on its
+rod-and-wire mount (16° would do it, and the six frames inspected are near-broadside but not
+measurably so); or the Box's own reference being long. A tape on the physical model — snout
+tip to fork, lying on its side — arbitrates the first and is the next step. The head/tail
+clicks themselves were inspected on six frames from 0.9 to 3.0 m and sit on the snout tip and
+the fork notch; the landmarks are not the problem.
+

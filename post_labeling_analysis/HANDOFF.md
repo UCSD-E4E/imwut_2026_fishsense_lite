@@ -352,10 +352,18 @@ in the sense of the fish frames coming *after* the board (they came before).
    it is a shared target**: one dive that photographs a fish model and a Box/Weasly, or a
    slate and a checkerboard (check `dive_slate_id` and `calibration_target_id` both
    non-null). Until then, report the gap as unidentified rather than unexplained.
-4. **Near-range bias — now mostly explained.** Most of it was the short-baseline dives
-   (503/504/498: −14 to −18 % below 0.8 m), removed by the range-trend pre-filter. What
-   remains is Weasly-Fish-specific: −6.8 % below 0.8 m vs −2.3 % for the Box at the same
-   ranges on sound dives. A landmark/label effect on that model up close; not ranging.
+4. **Near-range bias — explained.** Part was the short-baseline dives (503/504/498, now
+   filtered). The rest is **half-thickness parallax**: the laser dot lands on a solid model's
+   flank while the snout and fork lie in its midplane, so the length reads short by
+   (half thickness / range). Fitting error = a + b/z per target: trout b = −1.8 cm
+   [−2.4, −1.3], Snook −2.4, Grouper −5.0, Box −0.4 (≈ 0). A property of the method, small
+   for real fish at survey range (−1 % for a 40 cm fish at 2 m). See FINDINGS §7.6.
+9. **The trout's reference.** 310 mm is unprovenanced. An SfM scan scaled on the Box's tape
+   span gives 315 ± 1 mm snout-to-fork (FINDINGS §7.6, landmarks verified on the cloud and
+   on six labelled frames). Against 315 the trout still carries a range-flat −4 pp relative
+   to the Box that parallax does not explain: scan scale, mount yaw, or the Box reference.
+   A tape on the physical model (snout tip to fork, on its side) is the arbiter. Reference
+   left at 310 until then.
 5. **60 / 66 / 76.** The August repairs and dispute stand as written; 60's raw dive effect
    on the corpus polish is −0.87 (inside the band) because the corpus median moved, which
    is why it is held out by design rather than by threshold.

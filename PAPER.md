@@ -97,10 +97,16 @@ so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.24 %.
 Figure 3 plots error against laser range. Triangulation conditioning degrades as $Z^2$
 (Eq. 5), so a range dependence surviving into the delivered length would appear as a
 widening band; instead the binned median is flat at −2.1 to −1.8 % from 0.8 m to 4.7 m
-with an interquartile range that does not grow. The one departure is the nearest bin: below
-0.8 m the Weasly Fish reads −6.8 % (the Box, at the same ranges, −2.3 %). It is confined to
-one target, so it is a landmark effect on that model at close range rather than ranging;
-it is inside the error budget and below the working range of a diver measuring wild fish.
+with an interquartile range that does not grow. The one systematic departure is a
+$1/Z$ term on the solid models and not on the Box: fitting error $= a + b/Z$ per target
+gives $b = -1.8$ cm for the trout (95 % CI $-2.4$ to $-1.3$), $-2.4$ for the snook, $-5.0$ for the
+grouper, and $-0.4$ (indistinguishable from zero) for the Box. The mechanism is geometric:
+the laser dot lands on the model's flank while the snout and fork lie in its midplane, half
+a body thickness further from the camera, so the back-projection at the dot's depth reads
+the length short by that offset divided by range — ~4 % at 0.9 m, ~1 % at 3 m for a 7 cm
+thick model. The Box's tape patch is on the face the dot hits and shows none. The same term
+applies to a real fish and is small at survey range: a 40 cm fish 4 cm thick at 2 m reads
+1 % short.
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
