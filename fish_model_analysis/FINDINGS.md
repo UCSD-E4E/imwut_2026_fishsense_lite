@@ -456,13 +456,63 @@ This is what the "Weasly-only close-range under-read" (§7 above, handoff §6.4)
 real fish it is small at survey range (a 40 cm fish, 4 cm thick, at 2 m: −1 %), and it is
 one-sided, so it belongs in the paper's error budget as a stated bias.
 
+**A second, box-free instrument agrees with the scan.** The FishSense Mobile captures
+(`~/Desktop/fishsense-mobile-data/`, iPad and iPhone, May 2025; the June 2025 CCFRP boat
+set on the NAS) photograph this model with an iPhone/iPad LiDAR, and the head/tail labels
+for them survive in `~/fishsense-mobile-recovery/mobile_headtail_project46.json` with the
+`target = George` classification in `project48`. The capture databases are schema v1 and
+store no intrinsics (the app only added `intrinsics_bytes` at schema v7), but the
+per-device calibration matrices are published in the sibling analysis repo
+`UCSD-E4E/fishsense-mobile-oceans-2025`, `scripts/01_process.ipynb`: iPhone
+fx = fy = 1375.0719 (cx 968.64, cy 723.05), iPad 1604.2147 (cx 956.58, cy 717.76).
+
+Back-projecting each labelled snout and fork at its LiDAR depth — sampling depth with that
+notebook's own flood-fill, which snaps each landmark onto the object's connected depth
+component so a click near the silhouette cannot read the table behind it — gives:
+
+| capture set | camera | n | snout→fork |
+|---|---|---|---|
+| iPad, May 2025 | f = 1604.21 | 30 | 32.09 ± 1.05 cm |
+| iPhone, May 2025 | f = 1375.07 | 29 | 31.54 ± 0.82 cm |
+| iPhone, June 2025 (CCFRP) | f = 1375.07 | 7 | 32.89 ± 0.88 cm |
+| **pooled** | | **66** | **31.94 ± 0.13** (sem) |
+
+Two cameras whose focal lengths differ by 17 % agree to 0.55 cm — that agreement, not the
+pooled sem, is the evidence the intrinsics and the method are right. The LiDAR takes its
+scale from the sensor's own metric depth, so unlike the scan it owes nothing to the box.
+It therefore corroborates the scan against the reference rather than against the box: both
+instruments put the model longer than 310 mm, and both exclude the ~301 mm that the
+pipeline's box-relative reading would imply. The session-to-session spread (31.5 / 32.1 /
+32.9) is larger than either instrument's internal precision, which is why neither number
+is adopted.
+
+**Decision: the reference stays at 310 mm and the uncertainty is reported.** Neither 315
+nor 319 is a direct measurement, they disagree by more than their stated precisions, and
+the physical model can be tape-measured. `PAPER.md` §4.1 states the ±2 % and §4.2 quotes
+the consequence: at 315 mm the cohort reads median −2.88 %, $p_{90}$ −0.45 % over 615
+frames (three sessions re-sort out of the cohort: 59, 497, 500, 520, 527); at 319 mm,
+−3.41 % and −0.60 %. Worth about half a point of headline, in the pessimistic direction,
+changing no conclusion. **The arbiter is a tape on the physical model** — snout tip to
+fork, lying on its side, twice — and it supersedes both reconstructions.
+
+**A bug worth reporting upstream.** `compute_fish_length` in that OCEANS notebook does
+`points3d[idx, :] *= depth_pixel` over a 3×2 array whose *columns* are the two points, so
+it scales row 0 (both X components) by the snout's depth and row 1 (both Y components) by
+the fork's depth, and never scales row 2 — the two points keep Z = 1, so the ΔZ term drops
+out of the norm entirely. It coincides with the correct chord only when the two depths are
+equal. On these frames |ΔZ| is ~2 cm and the effect is 0.1–0.3 cm (the difference between
+the 3-D and fronto-parallel columns above), but the same notebook computes a per-frame
+`angle`, so tilted frames are in its scope and there the error grows.
+
 **What is still open is the range-flat part.** At 315 the trout's $a$ is −5.2 % against the
 Box's −1.2 % on the same dives — a 4 pp gap no parallax explains; at 310 it would be 2.5 pp.
-Three candidates, not yet separable: the scan's scale (the tape "corner to corner" span must
-be the same pair of corners the 150 mm reference names); a consistent yaw of the model on its
-rod-and-wire mount (16° would do it, and the six frames inspected are near-broadside but not
-measurably so); or the Box's own reference being long. A tape on the physical model — snout
-tip to fork, lying on its side — arbitrates the first and is the next step. The head/tail
+Two candidates remain. The scan's scale is no longer one of them: the span it was scaled on
+is confirmed to be the same box tape corner-to-corner 150 mm the reference names, and the
+LiDAR — which never touches the box — agrees with the scan to within its session spread. So
+either the model carries a consistent yaw on its rod-and-wire mount (16° would do it; the
+six frames inspected are near-broadside but not measurably so), or the box's own 150 mm is
+long. The second is testable: the box and the trout appear together on dives 521, 522 and
+509, so a per-frame comparison of the two on the same frames isolates it. The head/tail
 clicks themselves were inspected on six frames from 0.9 to 3.0 m and sit on the snout tip and
 the fork notch; the landmarks are not the problem.
 

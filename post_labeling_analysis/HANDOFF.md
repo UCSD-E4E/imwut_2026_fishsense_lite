@@ -358,12 +358,16 @@ in the sense of the fish frames coming *after* the board (they came before).
    (half thickness / range). Fitting error = a + b/z per target: trout b = −1.8 cm
    [−2.4, −1.3], Snook −2.4, Grouper −5.0, Box −0.4 (≈ 0). A property of the method, small
    for real fish at survey range (−1 % for a 40 cm fish at 2 m). See FINDINGS §7.6.
-9. **The trout's reference.** 310 mm is unprovenanced. An SfM scan scaled on the Box's tape
-   span gives 315 ± 1 mm snout-to-fork (FINDINGS §7.6, landmarks verified on the cloud and
-   on six labelled frames). Against 315 the trout still carries a range-flat −4 pp relative
-   to the Box that parallax does not explain: scan scale, mount yaw, or the Box reference.
-   A tape on the physical model (snout tip to fork, on its side) is the arbiter. Reference
-   left at 310 until then.
+9. **The trout's reference — the open item most worth an hour.** 310 mm is unprovenanced.
+   Two independent instruments say longer: an SfM chord of 315 ± 1 mm (scaled on the box's
+   150 mm tape span, confirmed to be the same span the reference names) and 31.94 ± 0.13 cm
+   from 66 LiDAR frames on two phones with published intrinsics, which takes its scale from
+   the sensors' own depth and so shares no scale chain with the box (FINDINGS §7.6 has the
+   method, the per-device numbers and the recovery paths for the labels and the intrinsics).
+   **Decision: reference stays at 310 and the uncertainty is reported** (`PAPER.md` §4.1/§4.2;
+   at 315 the cohort is 10 dives / n = 615 / median −2.88 / p90 −0.45). The arbiter is a tape
+   on the physical model, snout tip to fork, lying on its side — an hour's drive, and it
+   settles a ±2 % uncertainty on 38 % of the cohort's frames. Do that before submission.
 5. **60 / 66 / 76.** The August repairs and dispute stand as written; 60's raw dive effect
    on the corpus polish is −0.87 (inside the band) because the corpus median moved, which
    is why it is held out by design rather than by threshold.

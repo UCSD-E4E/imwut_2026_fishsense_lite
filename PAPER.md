@@ -26,7 +26,18 @@ Six rigid targets were measured: five painted fish models — a purple angelfish
 stylised rainbow trout (310 mm; "Weasly Fish" in the data), a grouper (360 mm), a snook
 (455 mm), a shark (605 mm) — and a 150 mm box. Each
 target's reference length is the snout-to-tail-fork distance a labeler is asked to click,
-measured with a tape. Targets were photographed in a university pool over 32 sessions
+measured with a tape.
+
+Two of those references carry a stated uncertainty, and we report them rather than adjust
+them. The **trout's 310 mm** is inherited and undocumented, and two independent
+reconstructions of the physical model both place it longer: a dense photogrammetric point
+cloud, scaled on the box's 150 mm span, gives a snout-to-fork chord of 315 ± 1 mm, and 66
+frames of the model captured with two LiDAR phones — different cameras, independently
+published intrinsics, scale taken from the sensors' own metric depth and so sharing no
+scale chain with the box — give 319 ± 2 mm. We keep 310 mm because neither reconstruction
+is a direct measurement and the two disagree by more than either one's precision, and we
+quote the consequence in §4.2. The **shark's 605 mm** is likewise undocumented and the
+model is no longer available; §4.2 reports its offset rather than correcting it. Targets were photographed in a university pool over 32 sessions
 between 2023 and 2025 at laser ranges of 0.25–4.71 m (median 1.7 m), by several divers on
 several camera+laser units, at ranges and poses of the diver's choosing rather than on a
 fixture. Every frame passed through the same pipeline as a field image: a labeler marks
@@ -93,6 +104,15 @@ Snook −0.9 %, Shark +4.3 % — shows no trend with size across a four-fold ran
 The polish attributes +3.2 points of the Shark's figure to the target itself rather than to
 any session; the model is no longer available to re-measure, and it is 25 of 771 frames,
 so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.24 %.
+
+The trout's reference uncertainty (§4.1) works the other way and is worth stating plainly,
+because that target is 291 of the 771 cohort frames. At 310 mm the cohort reads median
+−2.19 %, $p_{90}$ +0.06 %. At the photogrammetric 315 mm every trout frame reads 1.34
+points shorter, three sessions leave the cohort as their offsets re-sort, and the cohort
+reads median −2.88 %, $p_{90}$ −0.45 % over 615 frames; at the LiDAR's 319 mm, median
+−3.41 %, $p_{90}$ −0.60 %. The reference is therefore worth about half a point of the
+headline, in the pessimistic direction, and it does not change any conclusion here: the
+$p_{90}$ stays inside ±1 % and 99 % of frames stay within 15 % at every value.
 
 Figure 3 plots error against laser range. Triangulation conditioning degrades as $Z^2$
 (Eq. 5), so a range dependence surviving into the delivered length would appear as a
