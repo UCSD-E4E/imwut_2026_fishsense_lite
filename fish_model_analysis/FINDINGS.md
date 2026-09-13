@@ -303,10 +303,19 @@ Tukey median polish over the $p_{90}$ of each (dive, model) cell with ≥ 5 fram
 evidence when |dive effect| ≤ 2.5 pp (`cal.MAX_DIVE_EFFECT_PP`). Held out by design, decided
 before any corpus number was looked at (`cal.DESIGN_EXCLUDED_DIVES`): the angle experiment
 (87/94/103/107/114 — single-object dives, pose-dominated), the two August repairs (60, 76)
-and disputed 66. Dive 490 is *not* on that list; it falls out on its own effect (−13.8 pp).
+and disputed 66. Dive 490 was never on that list; since the 490 → 527 split (§7.4) it has no
+rows in the corpus and does not enter the polish at all.
 
-The polish fits tightly — median |residual| **0.15 pp** over 30 dives × 7 models — so the
-two additive terms remain the whole story at corpus scale.
+Median |residual| **0.15 pp**, but read that number with two structural facts (both spelled
+out in `post_labeling_analysis/HANDOFF.md` §3.1): only 52 of the 30 × 7 cells are observed
+against 36 free parameters, and 20 of the 30 dives carry a single cell whose residual is
+zero by construction — over the ten multi-model dives the median is **0.45 pp**. And the
+grid is **disconnected** (2023 dives span the fish models, 2025 dives the Box and Weasly,
+no shared cell), so dive and model effects are identified only within each component and
+the rule compares dive effects across a seam the polish's centring convention sets. The
+additive decomposition is well supported; it is not exact, and the checkerboard-vs-slate gap
+(`post_labeling_analysis/HANDOFF.md` §6.3) is that unidentifiable quantity rather than a
+measurement.
 
 **Scale-free pre-filter (added 2026-09-12, `cal.range_trend_flagged_dives`).** A rigid object
 must read the same length at every range, so the Theil–Sen slope of its length against laser
@@ -317,6 +326,16 @@ with a compensating angle, and that kind (503/504 at 8.90 cm, 498 at 9.51) is in
 the polish — its flat scale error and its ramp cancel where the $p_{90}$ sits (503: −14 % at
 0.8 m, −6 % at 2.5 m, +0.4 % beyond 3.5 m; $p_{90}$ −0.75). Flags 76, 491, 492, 494, 503, 504,
 509 and no sound-baseline dive; 498 is borderline (interval [+2.0, +3.8]) and stays.
+
+Two things to know before reusing it. It flags a dive when **any** cell flags, and the only
+two multi-cell flags here (76's Shark against its Purple Angel, 509's Box against its Weasly)
+are cells a sibling on the same extrinsics contradicts — a calibration error must move every
+target together, so those two are model effects by the polish's own premise. Requiring
+agreement yields the identical cohort here (509 fails the band anyway, 76 is design-excluded),
+so the code is left matching fishsense-lite's `range_trend.py` to the decimal; the guard
+belongs there first. And `theil_sen`'s Sen interval is one order statistic narrower per side
+than `scipy.stats.theilslopes`, which biases very slightly toward flagging; it changes nothing
+here, since 498's lower bound (+1.96) clears the 2.0 threshold under either convention.
 
 Result, pinned as `cal.CORPUS_ACCURACY_DIVES` and by `tests/test_calibration.py`:
 **59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 520, 521, 522** — three August dives
@@ -334,10 +353,18 @@ corpus median moved ~0.3 pp, so 491 (−2.73) and 527 (+2.95) both sit just outs
 | everything except the angle experiment | 27 | 1499 | −3.48 % | +0.16 % | 5.15 % |
 | everything | 32 | 2927 | −5.91 % | −0.59 % | 9.20 % |
 
-Every widening beyond the rule makes the numbers worse — that is the cost of not
-cherry-picking — and $p_{90}$ stays within ±0.7 % of zero in every row. Threshold
-sensitivity: 1.5 → 3.5 pp moves membership from 8 to 15 dives and $p_{90}$ between −0.42 %
-and +0.45 %.
+The two hold-outs do the rejecting and the 2.5 pp band does the tightening. Admitting the
+five dives the band alone excludes costs $p_{90}$ (+0.06 → +0.68 %) while leaving the median
+and mean |err| marginally *better* — so "every widening makes the numbers worse" is no longer
+true of that row, and should not be written; dropping the hold-outs as well runs the mean
+|err| from 3.49 % to 5.15 % and then 9.20 %, which is the real cost of not cherry-picking.
+$p_{90}$ stays within ±0.7 % of zero in every row.
+
+Sensitivity, both free numbers: the polish band over 1.5 → 3.5 pp moves membership from 8 to
+15 dives and $p_{90}$ between −0.42 % and +0.45 %. The range-trend threshold is flatter still
+— anything from 2.0 to 4.0 %/m gives the identical 13 dives and identical figures (only
+≤ 1.5 %/m moves it, to 12 dives and $p_{90}$ +0.09), and neither `MIN_DEPTH_M` over 0.6–1.0
+nor `MIN_FRAMES` over 6–12 changes the flag set at all.
 
 Ladder on the cohort ($p_{90}$): Box −0.14, Purple Angel +0.85, Weasly Fish −1.89, Grouper
 +0.29, Snook −0.94, Shark +4.29.
@@ -365,10 +392,10 @@ the model effect stated.
 
 | dive | effect (pp) | what it is |
 |---|---|---|
-| 490 | −13.8 | **Resolved 2026-09-12**: the laser rotated 0.82° in-plane between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error. Prod fixed 2026-09-12: its fish frames are now dive 527, borrowing 489; corpus not yet re-pulled. See `post_labeling_analysis/HANDOFF.md` §5. |
+| 490 | — | **Resolved 2026-09-12**: the laser rotated 0.82° in-plane between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error. Prod fixed and the corpus re-pulled 2026-09-12: its fish frames are now dive 527 borrowing 489, and 490 itself has no rows and no dive effect. See `post_labeling_analysis/HANDOFF.md` §5. |
 | 492 | −5.8 | borrows 490's row, shot 25 min before either of that rig's bursts; 0.25° from its true state |
 | 494 | −3.5 | borrows 493 |
-| 509 | −2.8 | self-calibrated; range trend −4.1 %/m (flagged) |
+| 509 | −2.8 | self-calibrated; flagged on its Box cell (−4.1 %/m) while its Weasly cell is flat (+0.06, CI [−0.79, +1.39]) — the two disagree, so the flag is not by itself a calibration finding; the polish band excludes it anyway |
 | 491 | −2.7 | borrows 490's row across a 0.2° laser movement; range trend −3.8 %/m (flagged) |
 | 527 | +2.9 | 490's fish frames under 489's calibration: −1.7 % median, $p_{90}$ +1.3 %, i.e. it reads like the 2023 slate dives, which sit ~1.8 pp above the checkerboard-dominated corpus median |
 | 503 / 504 | +0.9 / +2.7 | borrow 502 (8.90 cm): range trend +5.3 / +5.5 %/m (flagged); the polish alone would have kept 503 |

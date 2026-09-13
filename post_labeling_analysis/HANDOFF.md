@@ -49,10 +49,10 @@ list of things that were tried and shown not to work. Read §1 and §7 before do
 | `fish_model_analysis/data/all.csv` | the August 464-row export; strict subset of the corpus (tested). |
 | `fish_model_analysis/data/angles.csv` | the foreshortening experiment: 1,428 rows, `dive_id,image_id,taken_datetime,fish_angle_degrees,angle_category,length_m,depth_m`. Snook, 455 mm. |
 | `fish_model_analysis/sql/extract_corpus.sql`, `extract_angles.sql` | the psql that produced both; re-runnable read-only. `extract_angles.sql` was re-run on 2026-09-12 and reproduces `angles.csv` to the export's rounding. |
-| `fishsense_imwut/calibration.py` | geometry (triangulation, φ rotation, implied-yaw floor), `median_polish`, `cell_p90_grid`, `accuracy_cohort`, `load_angles`, `binned_angle_error`, and every cohort constant. Read its comments; they carry the reasoning. |
+| `fishsense_imwut/calibration.py` | geometry (triangulation, φ rotation, implied-yaw floor), `median_polish`, `cell_p90_grid`, `theil_sen`, `range_trend`, `range_trend_flagged_dives`, `accuracy_cohort`, `load_angles`, `binned_angle_error`, and every cohort constant. Read its comments; they carry the reasoning. |
 | `fishsense_imwut/pubfig.py` | publication style and every figure function. `nearest_rank_p90` is the estimator of record. |
 | `fish_model_analysis/fish_model_measurements.ipynb` | the analysis. Executes clean top to bottom; cell 3 asserts the August handoff numbers, cell 5 asserts the cohort. |
-| `tests/test_calibration.py` | `uv run pytest -q tests` — 11 tests; pins the polish, the rule, and the published 15-dive cohort. |
+| `tests/test_calibration.py` | `uv run pytest -q tests` — 17 tests; pins the polish, the Theil–Sen interval, the range-trend pre-filter, the rule, and the published 13-dive cohort. |
 | `fish_model_analysis/FINDINGS.md` | §1–6 August findings; **§7 the corpus results**. |
 | `fish_model_analysis/HANDOFF.md` | August physics and repair method. |
 | `PAPER.md` | Section 4 draft and the recommendation to cut Figures 4/5. |
@@ -166,6 +166,41 @@ applied to the result:
    known bad — and no sound-baseline dive. 498 (9.51 cm, +2.8 %/m, interval [+2.0, +3.8]) is
    the borderline that stays.
 
+   **Its constants barely matter, and that is the strongest argument that it was not tuned.**
+   Any threshold from 2.0 to 4.0 %/m selects the identical 13-dive cohort with identical
+   numbers (only ≤ 1.5 %/m moves it, to 12 dives and $p_{90}$ +0.09); `MIN_DEPTH_M` over
+   0.6–1.0 and `MIN_FRAMES` over 6–12 change the flag set not at all. Three of the four
+   constants are inert on this corpus and the fourth sits on a two-point plateau. Worth
+   quoting alongside the polish sweep; the paper now does.
+
+   **Known limitation — it flags a dive when ANY cell flags, and both multi-cell flags here
+   are cells their sibling contradicts.** 76: Shark +5.33 [+4.19, +6.77] against Purple Angel
+   −2.24 [−3.55, +2.72]. 509: Box −4.11 [−4.52, −3.64] against Weasly +0.06 [−0.79, +1.39].
+   A calibration error moves every target on the dive together — that is the premise the
+   polish rests on — so a lone flagging cell its sibling contradicts is a model effect, which
+   is exactly what §6.1 says about 76's Shark. Requiring agreement among usable cells flags
+   (491, 492, 494, 503, 504) and yields the **identical cohort**, because 509 is out on the
+   polish band (−2.83) and 76 is design-excluded. So it costs nothing here and the code is
+   deliberately left matching fishsense-lite's `range_trend.py` to the decimal. It is not
+   free in general: on a dive with a sound calibration and one anomalous target it rejects
+   the dive. The guard belongs in `range_trend.py` first, then here.
+
+Two structural facts about the grid, both load-bearing and neither visible in the 0.15 pp:
+
+- **52 of 210 cells are observed, against 36 free parameters, and 20 of the 30 dives carry
+  exactly one cell** — on those the dive effect absorbs the cell and the residual is
+  identically zero by construction. Over the ten multi-model dives the median |residual| is
+  **0.45 pp** (max 4.33). The additive model is well supported; it is not "essentially
+  exact", and quoting 0.15 pp as though it were fitted over 30 × 7 cells overstates it.
+- **The grid is disconnected.** The 2023 dives span {Grouper, Purple Angel, Ruler, Shark,
+  Snook} and the 2025 dives span {Box, Weasly Fish}, with no cell in common. Dive and model
+  effects are therefore identified only *within* each component; the polish's global
+  centring is what puts the two on one scale, and the rule compares dive effects across
+  that seam. Shifting the 2025 block by ±1 pp — which the data cannot rule out — moves
+  membership and the cohort $p_{90}$ by roughly as much as the 1.5→3.5 pp threshold sweep
+  does. The headline survives every variant, but §6.3's checkerboard-vs-slate gap is this
+  unidentifiable quantity, not a measurement.
+
 Result on the corpus (re-pulled after the 490 → 527 split, §5):
 **59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 520, 521, 522** — n = 771, median −2.19 %,
 $p_{90}$ +0.06 %, mean |err| 3.71 %; 78 % of frames within 5 %, 98 % within 10 %, 99 %
@@ -232,7 +267,9 @@ and deliberately **not** ingested — it adds frames of the two targets already 
 ## 5. Dive 490 — RESOLVED 2026-09-12: the laser moved between its fish frames and its board burst
 
 This section originally read "irreducible contradiction". It is not. The read-only prod
-timeline for rig FSL-02D on 2023-08-14 (`image.taken_datetime`):
+timeline for rig FSL-02D on 2023-08-14 (`image.taken_datetime`) — but see §6.9: this date
+contradicts §2's classification of 480–522 as the 2025 pool tests, and one of the two is
+wrong. The ordering below is what the argument rests on, and it is unaffected either way:
 
 | when (UTC) | what | dive | extrinsics |
 |---|---|---|---|
@@ -276,11 +313,12 @@ Consequences:
 - After the re-pull 491 (−2.73) is out of the cohort and 527 (+2.95) is not in it; both are
   within half a point of the band. 491 borrows 490's row across a ~0.2° laser movement.
 - The general detector — the range trend of a rigid object's length, scale-free — now
-  exists in fishsense-lite as `range_trend.py` (branch
-  `chore/checkerboard-scale-audit-script`). On this corpus it flags exactly 490, 494, 509,
-  491, 492 and no cohort cell; only its negative side is signal (§6.4's close-range
-  under-read produces positive slopes on good dives); it is blind to range-flat baseline
-  errors (506/507 via 505); and no wild-fish dive in prod has the range spread it needs.
+  exists in fishsense-lite as `range_trend.py`, merged to `main` (PRs #891/#893; see §1).
+  On the re-pulled corpus it flags **76, 491, 492, 494, 503, 504, 509** and no cohort dive
+  (490 no longer has rows; the authoritative statement of the flag set and its sensitivity
+  is §3.1). Both signs are signal — the positive side is what caught 503/504/498's short
+  baselines — but it is blind to range-flat baseline errors (506/507 via 505), and no
+  wild-fish dive in prod has the range spread it needs (§6.8).
 
 Earlier claims from the session that were wrong and should not be repeated: that 490's far
 frames had no fish (misread of a downscaled render); that the folder held two laser states
@@ -302,12 +340,17 @@ in the sense of the fish frames coming *after* the board (they came before).
    case, and since #894 a dive the api no longer counts as calibrated. 58 (+3.14) and 506
    (+3.97) are the positive-side rejects. The rule is defensible; the membership is not
    sacred.
-3. **Checkerboard vs slate offset.** Inside the cohort the ten 2025 checkerboard dives
-   (median −2.67, $p_{90}$ −0.42) sit ~1.5 pp below the three 2023 slate-borrow dives
-   (−1.17, +1.29), and 527 — a checkerboard-calibrated dive — reads like the slate ones.
-   Candidates: the board's own ±1.2 % pitch tolerance; a systematic in corner detection;
-   target set (Box/Weasly vs the fish models). The near-range frames are no longer a
-   candidate (§6.4).
+3. **Checkerboard vs slate offset — not estimable as posed.** Inside the cohort the ten 2025
+   checkerboard dives (median −2.67, $p_{90}$ −0.42) sit ~1.5 pp below the three 2023
+   slate-borrow dives (−1.17, +1.29), and 527 — a checkerboard-calibrated dive — reads like
+   the slate ones. But the two groups share no target (§3.1), so calibration method is
+   perfectly confounded with target set, and the polish cannot break it: the gap *is* the
+   quantity the disconnected grid leaves to a centring convention. Candidates remain the
+   board's own ±1.2 % pitch tolerance, a systematic in corner detection, and the target sets
+   themselves; the near-range frames are no longer one (§6.4). **The only thing that settles
+   it is a shared target**: one dive that photographs a fish model and a Box/Weasly, or a
+   slate and a checkerboard (check `dive_slate_id` and `calibration_target_id` both
+   non-null). Until then, report the gap as unidentified rather than unexplained.
 4. **Near-range bias — now mostly explained.** Most of it was the short-baseline dives
    (503/504/498: −14 to −18 % below 0.8 m), removed by the range-trend pre-filter. What
    remains is Weasly-Fish-specific: −6.8 % below 0.8 m vs −2.3 % for the Box at the same
@@ -328,6 +371,19 @@ in the sense of the fish frames coming *after* the board (they came before).
    times over a ≥ 2× range spread beyond 0.8 m). Only the 2025 pool sessions and the angle
    tests qualify. It becomes a field check only if the protocol adds a rigid reference
    photographed at two ranges after calibrating.
+9. **Unresolved: are dives 489–492 from 2023 or 2025?** §5's prod timeline dates them to
+   **2023-08-14** on rig FSL-02D; §2 puts 480–522 in the **2025** pool tests, and `PAPER.md`
+   §4.1 sells the cohort as "three slate-calibrated 2023 sessions and ten
+   checkerboard-calibrated 2025 sessions". `angles.csv` puts the angle dives at 2023-08-31,
+   so 2023 dates in the 480s are not absurd. Nothing in the cohort turns on it — 489–492 and
+   527 are all excluded — but the paper's era labeling and §6.3's framing do. One read-only
+   query settles it and was not run (prod reads were unavailable in the session that
+   found this):
+
+   ```sql
+   SELECT dive_id, min(taken_datetime)::date, max(taken_datetime)::date, count(*)
+   FROM image WHERE dive_id BETWEEN 480 AND 527 GROUP BY 1 ORDER BY 1;
+   ```
 
 ---
 

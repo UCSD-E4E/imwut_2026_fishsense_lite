@@ -40,8 +40,16 @@ error has two additive components: a per-*session* term, which is the calibratio
 and moves every target in that session together; and a per-*target* term, which is a
 reference or landmark offset and follows the target across sessions. We separate them with
 a Tukey median polish on the $p_{90}$ percent error of each (session, target) cell with at
-least five frames [Tukey 1977]. The polish fits tightly — median absolute residual
-0.15 percentage points over 30 sessions × 7 targets — so the two terms are the whole story.
+least five frames [Tukey 1977]. Fifty-two cells are observed over 30 sessions and 7 targets,
+and the additive fit accounts for them closely: the median absolute residual is 0.15
+percentage points, and 0.45 points over the ten sessions that carry more than one target and
+so can exhibit a residual at all. One caveat follows from which targets went in the water
+when: the 2023 sessions photographed the fish models and the 2025 sessions the box and one
+model, with no target in common, so the session and target terms are anchored separately
+within each group and the polish's centring is what places the two groups on a single scale.
+A reference error common to one group's targets would therefore shift that group's session
+offsets bodily against the other's; within a group it could not.
+
 A session enters the accuracy cohort when its calibration offset is within 2.5 percentage
 points of the corpus median. Two hold-outs precede that test. By design, before any number
 was computed: the five angle-experiment sessions of §4.3 (a single target at deliberately
@@ -51,12 +59,19 @@ target must read the same length at every range, so a session whose targets show
 trend with range — the Theil–Sen slope over frames beyond 0.8 m, with its 95 % interval
 clear of ±2 % per metre — has a calibration error in the in-plane laser angle that no
 reprojection test can see (§3.3), and is excluded. That check removes seven sessions,
-every one of which the reference lengths independently grade as wrong, including two whose
-median error looked fine because a short fitted baseline and a compensating angle cancel
-at mid-range. The rule admits 13 sessions and 771 measurements; three are slate-calibrated
-2023 sessions and ten are checkerboard-calibrated 2025 sessions. Sensitivity to the one
-free number is small: moving the threshold from 1.5 to 3.5 points changes membership from
-8 to 15 sessions and the cohort $p_{90}$ by less than half a point.
+including two whose median error looked fine because a short fitted baseline and a
+compensating angle cancel at mid-range. Five of the seven carry a single target and the
+reference lengths independently grade every one of them as wrong; the remaining two are
+rejected on one target while a second target in the same session shows no trend, and both
+are already outside the cohort for other reasons, so nothing in the reported figures turns
+on them. The rule admits 13 sessions and 771 measurements; three are slate-calibrated
+2023 sessions and ten are checkerboard-calibrated 2025 sessions.
+
+Neither free number is delicate. Moving the polish threshold from 1.5 to 3.5 points changes
+membership from 8 to 15 sessions and the cohort $p_{90}$ by less than half a point. The
+range check is insensitive over a wider band still: any trend threshold from 2 to 4 % per
+metre selects the identical 13 sessions and the identical figures, and neither the 0.8 m
+floor (0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions it rejects.
 
 #### 4.2 Accuracy
 
@@ -87,8 +102,11 @@ one target, so it is a landmark effect on that model at close range rather than 
 it is inside the error budget and below the working range of a diver measuring wild fish.
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
-selections. Widening beyond the rule only worsens the figures, which is the cost of not
-choosing sessions by hand; $p_{90}$ stays within ±0.7 % of zero throughout.
+selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
+admitting the five sessions the band alone excludes costs $p_{90}$ (+0.06 % to +0.68 %) while
+leaving the median and mean marginally better, whereas dropping the hold-outs as well runs
+the mean error from 3.5 % to 5.2 % and then 9.2 %. $p_{90}$ stays within ±0.7 % of zero
+throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
@@ -100,8 +118,10 @@ choosing sessions by hand; $p_{90}$ stays within ±0.7 % of zero throughout.
 ```latex
 \begin{table}[t]
   \caption{Percent length error over the accuracy cohort and over wider selections.
-  Widening beyond the rule only worsens the figures; $p_{90}$ stays within $\pm0.7\,\%$
-  of zero throughout.}
+  The hold-outs do the rejecting and the $2.5$-point band the tightening: admitting the
+  sessions the band alone excludes costs $p_{90}$ while leaving the median marginally
+  better, whereas dropping the hold-outs runs the mean error from $3.5\,\%$ to $9.2\,\%$.
+  $p_{90}$ stays within $\pm0.7\,\%$ of zero throughout.}
   \label{tab:accuracy}
   \begin{tabular}{lrrrrr}
     \toprule
