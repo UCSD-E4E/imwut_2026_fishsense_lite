@@ -111,6 +111,53 @@ fail on one of the two criteria in §4.1. An instrument whose scale parameter dr
 than its own measurement error between uses is one that must be calibrated, and validated,
 at the point of use.
 
+*(Added 2026-09-14 from the conditioning measurements. This is the text §4.5 refers to
+as "the conditioning criterion of §4.2"; it is written to slot in after the paragraph above
+and before §4.3. Numbers and their controls are in `fish_model_analysis/FINDINGS.md` §9.)*
+
+A second failure mode of the same parameter is that a session's own fit can fail to
+determine it. What fixes the laser's direction is the spread of the calibration
+observations *along* the ray — the lever arm — against the noise in locating the dot, not
+their number: one pixel of dot-label noise at range $z$ is $z/f$ metres of lateral error,
+so it rotates the fitted axis by about $(z/f)/\ell$ radians for a lever $\ell$. Two
+observations a metre apart therefore determine the axis far better than sixteen at one
+distance, and a burst shot at a single distance does not determine it at all.
+
+The consequence is not a large error everywhere. It is a fit that is accurate where it was
+taken and wrong away from it, which makes it invisible to a validation performed at the
+working distance. The calibration frames themselves supply the check: the target's pose
+gives a per-frame distance that does not involve the laser at all, so laser-triangulated
+range can be compared against it frame by frame. For one session of 16 observations
+spanning 0.03 m of range, the stored calibration reproduces its own working distance to
+$-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and $n=15$ frames);
+its fitted baseline, 12.95 cm, is the widest in a fleet whose sound calibrations lie
+within 9.99–10.45 cm.
+
+Three checks miss it, and the pattern in how they miss is the point. The known-length
+targets in that session all sit within 0.1 m of its calibration distance and read
+$-2.4\,\%$ at $0°$ ($n=15$) — ordinary. Reprojection residual cannot see it, for the
+reason given above. And leave-one-out cross-validation over the calibration observations
+reports 0.56 % median error on the held-out frame, *better* than the eleven sound sessions
+(0.52–1.48 %), because a frame held out of a single-distance burst is predicted at the
+distance the remaining frames already anchor. Every check evaluated where the data already
+lies is blind to conditioning; only the geometry of the observations, or an evaluation at a
+different distance, reveals it.
+
+We therefore admit a session as accuracy evidence only if its calibration observations
+span at least 0.6 m of range. The criterion needs no threshold search and no reference
+length: sound sessions span 1.02–2.32 m, the two rejected span 0.03 and 0.07 m, and the
+bound is a statement about the data's geometry rather than about any measured error, so it
+applies before a validation target exists.
+
+Where two bursts of one mount state exist at different distances, the remedy is to fit
+them jointly. Combining the session above with a burst 5.5 h later at 4.2 m gives a 2.25 m
+lever and a 10.87 cm baseline that reproduces both distances to $-0.22\,\%$ and
+$-1.10\,\%$, with held-out medians of $-0.23\,\%$ and $-1.19\,\%$; neither burst alone
+predicts the other's distance (to $-17.25\,\%$ and $-127.6\,\%$). That the two agree is
+also the one direct piece of evidence here that a mount can hold for hours — the failure
+documented above is not that it always moves, but that nothing in the data tells you
+whether it did without a check at a second distance.
+
 #### 4.3 Accuracy
 
 Figure 1 plots measured against known length for every cohort frame; Figure 2 gives the

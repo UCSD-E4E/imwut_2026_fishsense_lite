@@ -689,3 +689,88 @@ the range check of §7 cannot grade these calibrations, and 4–18 fish per rig 
 between-fish size spread puts the standard error on a rig median at 7–14 %. The stereo
 comparison (§8) is a consistency check at best. PAPER.md §4.5 is written to these limits.
 
+
+
+## 9. Conditioning, measured against an independent range standard (2026-09-14)
+
+Everything in §7 grades a calibration with a *known length*. This section grades one
+without, using the calibration target's own pose, and the result is the text PAPER.md §4.2
+now carries.
+
+**The standard.** A calibration frame carries a target of known geometry, so `solvePnP`
+gives a per-frame distance that does not involve the laser. Comparing laser-triangulated
+range against it, frame by frame, is the only check in the toolkit with access to an
+*independent* depth — which is why it is the only one that can see scale. Reprojection
+residual cannot (§7.x epipolar blindness), and `LaserDepth.residual_m` was measured not to
+(Spearman −0.026, n=464).
+
+**Control on the estimator, run before any claim was made.** An offline harness replicating
+stage 13 (`plane_from_correspondences` → `laser_point_on_plane` → Atanasov fit) was run
+against the 11 dives whose slate-frame laser labels are *all* live, so the fit's inputs are
+provably still what the database holds. It reproduces prod's stored `laser_position` and
+`laser_axis` on all 11: worst baseline disagreement **1e-5 cm**, worst axis disagreement
+**0.0000°**, including dive 107 at 12.954 cm. Prediction made from it and then confirmed in
+prod: dive 347 would refit to 10.11 cm and pass all four gates — prod returned **10.101 cm**
+and no refusal.
+
+**Dive 107: locally accurate, catastrophically wrong 2 m away.** 16 observations spanning
+0.03 m of range.
+
+| calibration | baseline | vs PnP range at 2.0 m (n=16) | at 4.2 m (n=15) |
+|---|---|---|---|
+| 107's own (stored) | 12.954 cm | −0.12 % | **−17.25 %** (out of sample) |
+| 526's own | 1.995 cm | −127.58 % (out of sample) | +2.87 % |
+| joint 107+526 | 10.865 cm | −0.22 % | −1.10 % |
+
+Leave-one-out on the joint fit: held-out 526 frames median **−1.19 %** (worst single frame
+10.6 %, one weak observation), held-out 107 frames median **−0.23 %**, max 1.91 %. So the
+two bursts — same camera, same slate, same NAS folder, 5.5 h apart — are consistent with
+one mount state, and the joint fit is the better calibration for both.
+
+All 180 of dive 107's measured frames sit at 1.96–2.06 m, inside its anchor range, so **no
+published 107 number is affected**; its stored fit is wrong only where nothing measures.
+That is also why 526 could not simply borrow it.
+
+**The negative result: leave-one-out is not a screen. Do not build it.** Refitting N times
+leaving one slate observation out and predicting the held-out depth gives, per dive:
+
+    sound dives (n=11)   lever 1.02–2.32 m   LOO median |depth err| 0.52–1.48 %
+    dive 107             lever 0.03 m        0.56 %   <- better than most sound dives
+    dive 526             lever 0.07 m        4.42 %
+
+Dive 107 scores 0.56 % while being 17 % wrong at 4.2 m. The reason is structural, not a
+threshold: a frame held out of a single-distance burst is predicted at the distance the
+remaining frames already anchor, so it carries no information about the ray's direction.
+**Every in-distribution check is blind to conditioning** — known-length medians at the
+working distance, reprojection residual, and cross-validation alike. Only the observation
+geometry (the lever arm) or an evaluation at a genuinely different distance sees it.
+
+**Two independent scale standards agree to ~1 %.** The pipeline's metric scale comes from
+the calibration target, so it *does* need a size reference — a printed one. Slate templates
+(scanned DPI) and the E4E checkerboard (4.2 cm square) are independent standards, and the
+baseline is a rig constant, so any camera calibrated both ways should agree. Over the **5
+cameras** carrying both (19 fits, **5 distinct slate templates**), mean checkerboard−slate
+difference **−0.027 cm = −0.27 %** of baseline, sd 0.104 cm, |max| 0.154 cm — *below* the
+within-standard same-camera noise floor (10 groups, mean sd 0.121 cm). 95 % CI on the
+relative scale error: **−1.14 % to +0.61 %**. Gate-refused fits (107, 347-old, 349-old, 498,
+502) excluded and named.
+
+Consequence for the error budget: the dominant uncertainty in the accuracy number is the
+**fish-model reference** (±2 % on the 310 mm Weasly), not the calibration chain. Cannot see:
+a common-mode error in both standards, or in the intrinsics — both rescale the PnP depth and
+the laser depth together. A per-camera focal error would show as a per-camera baseline
+offset and is bounded by the 7-camera agreement; a fleet-wide focal bias is invisible to all
+of it.
+
+**Recovery of dives 347 and 349 (the two §4.5 exclusions).** Both were left with 1 and 2
+usable observations because the 3σ per-dive validator superseded their genuine slate dots:
+347's thirteen sit 0.34–8.48 px off a line its 319 fish dots define to 1.25 px median, and
+349's twelve sit 2.87–5.98 px off a 0.94 px line, against thresholds of 3.56 and 3.00 px.
+Fleet-wide, the largest live calibration-frame offset is 8.33 px and the nearest real
+mislabel is 45.57 px, so a 20 px absolute bound on calibration frames separates them; it
+protects exactly the 21 revived labels and changes no other live label in the fleet
+(verified over all 19 dives with calibration frames). Shipped as
+`COARSE_CALIBRATION_TOLERANCE_PX`; the revived labels survived the next validator pass in
+prod. Refits: 347 → 10.101 cm (predicted 10.11), 349 pending at the next stage-13 firing.
+Recovers **73 measurements of 24 fish**, taking §4.5 from 91/50 to the full seven
+deployments.
