@@ -4,8 +4,10 @@ Run from the repository root:
 
     uv run python fish_model_analysis/rig_bias.py
 
-Writes `fish_model_analysis/figures/fig10_no_rig_bias.{pdf,png}` and prints the
-one-way test the caption quotes.
+Writes `fish_model_analysis/figures/fig10_no_rig_bias.{pdf,png}` and
+`fig10b_error_by_camera.{pdf,png}`, and prints the one-way test the caption
+quotes. The angle-experiment sessions are excluded from both -- see
+`per_camera_offsets`.
 
 WHAT IS PLOTTED, AND WHY IT IS NOT THE OBVIOUS THING
 ----------------------------------------------------
@@ -55,16 +57,28 @@ OUTDIR = Path(__file__).resolve().parent / "figures"
 
 
 def per_camera_offsets():
-    """camera id -> [(session id, calibration offset pp, in cohort), ...]."""
+    """camera id -> [(session id, calibration offset pp, in cohort), ...].
+
+    The five angle-experiment sessions are excluded. They photograph one target
+    at deliberately oblique poses, so the polish cannot separate their session
+    effect from the snook's target effect and what it returns for them is pose,
+    not a calibration offset -- the wrong quantity to attribute to a unit. They
+    are also unevenly spread across units (one unit had two sessions, one of
+    them an angle session), so leaving them in would let pose set that unit's
+    position on the axis.
+    """
     rows = cal.load_rows(CORPUS)
     df = cal.to_frame(rows)
     dive_to_camera = {int(r["dive_id"]): int(r["camera_id"]) for r in rows}
     effects = cal.median_polish(cal.cell_p90_grid(df)).dive_effect
     cohort = set(cal.accuracy_cohort(df))
+    angle = set(cal.ANGLE_TEST_DIVES)
 
     out: dict[int, list] = {}
     for dive in effects.index:
         d = int(dive)
+        if d in angle:
+            continue
         out.setdefault(dive_to_camera[d], []).append(
             (d, float(effects[dive]), d in cohort)
         )

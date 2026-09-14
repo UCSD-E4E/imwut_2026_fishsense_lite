@@ -76,12 +76,16 @@ Spreading the corpus over many sessions, sites and weather is only useful if no 
 unit dominates it, so we check that directly. Seven camera+laser units contributed, six of
 them across both campaigns, and Figure 10 plots each session's calibration offset grouped
 by unit — the session term of the polish below, which is comparable across units that
-photographed different targets in a way a raw per-unit mean is not. No unit stands apart.
-A one-way fit puts the between-unit variance component at zero against a within-unit spread
-of 2.5 points ($F(6,23) = 0.61$, $p = 0.72$): the units differ from one another by less
-than sessions of the same unit differ among themselves. The sessions that fail the checks
-below are likewise spread across six of the seven units rather than concentrated on one,
-which is what a bad unit, as opposed to a bad session, would look like.
+photographed different targets in a way a raw per-unit mean is not. The five
+angle-experiment sessions of §4.4 are left out: a single target at deliberately oblique
+poses gives the polish no way to separate that session from that target, so what it returns
+for them is pose rather than a calibration offset. No unit stands apart among the 25 that
+remain. A one-way fit puts the between-unit variance component at zero against a
+within-unit spread of 2.6 points ($F(6,18) = 0.71$, $p = 0.64$): the units differ from one
+another by less than sessions of the same unit differ among themselves. The sessions that
+fail the checks below are likewise spread across five of the seven units rather than
+concentrated on one, which is what a bad unit, as opposed to a bad session, would look
+like.
 
 Not every session is accuracy evidence, and we do not choose which are by hand. A per-frame
 error has two additive components: a per-*session* term, which is the calibration offset
@@ -448,12 +452,14 @@ check that would have caught any of this in the field.
   that sets metric scale and that no reprojection check can observe. The 0.27° spread is
   worth −4.5 % in length at 2 m, so the mount moves between uses by more than the accuracy
   the instrument otherwise achieves. Marker distinguishes cohort membership.
-- **Figure 10** — Session calibration offset by camera unit, all 32 sessions. Each marker
-  is one session's offset (the session term of the median polish, which removes the
-  per-target term and so is comparable across units that photographed different targets);
-  the bar is the unit's median and the band is ±1 within-unit standard deviation. Every
-  unit's median falls inside that band, the between-unit variance component is zero, and
-  the sessions the rule rejects are spread across six of the seven units.
+- **Figure 10** — Session calibration offset by camera unit, for the 25 sessions outside
+  the angle experiment. Each marker is one session's offset (the session term of the median
+  polish, which removes the per-target term and so is comparable across units that
+  photographed different targets); the bar is the unit's median and the band is ±1
+  within-unit standard deviation. Every unit's median falls inside that band, the
+  between-unit variance component is zero, and the sessions the rule rejects are spread
+  across five of the seven units. Unit 1 contributed a single non-angle session, so its
+  marker and median coincide.
 - **Figure 9** *(no section references it yet — see the note under "Edits elsewhere")* —
   Length error against position in the frame with no refraction correction,
   simulated for this camera and housing. Ignoring the water's index expands the scene
