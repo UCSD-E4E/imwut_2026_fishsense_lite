@@ -974,3 +974,84 @@ def fig_flat_port_cost(
     ax.margins(x=0)
     fig.tight_layout()
     return fig
+
+
+# --- rig bias -------------------------------------------------------------
+
+
+def fig_no_rig_bias(
+    per_camera,
+    within_sd: float,
+    f_stat: float | None = None,
+    p_value: float | None = None,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.6),
+) -> plt.Figure:
+    """Per-session calibration offset, grouped by camera.
+
+    `per_camera` maps camera id -> list of (session id, offset_pp, in_cohort).
+
+    The quantity plotted is the session effect of the median polish, not the raw
+    per-camera error, and the distinction is load-bearing: cameras photographed
+    different target sets, so a raw per-camera mean is confounded with which
+    targets that camera happened to see. The polish removes the target term, so
+    what is left is the calibration offset alone.
+
+    The argument the figure makes is a comparison of two spreads. If a camera
+    carried a bias, its sessions would sit together and away from the rest. They
+    do not: the scatter within one camera is as large as the scatter between
+    cameras, and the sessions that fail the checks of the accuracy rule (open
+    markers) are spread across cameras rather than clustered on one.
+    """
+    cams = sorted(per_camera)
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="y")
+
+    ax.axhspan(-within_sd, within_sd, color=GRIDLINE, alpha=0.55, zorder=0,
+               label="±1 sd within a camera")
+    _zero_line(ax, orientation="h")
+
+    for i, cam in enumerate(cams):
+        pts = per_camera[cam]
+        n = len(pts)
+        offsets = np.linspace(-0.17, 0.17, n) if n > 1 else np.array([0.0])
+        for (dive, val, keep), dx in zip(pts, offsets):
+            if keep:
+                ax.plot(i + dx, val, marker="o", markersize=4.2, color=SERIES_1,
+                        linestyle="none", zorder=4)
+            else:
+                ax.plot(i + dx, val, marker="o", markersize=4.2, markerfacecolor="none",
+                        markeredgecolor=INK_MUTED, markeredgewidth=0.9,
+                        linestyle="none", zorder=3)
+        med = float(np.median([v for _, v, _ in pts]))
+        ax.plot([i - 0.28, i + 0.28], [med, med], color=SERIES_2, linewidth=1.9, zorder=5)
+
+    ax.set_xticks(range(len(cams)))
+    ax.set_xticklabels([str(c) for c in cams])
+    ax.set_xlim(-0.5, len(cams) - 0.5)
+    ax.set_xlabel("Camera unit")
+    ax.set_ylabel("Session calibration offset (pp)")
+
+    # Headroom for the legend and the footnote, so neither lands on a session.
+    flat = [v for pts in per_camera.values() for _, v, _ in pts]
+    lo, hi = min(flat), max(flat)
+    ax.set_ylim(lo - 0.34 * (hi - lo), hi + 0.20 * (hi - lo))
+
+    if f_stat is not None and p_value is not None:
+        ax.annotate(
+            f"$F({int(f_stat[1])},{int(f_stat[2])}) = {f_stat[0]:.2f}$,  "
+            f"$p = {p_value:.2f}$",
+            xy=(0.985, 0.975), xycoords="axes fraction", ha="right", va="top",
+            fontsize=6.5, color=INK_SECONDARY,
+        )
+
+    from matplotlib.lines import Line2D
+    ax.legend(handles=[
+        Line2D([], [], marker="o", linestyle="none", markersize=4.2, color=SERIES_1,
+               label="in accuracy cohort"),
+        Line2D([], [], marker="o", linestyle="none", markersize=4.2,
+               markerfacecolor="none", markeredgecolor=INK_MUTED, label="rejected"),
+        Line2D([], [], color=SERIES_2, linewidth=1.9, label="camera median"),
+    ], fontsize=6, loc="lower left", ncol=1, handletextpad=0.5,
+        borderpad=0.2, labelspacing=0.35, framealpha=0.0)
+    fig.tight_layout()
+    return fig
