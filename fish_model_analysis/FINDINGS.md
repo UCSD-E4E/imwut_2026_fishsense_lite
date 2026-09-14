@@ -859,3 +859,44 @@ frames, the kernel, or an evaluation at a different range.
 
 **Recovery status of the corpus, final:** dives 347 and 349 are recovered and measured. No
 other dive is recoverable from existing data, and no relabelling would change that.
+
+
+### 9.3 Dive 498 repaired — and what that means for §4.3's cohort (2026-09-14)
+
+Dive 498's own calibration (baseline 9.51 cm from a 0.34 m lever) was retired in prod.
+Because `Dive.calibration_dive_id = 496`, deleting it did **not** leave the dive
+uncalibrated: it fell back to dive 496's row, and 496 is the *same camera, same day, same
+rig folder* — `ED-00/FSL-04D/LaserCalibration` against 498's `ED-00/FSL-04D/George` — i.e.
+that session's own calibration burst. 496's fit passes the baseline gate (10.362 cm) and
+describes 498's 40 live dots, so the borrow is the calibration 498 should have been using.
+
+Re-measured under it, with the old lengths snapshotted first:
+
+| | n | median | median % error vs 310 mm | range trend |
+|---|---|---|---|---|
+| own 9.51 cm fit | 35 | 288.6 mm | **−6.89 %** | −14…−18 % at 0.8 m, ramping to ~0 at 4 m |
+| 496's 10.36 cm fit | 35 | 300.1 mm | **−3.20 %** | **+0.81 %/m, 95 % CI [−0.08, +1.79]** |
+
+The range trend is the scale-free check, and it is now flat with an interval spanning zero,
+inside the ±1 %/m band sound calibrations occupy. The residual −3.2 % is ordinary against
+the cohort median of −2.19 %, half-thickness parallax on a solid model, and ±2 % on the
+reference.
+
+**The consequence for the paper, stated because it is a reproducibility problem and not a
+numbers problem.** §4.3's cohort is derived by a *rule*, and `data/corpus.csv` is frozen at
+2026-09-12. 498 was excluded by the range-trend pre-filter on a trend that no longer exists,
+so **a fresh export would admit it and the published cohort would become 14 dives, not 13**.
+The pinned tests stay green because they run against the frozen CSV, which is the intended
+behaviour but also means they cannot notice this.
+
+Two honest options, and the first is what the submission should do:
+
+1. **Keep the frozen export and say so.** The corpus is a stated snapshot; 498's repair
+   postdates it. Cite the export date in §4.3 and note that one excluded session was
+   subsequently repaired in the pipeline. Nothing in §4.3 changes.
+2. **Re-export and re-run.** Correct but not free: the cohort, Table 1, the threshold sweep
+   and every figure derived from `corpus.csv` move together, and 498 is a −3.2 % dive that
+   would pull the cohort median slightly.
+
+Do not do the third thing — quietly re-running the rule against new data while quoting the
+old cohort — which is how a stated rule and a stated result come apart.
