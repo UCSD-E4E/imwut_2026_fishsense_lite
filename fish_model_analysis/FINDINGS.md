@@ -1043,3 +1043,51 @@ per-target numbers in §4.3 are the nearest-rank ones. Do not mix them.
 
 Figures 1, 2, 3, 6, 8 and A were regenerated from the fresh export with the same `pubfig`
 calls the notebook makes.
+
+
+## 10. Six mislabelled frames, found by the implied pixel separation (2026-09-14)
+
+A frame's measured length is geometry; its label is what the length is *graded against*. So
+a frame whose length fits another target present in the same session far better than its own
+label is a labelling error, not a measurement error. The decisive statistic is the head/tail
+**pixel separation** the measurement implies, $\text{px} = L f / z$, which depends on neither
+the length convention nor the reference table:
+
+| session | frames | labelled | actually | implied span | nearest correct | nearest labelled |
+|---|---|---|---|---|---|---|
+| 84 | 2 | Snook | **Purple Angel** | 460, 369 px | 456, 372 | 1065, 951 |
+| 521 | 4 | Box | **Weasly Fish** | 1411, 1289, 871, 595 px | 1353, 1261, 920, 611 | 752, 662, 421, 286 |
+
+Dive 84's landmarks are 2.3× too close together to be on a snook and match the angelfish
+within a percent; the diver was alternating targets at the same range (purple angel at
+1.200/1.209/1.211 m, snook at 1.193/1.208/1.210 m), which is how the confusion happens.
+Dive 521's four read +95 to +102 % as a 150 mm box, which no pose or calibration error
+produces. Corrected in prod 2026-09-14 (`specieslabel.content_of_image`).
+
+**Detector reliability, measured before any flag was trusted.** Of 2,927 frames only 875
+have another target in the same session to compare against at all; over those, the own label
+fits better by 45.8 pp at the median, and only 13 frames have an alternative better by
+20 pp and 7 by 40 pp. The flags are the extreme tail, not noise. Threshold used: own error
+≥ 30 % and some same-session alternative ≤ 10 %.
+
+**One flag deliberately not acted on.** Dive 66 has a frame at 315.93 mm labelled Snook: the
+ruler fits it to 7.9 % and the snook label to −30.6 %, and *both* are inside the
+foreshortening range (−31.4 % at 45°, §4.4). It sits at the very bottom of that session's
+continuous snook range, and the two candidates' lengths are too close for the pixel test to
+separate them. Ambiguous, and design-excluded anyway.
+
+**What the method cannot see**, so this is not a clean bill of health: a confusion between
+targets of similar length (purple angel 192 vs gray anthias 195 mm), or a whole session
+mislabelled — the comparison is within-session. No detector built on length finds either.
+
+**Effect.** The lengths do not change, only what they are graded against. The cohort stays
+13 sessions and 793 frames:
+
+    median      -2.18 -> -2.19 %
+    p90         +0.09 -> +0.06 %
+    mean |err|   3.71 ->  3.09 %      the six frames carried 57-102 % errors
+    within 15 %    99 ->   100 %
+
+The corrected median and p90 coincide with the originally published −2.19 % / +0.06 % — the
+third such coincidence in this analysis and, like the others, arithmetic rather than
+corroboration: the cohort membership and the frame count both differ from the original.

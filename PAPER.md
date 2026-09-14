@@ -221,13 +221,13 @@ than the instrument, and a high quantile is the estimator that rejects the pose 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
-Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.09 %; 79 % of
-frames are within 5 % of the reference, 97 % within 10 %, and 99 % within 15 %. The
-per-target $p_{90}$ — Box −0.1 %, Grouper +0.3 %, Purple Angel +0.9 %, Snook −0.9 %,
+Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.06 %; 79 % of
+frames are within 5 % of the reference, 98 % within 10 %, and every frame within 15 %. The
+per-target $p_{90}$ — Box −0.2 %, Grouper +0.3 %, Purple Angel +0.9 %, Snook −0.9 %,
 Weasly Fish −1.4 %, Shark +4.3 % — shows no trend with size across a four-fold range of
 lengths. The polish attributes +3.2 points of the Shark's figure to the target itself
 rather than to any session; the model is no longer available to re-measure, and it is 25 of
-793 frames, so excluding it moves the cohort $p_{90}$ from +0.09 % to −0.14 %.
+793 frames, so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.17 %.
 
 How sensitive those figures are to the rule's one free parameter is worth stating, because
 the cohort is selected rather than chosen. Moving the bound from 2.3 to 2.75 points
@@ -280,10 +280,10 @@ throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 13 | 793 | −2.18 % | +0.09 % | 3.71 % |
-| every session not held out (design + range check) | 18 | 910 | −2.13 % | +0.48 % | 3.68 % |
-| every session except the angle experiment | 27 | 1,499 | −3.85 % | +0.09 % | 5.35 % |
-| every session | 32 | 2,927 | −6.11 % | −0.61 % | 9.30 % |
+| accuracy cohort (rule) | 13 | 793 | −2.19 % | +0.06 % | 3.09 % |
+| every session not held out (design + range check) | 18 | 910 | −2.14 % | +0.47 % | 3.14 % |
+| every session except the angle experiment | 27 | 1,499 | −3.85 % | +0.04 % | 5.02 % |
+| every session | 32 | 2,927 | −6.10 % | −0.63 % | 9.13 % |
 
 ```latex
 \begin{table}[t]
@@ -297,10 +297,10 @@ throughout.
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 13 &   793 & $-2.18$ & $+0.09$ & 3.71 \\
-    not held out (design + range check)  & 18 &   910 & $-2.13$ & $+0.48$ & 3.68 \\
-    all but the angle experiment         & 27 & 1{,}499 & $-3.85$ & $+0.09$ & 5.35 \\
-    every session                        & 32 & 2{,}927 & $-6.11$ & $-0.61$ & 9.30 \\
+    accuracy cohort (rule)               & 13 &   793 & $-2.19$ & $+0.06$ & 3.09 \\
+    not held out (design + range check)  & 18 &   910 & $-2.14$ & $+0.47$ & 3.14 \\
+    all but the angle experiment         & 27 & 1{,}499 & $-3.85$ & $+0.04$ & 5.02 \\
+    every session                        & 32 & 2{,}927 & $-6.10$ & $-0.63$ & 9.13 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -425,8 +425,8 @@ check that would have caught any of this in the field.
   measurement leaves the 15 % budget when the fish is more than 30° from broadside
   (Figure 8)."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.09 %.
-  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.09 % over 793
+  claims are supported: every cohort frame is within 15 % and the $p_{90}$ is +0.06 %.
+  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.06 % over 793
   measurements of six targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3's promise about refraction is still unmet.** The hardware paragraph says of the

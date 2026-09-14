@@ -234,27 +234,63 @@ def test_range_trend_flagged_dives_on_the_corpus():
     assert cal.range_trend_flagged_dives(df) == (76, 491, 492, 494, 503, 504, 509)
 
 
-def test_the_pre_filter_is_what_removes_503_and_504():
-    """Both clear the dive-effect bound and are removed by the range trend
-    alone — and both borrow dive 502's calibration, which prod refitted from
-    8.90 cm to a sound 10.35 cm on 2026-09-14. A plausible baseline is
-    therefore not sufficient: the trend still says their lengths vary with
-    range, which is what the scale-free filter is for."""
+def test_the_pre_filter_is_what_removes_491_503_and_504():
+    """All three clear the dive-effect bound and are removed by the range trend
+    alone. 503 and 504 borrow dive 502's calibration, which prod refitted from
+    8.90 cm to a sound 10.35 cm on 2026-09-14 — so a plausible baseline is not
+    sufficient, and the scale-free trend still says their lengths vary with
+    range. 491 borrows across the mid-session laser movement of §4.2."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     with_filter = cal.accuracy_cohort(df)
     without = cal.accuracy_cohort(df, range_trend_filter=False)
-    assert set(without) - set(with_filter) == {503, 504}
+    assert set(without) - set(with_filter) == {491, 503, 504}
 
 
 def test_corpus_is_a_superset_of_the_august_export():
-    """Every August frame reappears in the corpus with the same length."""
+    """Every August frame reappears in the corpus with the same length.
+
+    Keyed on (session, length) and NOT on the target name, because the name
+    can legitimately change while the measurement does not: two of dive 84's
+    frames were labelled Snook in the August export and are purple angelfish
+    (their landmarks are 2.3x too close together to be on a snook), corrected
+    in prod on 2026-09-14. The length is the measurement; the name is what it
+    is graded against, and this test is about the former."""
     aug = cal.to_frame(cal.load_rows(DATA / "all.csv"))
     corpus = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert 490 not in set(corpus.dive_id)  # split into 527 on 2026-09-12
     assert (corpus.dive_id == 527).sum() == 62
-    key = ["dive_id", "model_name", "length_m"]
+    key = ["dive_id", "length_m"]
     missing = aug.merge(corpus[key].drop_duplicates(), on=key, how="left", indicator=True)
     assert (missing["_merge"] == "both").all()
+
+
+def test_the_dive_84_relabels_are_in_the_corpus():
+    """The two corrected frames, pinned by the quantity that identified them.
+
+    A purple angelfish reads ~192 mm; as a snook it would read -58 %. Both
+    frames now sit in dive 84's purple-angel population (180.9-194.2 mm) and
+    nowhere near its snook population (434.9-451.4 mm), and the session reads
+    16 purple angel to 13 snook rather than 14 to 15."""
+    corpus = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    d84 = corpus[corpus.dive_id == 84]
+    counts = d84.model_name.value_counts().to_dict()
+    assert counts["Purple Angel"] == 16
+    assert counts["Snook"] == 13
+    assert d84[d84.model_name == "Snook"].length_m.min() > 0.40
+    assert d84[d84.model_name == "Purple Angel"].length_m.max() < 0.20
+
+
+def test_the_dive_521_relabels_are_in_the_corpus():
+    """Four frames labelled as the box are the trout: 292-304 mm, which is
+    +95 to +102 % as a 150 mm box and within a few percent of the trout. Their
+    implied head/tail spans sit 16-58 px from the nearest trout frame and
+    309-659 px from the nearest box."""
+    corpus = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    d521 = corpus[corpus.dive_id == 521]
+    counts = d521.model_name.value_counts().to_dict()
+    assert counts["Box"] == 42
+    assert counts["Weasly Fish"] == 37
+    assert d521[d521.model_name == "Box"].length_m.max() < 0.20
 
 
 # --- angle experiment -------------------------------------------------------
