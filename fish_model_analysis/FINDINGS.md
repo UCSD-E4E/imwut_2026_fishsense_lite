@@ -774,3 +774,57 @@ protects exactly the 21 revived labels and changes no other live label in the fl
 prod. Refits: 347 → 10.101 cm (predicted 10.11), 349 pending at the next stage-13 firing.
 Recovers **73 measurements of 24 fish**, taking §4.5 from 91/50 to the full seven
 deployments.
+
+
+### 9.1 Screening the rest of the corpus: nothing else is recoverable (2026-09-14)
+
+Eight dives carry superseded slate-frame laser dots. Each was dry-run through the validated
+harness: fit the dive line on its live dots, revive a superseded slate dot only if it lies
+within `COARSE_CALIBRATION_TOLERANCE_PX` of that line, refit, run all four gates.
+
+| dive | superseded slate dots, offset from the live line | verdict |
+|---|---|---|
+| 466 | 22 dots at **42.6–46.2 px** | reflection line, as dive 77. Reviving would poison the fit; needs **relabelling** |
+| 103 | none — its fit spans **0.02 m** of range, baseline 6.25 cm | single-distance burst, refused by geom+baseline |
+| 427 | none — **0.05 m**, baseline 16.01 cm | same |
+| 279 | 6 dots, four at 0.7–2.8 px, two at 10.1 | refit gives **29.6 cm** baseline → refused. Leave |
+| 383 | 9 dots, one at 2.4, rest 18.1–32.4 px | refit **fails describes-the-dive**. Leave |
+| 465 | 14 dots at 3.6–4.6 px | the one real contest, resolved below. Leave |
+| 471 | 4 at 4.2–5.6 px, one at 38.2 | refit moves the baseline 0.45 %. No benefit |
+| 77 | 4 at 3.4–8.6 px, 34 at ~35 px | the reflection dive. Marginal. Leave |
+
+**No dive gains a calibration it does not have.** 103 and 427 are the dive-107 disease and
+neither has a same-folder, same-camera sibling holding slate observations at another range
+(103 is camera 10 among cameras 1/4/5/6; 427's only folder-mate has no slate labels), so the
+107+526 joint-fit remedy is unavailable to them.
+
+**Dive 465, judged against the slate PnP range.** Its 3 live observations already span
+1.16–2.51 m, so the 7 revivable dots add density, not range.
+
+    3-obs fit (stored, 10.217 cm)    in-sample 0.53 %   out-of-sample 3.15 % (n=7)
+    10-obs fit (revived, 9.927 cm)   in-sample 1.72 %   leave-one-out 2.14 % (max 5.01)
+
+The revived fit predicts unseen ranges modestly better (2.14 % against 3.15 %), but it moves
+the baseline to 9.927 cm — *outside* the fleet IQR of 9.99–10.45 where the stored 10.217 sits
+inside — on a 10-sample statistic with no interval, for a dive whose 31 measurements of 18
+fish are in the paper's field set. A ~3 % shift in published lengths is not justified by a
+one-point difference in a 10-sample median. Left alone.
+
+**The finding that matters for reuse: the 20 px tolerance is NOT a revival criterion.** It was
+calibrated for one job — stop the validator superseding genuine calibration dots *going
+forward* — and the fleet check showed it changes no live label except protecting 347's and
+349's. Used instead as a filter for *reviving* already-dead dots it admits ones that
+demonstrably wreck a fit: 279 (→ 29.6 cm baseline) and 383 (→ describes-the-dive refuses).
+The two tasks have different error costs, so a revival must be validated per dive by the four
+gates and, where a second range exists, by the independent PnP range test. Dives 347 and 349
+clear that bar; nothing else in the corpus does.
+
+**One live lead.** Dive 466 (`121024_Alligator2_FSL06`, HIGH, camera 6, slate 8) is otherwise
+ready to measure: 107 completed species labels (68 real fish, 24 top-three), 60 completed
+head/tail labels with 30 coordinate pairs, and LABEL_STUDIO clusters already present. Its only
+blocker is that all 22 of its slate-frame laser labels are on the specular reflection. If the
+true dot is visible in those 11 frames, relabelling them is a small job that would add a
+**new deployment** to the field set — the only remaining recovery in the corpus that would add
+field data rather than re-derive existing numbers. Note the plumbing: superseded rows do not
+accept Label Studio corrections, so this needs an operator un-supersede before a labeller can
+fix the positions.
