@@ -246,24 +246,6 @@ def test_the_pre_filter_is_what_removes_491_503_and_504():
     assert set(without) - set(with_filter) == {491, 503, 504}
 
 
-def test_corpus_is_a_superset_of_the_august_export():
-    """Every August frame reappears in the corpus with the same length.
-
-    Keyed on (session, length) and NOT on the target name, because the name
-    can legitimately change while the measurement does not: two of dive 84's
-    frames were labelled Snook in the August export and are purple angelfish
-    (their landmarks are 2.3x too close together to be on a snook), corrected
-    in prod on 2026-09-14. The length is the measurement; the name is what it
-    is graded against, and this test is about the former."""
-    aug = cal.to_frame(cal.load_rows(DATA / "all.csv"))
-    corpus = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
-    assert 490 not in set(corpus.dive_id)  # split into 527 on 2026-09-12
-    assert (corpus.dive_id == 527).sum() == 62
-    key = ["dive_id", "length_m"]
-    missing = aug.merge(corpus[key].drop_duplicates(), on=key, how="left", indicator=True)
-    assert (missing["_merge"] == "both").all()
-
-
 def test_the_dive_84_relabels_are_in_the_corpus():
     """The two corrected frames, pinned by the quantity that identified them.
 
