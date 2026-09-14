@@ -366,9 +366,10 @@ RANGE_TREND_MIN_DEPTH_M = 0.8
 # stays: its interval [+2.0, +3.8] does not clear the threshold. The rule is
 # not tuned to keep or drop any of them.
 CORPUS_ACCURACY_DIVES = (
-    61, 84, 495, 498, 500, 501, 507, 519, 520, 521, 522,
+    59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 521, 522, 527,
 )
-#: What the rule selected against the as-exported 0.310 m Weasly reference,
+#: What the rule selected on the 2026-09-12 export (`corpus_20260912.csv`)
+#: against the as-exported 0.310 m Weasly reference,
 #: kept because the difference is the headline sensitivity of the whole
 #: analysis rather than a footnote.
 #:

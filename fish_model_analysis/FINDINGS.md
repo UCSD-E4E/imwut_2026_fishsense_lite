@@ -993,3 +993,53 @@ them as, and says what they are *not*. What would settle it is not more of this 
 is one session that photographs a solid and a flat target together over a wide range spread
 with enough frames on each, or the Snook's thickness plus a session pairing both solids
 (their lengths differ 1.5×, so the same mechanism predicts different percentages).
+
+
+### 9.6 Corpus refreshed to 2026-09-14, and why the numbers came back (2026-09-14)
+
+§9.3 posed the export question and this resolves it: `data/corpus.csv` is now a fresh
+export, and the 2026-09-12 one is kept beside it as `data/corpus_20260912.csv` because the
+reference-sensitivity result below is only reproducible against it.
+
+Four prod changes land together, all of them improvements and none of them the reference
+alone:
+
+    the Weasly reference is now 312.7 mm, measured (§9.x, prod row 8 updated)
+    dive 498 re-measured under dive 496's calibration -- its own session's board
+        burst -- after its 0.34 m-lever fit was retired (§9.3)
+    dive 502 REFITTED BY THE PIPELINE, 8.90 -> 10.354 cm, once the shipped baseline
+        floor made the old fit read as uncalibrated; 503 and 504 borrow it
+    two orphaned measurement rows deleted (§9.4)
+
+**Result: 13 dives, n = 793, median −2.16 %, p90 +0.12 %**, cohort
+(59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 521, 522, 527).
+
+**The trap in that result.** It is within 0.03 points of the originally published
+−2.19 % / +0.06 %, and anyone diffing the two would conclude nothing changed. The
+membership proves otherwise — 520 left, 527 joined — and the mechanism is two independent
+corrections pushing opposite ways:
+
+    reference 310 -> 312.7 alone      13 dives -> 11, median -2.19 -> -2.63 %
+    plus 498/502 recalibration        11 dives -> 13, median -2.63 -> -2.16 %
+
+Report the coincidence as a coincidence. It is not corroboration of the old number.
+
+**Better news on the rule.** On the fresh data the bound is not knife-edge: 2.25, 2.50 and
+2.75 pp all select the same 13 dives and the same 793 frames, so the chosen 2.5 sits mid
+plateau (below 2.0 it drops to 10; at 3.0 it admits an 11th). Four dives still sit within
+0.5 pp of the cut — 520 out at −2.75, and 497, 527, 59 in at about +2.2 — so a member can
+be marginal even where the membership is stable. Both facts are now in PAPER.md §4.3.
+
+**The range-trend filter still earns its place, and on different dives.** It now removes
+503 and 504, which borrow the *refitted* 10.354 cm calibration. A plausible baseline is
+therefore not sufficient: the scale-free trend still says their lengths vary with range.
+That is the cleanest demonstration yet that the two checks are independent.
+
+**One estimator note worth keeping.** The paper defines $p_{90}$ as nearest-rank
+($\lceil 0.9n \rceil$), which is what the pipeline reports, and `pubfig.nearest_rank_p90`
+is what the notebook uses. Interpolated `np.percentile(...,90)` agrees to 0.00 pp at
+n = 793 but differs by up to 0.08 pp on the per-target figures, where n is 25-313 — so the
+per-target numbers in §4.3 are the nearest-rank ones. Do not mix them.
+
+Figures 1, 2, 3, 6, 8 and A were regenerated from the fresh export with the same `pubfig`
+calls the notebook makes.

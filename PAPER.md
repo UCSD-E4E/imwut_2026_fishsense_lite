@@ -202,29 +202,34 @@ than the instrument, and a high quantile is the estimator that rejects the pose 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
-Over the cohort the median frame error is −2.6 % and the $p_{90}$ is −0.42 %; 71 % of
-frames are within 5 % of the reference, 96 % within 10 %, and 99 % within 15 %. The
-per-target $p_{90}$ — Box −0.3 %, Grouper −0.1 %, Purple Angel +0.6 %, Snook −1.2 %,
-Weasly Fish −2.7 %, Shark +2.6 % — shows no trend with size across a four-fold range of
+Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.12 %; 79 % of
+frames are within 5 % of the reference, 97 % within 10 %, and 99 % within 15 %. The
+per-target $p_{90}$ — Box −0.1 %, Grouper +0.3 %, Purple Angel +0.9 %, Snook −0.9 %,
+Weasly Fish −1.3 %, Shark +4.3 % — shows no trend with size across a four-fold range of
 lengths. The polish attributes +3.2 points of the Shark's figure to the target itself
-rather than to any session; the model is no longer available to re-measure, and it is 7 of
-643 frames, so excluding it moves the cohort $p_{90}$ only from −0.42 % to −0.44 %.
+rather than to any session; the model is no longer available to re-measure, and it is 25 of
+793 frames, so excluding it moves the cohort $p_{90}$ from +0.12 % to −0.14 %.
 
-How much the trout's reference is worth is worth stating plainly, because that target is
-291 of the 643 cohort frames, and measuring it (§4.1) is what fixed the numbers above. At
-the inherited 310 mm the same rule selected thirteen sessions and read median −2.19 %,
-$p_{90}$ +0.06 %; at the measured 312.7 mm it selects eleven and reads −2.63 % and
-−0.42 %. Two sessions leave the cohort, and neither measures the trout at all — one is
-Grouper, Snook, Shark and Purple Angel, the other only the box. The grid is unbalanced,
-with eight of the thirty-two sessions measuring only the trout, so correcting one target's
-reference moves every session effect by about half a point, and those two sat 0.42 and
-0.46 points inside the 2.5-point bound. That is a property of thresholding a
-jointly-estimated effect, not of those sessions' calibrations, and it is the honest measure
-of how marginal a cohort member can be: we report both sets rather than presenting the
-larger one. No conclusion here turns on it — the $p_{90}$ stays inside ±1 % and 99 % of
-frames stay within 15 % under either reference.
+How sensitive those figures are to the rule's one free parameter is worth stating, because
+the cohort is selected rather than chosen. Moving the bound from 2.25 to 2.75 points
+selects the same thirteen sessions and the same 793 frames; below 2.0 it drops to ten and
+at 3.0 it admits an eleventh. The chosen 2.5 therefore sits in the middle of a plateau, not
+on a knife edge — though four sessions do lie within half a point of it, three inside and
+one out, so a cohort member can be marginal even when the membership is not.
 
-The trout's own $p_{90}$ of −2.7 % is the largest of any target, and we can say what it is
+The reference matters as much as the bound, and by a route worth recording. On the earlier
+export, against the inherited 310 mm, this rule selected thirteen sessions reading median
+−2.19 %; correcting the reference alone moved it to eleven sessions and −2.63 %, dropping
+two sessions that do not measure the trout at all. The grid is unbalanced — eight of the
+thirty-two sessions measure only the trout — so correcting one target's reference shifts
+every session effect by about half a point, which is enough to move a marginal member
+across the bound. The current figures use the measured reference *and* a re-calibration of
+three sessions the pipeline's own gates rejected in the interim, and those two corrections
+happen to push the decomposition in opposite directions, landing within 0.03 points of the
+original median. That is a coincidence of two independent fixes and not evidence that the
+original was right: the cohort membership differs.
+
+The trout's own median of −4.4 % is the most negative of any target, and we can say what it is
 *not* rather than what it is. Two of the targets are solid — the trout, 58.7 mm across the
 mid-body, and the snook — while the rest are flat plates, so a natural explanation is
 parallax: the near flank sits closer to the camera than the plane the length is measured
@@ -253,14 +258,14 @@ applies to a real fish and is small at survey range: a 40 cm fish 4 cm thick at 
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
-admitting the three sessions the range trend alone excludes costs the median (−2.63 % to −3.20 %) while
+admitting the two sessions the range trend alone excludes costs the median (−2.16 % to −2.37 %) while
 leaving the median and mean marginally better, whereas dropping the hold-outs as well runs
 the mean error from 3.5 % to 5.2 % and then 9.2 %. $p_{90}$ stays within ±0.7 % of zero
 throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 11 | 643 | −2.63 % | −0.42 % | 9.14 % |
+| accuracy cohort (rule) | 13 | 793 | −2.16 % | +0.12 % | 8.25 % |
 | every session not held out (design + range check) | 18 | 910 | −1.94 % | +0.68 % | 3.49 % |
 | every session except the angle experiment | 27 | 1,499 | −3.48 % | +0.16 % | 5.15 % |
 | every session | 32 | 2,927 | −5.91 % | −0.59 % | 9.20 % |
@@ -392,9 +397,9 @@ check that would have caught this in the field.
   measurement leaves the 15 % budget when the fish is more than 30° from broadside
   (Figure 8)."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is −0.42 %.
-  Consider stating the broadside figure directly: "median −2.6 %, $p_{90}$ −0.42 % over 643
-  measurements of six targets at 0.27–4.7 m".
+  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.12 %.
+  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.12 % over 793
+  measurements of six targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3's promise about refraction is still unmet.** The hardware paragraph says of the
   M52 air lens "we quantify the distortion this corrects in Section 4", and no section here

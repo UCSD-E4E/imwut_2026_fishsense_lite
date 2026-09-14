@@ -136,7 +136,7 @@ def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
     assert cal.CORPUS_ACCURACY_DIVES == (
-        61, 84, 495, 498, 500, 501, 507, 519, 520, 521, 522
+        59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 521, 522, 527
     )
 
 
@@ -149,8 +149,9 @@ def test_correcting_one_reference_costs_two_cohort_members():
     unbalanced (8 of 32 dives measure only the Weasly Fish), so a per-model
     change moves every dive effect by ~0.5 pp, and those two sat 0.42 and
     0.46 pp inside the 2.5 pp bound."""
-    raw = cal.to_frame(cal.load_rows(DATA / "corpus.csv"), corrected_references=False)
-    corrected = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    frozen = DATA / "corpus_20260912.csv"
+    raw = cal.to_frame(cal.load_rows(frozen), corrected_references=False)
+    corrected = cal.to_frame(cal.load_rows(frozen))
     assert cal.accuracy_cohort(raw) == cal.CORPUS_ACCURACY_DIVES_AS_EXPORTED
     assert set(cal.accuracy_cohort(raw)) - set(cal.accuracy_cohort(corrected)) == {59, 497}
 
@@ -173,8 +174,9 @@ def test_the_range_trend_filter_does_not_depend_on_any_reference():
     """It compares a rigid target against ITSELF across range, so no reference
     length enters. Pinned because it is what makes the pre-filter trustworthy
     when a reference moves."""
-    raw = cal.to_frame(cal.load_rows(DATA / "corpus.csv"), corrected_references=False)
-    corrected = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    frozen = DATA / "corpus_20260912.csv"
+    raw = cal.to_frame(cal.load_rows(frozen), corrected_references=False)
+    corrected = cal.to_frame(cal.load_rows(frozen))
     assert cal.range_trend_flagged_dives(raw) == cal.range_trend_flagged_dives(corrected)
 
 
@@ -207,10 +209,19 @@ def test_range_trend_needs_frames_beyond_0_8_m_over_a_2x_spread():
 
 
 def test_to_frame_carries_the_dive_baseline():
-    df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
-    assert "baseline_m" in df.columns
-    assert df[df.dive_id == 503].baseline_m.iloc[0] == pytest.approx(0.0890, abs=5e-4)
-    assert df[df.dive_id == 500].baseline_m.iloc[0] == pytest.approx(0.1041, abs=5e-4)
+    """The column the range-trend filter needs, on both exports.
+
+    Dive 503 is the interesting one: it borrows dive 502's calibration, which
+    the 2026-09-12 export caught at 8.90 cm — below the 9.7 cm floor — and
+    which prod refitted to 10.35 cm on 2026-09-14 once the shipped gates made
+    the old fit read as uncalibrated. Both values are pinned so a future edit
+    cannot silently swap one export for the other."""
+    fresh = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    frozen = cal.to_frame(cal.load_rows(DATA / "corpus_20260912.csv"))
+    assert "baseline_m" in fresh.columns
+    assert frozen[frozen.dive_id == 503].baseline_m.iloc[0] == pytest.approx(0.0890, abs=5e-4)
+    assert fresh[fresh.dive_id == 503].baseline_m.iloc[0] == pytest.approx(0.1035, abs=5e-4)
+    assert fresh[fresh.dive_id == 500].baseline_m.iloc[0] == pytest.approx(0.1041, abs=5e-4)
 
 
 def test_range_trend_flagged_dives_on_the_corpus():
@@ -221,15 +232,16 @@ def test_range_trend_flagged_dives_on_the_corpus():
     assert cal.range_trend_flagged_dives(df) == (76, 491, 492, 494, 503, 504, 509)
 
 
-def test_the_pre_filter_is_what_removes_three_short_baseline_dives():
-    """491, 503 and 504 clear the dive-effect bound and are removed by the
-    range trend alone. It was 503 only against the as-exported reference; the
-    other two came inside the bound when it moved, which is exactly the case
-    the scale-free filter exists to catch."""
+def test_the_pre_filter_is_what_removes_503_and_504():
+    """Both clear the dive-effect bound and are removed by the range trend
+    alone — and both borrow dive 502's calibration, which prod refitted from
+    8.90 cm to a sound 10.35 cm on 2026-09-14. A plausible baseline is
+    therefore not sufficient: the trend still says their lengths vary with
+    range, which is what the scale-free filter is for."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     with_filter = cal.accuracy_cohort(df)
     without = cal.accuracy_cohort(df, range_trend_filter=False)
-    assert set(without) - set(with_filter) == {491, 503, 504}
+    assert set(without) - set(with_filter) == {503, 504}
 
 
 def test_corpus_is_a_superset_of_the_august_export():
