@@ -37,7 +37,24 @@ published intrinsics, scale taken from the sensors' own metric depth and so shar
 scale chain with the box — give 319 ± 2 mm. We keep 310 mm because neither reconstruction
 is a direct measurement and the two disagree by more than either one's precision, and we
 quote the consequence in §4.3. The **shark's 605 mm** is likewise undocumented and the
-model is no longer available; §4.3 reports its offset rather than correcting it. Targets were photographed in a university pool over 32 sessions
+model is no longer available; §4.3 reports its offset rather than correcting it.
+
+It is worth being explicit about which half of the measurement chain those uncertainties
+sit in, because the other half is checkable and checks out. The pipeline's metric scale
+does not come from the targets: it comes from the calibration object — a scanned dive slate
+or a printed checkerboard — and a wrong one would rescale every length invisibly, since
+reprojection residual cannot see scale (§3.3). Those two objects are independent standards,
+and the laser baseline is a property of the rig rather than the dive, so any camera
+calibrated both ways must report the same baseline either way. Over the five units carrying
+both (19 calibrations, five distinct slate scans) the mean checkerboard-minus-slate
+difference is **−0.27 % of baseline (95 % CI −1.1 % to +0.6 %)**, below the scatter between
+two calibrations of one unit under one standard (sd 0.12 cm). The scale chain is therefore
+verified to about a percent without reference to any fish, which places the dominant
+uncertainty in §4.3's accuracy figures on the target lengths above — not on the
+calibration. What neither check can see is an error common to both standards, or one in the
+camera intrinsics, which rescale the calibration object and the laser together.
+
+Targets were photographed in a university pool over 32 sessions
 between 2023 and 2025 at laser ranges of 0.25–4.71 m (median 1.7 m), by several divers on
 several camera+laser units, at ranges and poses of the diver's choosing rather than on a
 fixture. Every frame passed through the same pipeline as a field image: a labeler marks
@@ -99,8 +116,18 @@ sensitivity of $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m 
 between-session spread alone exceeds the accuracy we report below. Nor is a session a safe
 unit. In one session two calibrations of the same rig, taken seven minutes apart, differ by
 0.82°; the target frames shot between them agree with the earlier one, while frames from
-25 minutes before agree with neither, placing the mount in a third state. A stored
-calibration is valid for the frames it was taken with and not reliably beyond them.
+25 minutes before agree with neither, placing the mount in a third state.
+
+One field deployment shows the same thing without needing a second calibration to compare
+against, and it is the cleanest instance we have. The dive holds two bursts of calibration
+frames, 52 minutes apart, and 71 laser dots on its measurement frames. Those 71 define a
+line to 0.64 px; the first burst's dots sit 42.6–46.2 px off that line and the second's sit
+66.5–72.9 px, each burst internally tight. Three distinguishable laser states in one dive,
+measured against the dive's own frames rather than against another fit — and the dots are
+correctly placed, which we verified by inspecting the frames at the pixel level after the
+offsets first suggested mislabelling. A calibration is valid for the frames it was taken
+with and not reliably beyond them, and in this dive no calibration is valid for the frames
+that would be measured: it yields no lengths at all.
 
 Three consequences follow, and they shape the rest of the paper. The pipeline re-fits the
 laser per dive rather than trusting a stored calibration. A per-session validation target
@@ -263,20 +290,27 @@ Figures 5–6, the mount failures and the in-field recalibration procedure — g
 unchanged. What follows replaces the stereo-comparison paragraph, which the data does not
 support; see the note at the end of this subsection.)*
 
-Volunteer divers measured wild fish on seven deployments at one Florida reef, yielding 154
-measurements of 70 individuals across eight species on six camera units. Two of the seven
-calibrations are excluded by the conditioning criterion of §4.2 — one was fitted from a
-single frame, the other from two dots 26 cm apart in range — leaving 91 measurements of 50
-fish. Laser range was 0.71–3.32 m (median 1.48 m), closer than the pool median.
+Volunteer divers measured wild fish on seven deployments at one Florida reef, yielding 164
+measurements of 74 individuals on six camera units, across nine named species and one
+nontarget category. Two of the seven calibrations initially failed the conditioning
+criterion of §4.2 — one fitted from a single frame, the other from two dots 26 cm apart in
+range — and both were repaired rather than excluded. The frames they needed existed but had
+been removed by the per-dive outlier filter, which judged the calibration frames against a
+line its measurement frames dominate; reinstating them gives lever arms of 2.41 m and 1.30 m
+and baselines of 10.10 and 10.52 cm, inside the 9.99–10.45 cm the fleet occupies. All seven
+deployments therefore carry calibrations that pass every check in §4.1–4.2. Laser range was
+0.71–3.14 m (median 1.48 m), closer than the pool median.
 
 **Repeatability transfers to the field with a measurable penalty.** Where a diver captured
 the same individual in three or more frames we can measure the system's repeatability
 directly, and this is the one field figure that needs nothing external: a calibration error
 is common to all frames of one fish and cancels in a relative spread, as does any error in
-the length convention, and no comparison population is involved. Over 24 such individuals
-the within-fish coefficient of variation is **3.3 % (median; bootstrap 95 % CI 2.4–4.3 %),
-with a $p_{90}$ of 14 %**. The identical statistic on the pool cohort — repeat frames of one
-target in one session, 23 cells — is **1.4 % (95 % CI 1.2–2.2 %), $p_{90}$ 4.5 %**. So a
+the length convention, and no comparison population is involved. (It is therefore the one
+result the two repaired calibrations could not have changed, and indeed did not: it stands at
+3.3 % before and 3.2 % after.) Over 25 such individuals the within-fish coefficient of
+variation is **3.2 % (median; bootstrap 95 % CI 2.0–4.3 %), with a $p_{90}$ of 14 %**. The
+identical statistic on the pool cohort — repeat frames of one target in one session, 23
+cells — is **1.4 % (95 % CI 1.2–2.2 %), $p_{90}$ 4.5 %**. So a
 repeat measurement of a wild fish varies about 2.4 times more than a repeat measurement of a
 posed model, and its tail is three times worse. That penalty is what the field adds: the
 animal moves between frames, the water is turbid, and the snout and fork are harder to place.
@@ -306,7 +340,7 @@ cautions belong with it: the two systems' spreads are the same (between-fish CV 
 against 19.1 %), so no claim of a narrower distribution is supported; and the stereo's
 quoted precision is a propagated click-error (1.0 % of length) rather than a measured
 repeatability, with essentially one measurement per individual in the archive, so it is not
-comparable to the 3.3 % above.
+comparable to the 3.2 % above.
 
 #### Sessions the rule rejects
 
