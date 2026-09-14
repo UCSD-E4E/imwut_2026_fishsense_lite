@@ -23,7 +23,7 @@ field-deployment text.
 #### 4.1 Known-length targets
 
 Six rigid targets were measured: five painted fish models — a purple angelfish (192 mm), a
-stylised rainbow trout (310 mm; "Weasly Fish" in the data), a grouper (360 mm), a snook
+stylised rainbow trout (312.7 mm; "Weasly Fish" in the data), a grouper (360 mm), a snook
 (455 mm), a shark (605 mm) — and a 150 mm box. Each
 target's reference length is the snout-to-tail-fork distance a labeler is asked to click,
 measured with a tape.
@@ -60,7 +60,7 @@ calibration. What neither check can see is an error common to both standards, or
 camera intrinsics, which rescale the calibration object and the laser together.
 
 Targets were photographed in a university pool over 32 sessions
-between 2023 and 2025 at laser ranges of 0.25–4.71 m (median 1.7 m), by several divers on
+between 2023 and 2025 at laser ranges of 0.25–5.47 m (median 2.0 m), by several divers on
 several camera+laser units, at ranges and poses of the diver's choosing rather than on a
 fixture. Every frame passed through the same pipeline as a field image: a labeler marks
 the laser dot and the snout and tail-fork, the laser dot fixes the range (Eq. 5), and the
@@ -98,7 +98,7 @@ compensating angle cancel at mid-range. Five of the seven carry a single target 
 reference lengths independently grade every one of them as wrong; the remaining two are
 rejected on one target while a second target in the same session shows no trend, and both
 are already outside the cohort for other reasons, so nothing in the reported figures turns
-on them. The rule admits 13 sessions and 771 measurements; three are slate-calibrated
+on them. The rule admits 13 sessions and 793 measurements; three are slate-calibrated
 2023 sessions and ten are checkerboard-calibrated 2025 sessions.
 
 Neither free number is delicate. Moving the polish threshold from 1.5 to 3.5 points changes
@@ -138,14 +138,10 @@ Three consequences follow, and they shape the rest of the paper. The pipeline re
 laser per dive rather than trusting a stored calibration. A per-session validation target
 remains good practice, because the failure is silent — this is what the range check of §4.1
 supplies, and it needs no reference length. And calibration state is the dominant reason a
-session is not accuracy evidence: of the 25 sessions here with enough frames to judge, 12
-fail on one of the two criteria in §4.1. An instrument whose scale parameter drifts by more
+session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 11
+fail one of the two criteria in §4.1. An instrument whose scale parameter drifts by more
 than its own measurement error between uses is one that must be calibrated, and validated,
 at the point of use.
-
-*(Added 2026-09-14 from the conditioning measurements. This is the text §4.5 refers to
-as "the conditioning criterion of §4.2"; it is written to slot in after the paragraph above
-and before §4.3. Numbers and their controls are in `fish_model_analysis/FINDINGS.md` §9.)*
 
 A second failure mode of the same parameter is that a session's own fit can fail to
 determine it. What fixes the laser's direction is the spread of the calibration
@@ -175,11 +171,16 @@ distance the remaining frames already anchor. Every check evaluated where the da
 lies is blind to conditioning; only the geometry of the observations, or an evaluation at a
 different distance, reveals it.
 
-We therefore admit a session as accuracy evidence only if its calibration observations
-span at least 0.6 m of range. The criterion needs no threshold search and no reference
-length: sound sessions span 1.02–2.32 m, the two rejected span 0.03 and 0.07 m, and the
-bound is a statement about the data's geometry rather than about any measured error, so it
-applies before a validation target exists.
+The pipeline therefore refuses to store a calibration whose observations span less than
+0.6 m of range, so such a session cannot reach the accuracy analysis at all. The bound
+needs no threshold search and no reference length — it is a statement about the geometry of
+the observations, not about any measured error, so it applies before a validation target
+exists — and it separates the sessions we can check cleanly: of the eleven whose stored
+observations we can recover, the sound ones span 1.02–2.32 m against 0.03 and 0.07 m for
+the two refused. That caveat is real and worth stating: the slate path stores the
+per-frame observations it fitted, while the checkerboard path does not, so for
+checkerboard-calibrated sessions the lever arm is verifiable only going forward, as a gate
+at the moment of fitting, and not retrospectively.
 
 Where two bursts of one mount state exist at different distances, the remedy is to fit
 them jointly. Combining the session above with a burst 5.5 h later at 4.2 m gives a 2.25 m
@@ -258,34 +259,34 @@ applies to a real fish and is small at survey range: a 40 cm fish 4 cm thick at 
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
-admitting the two sessions the range trend alone excludes costs the median (−2.16 % to −2.37 %) while
-leaving the median and mean marginally better, whereas dropping the hold-outs as well runs
-the mean error from 3.5 % to 5.2 % and then 9.2 %. $p_{90}$ stays within ±0.7 % of zero
+admitting the two sessions the range trend alone excludes costs the median (−2.16 % to
+−2.37 %) and leaves $p_{90}$ where it was, whereas dropping the hold-outs as well runs the
+mean error from 3.7 % to 5.3 % and then 9.3 %. $p_{90}$ stays within ±0.6 % of zero
 throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 13 | 793 | −2.16 % | +0.12 % | 8.25 % |
-| every session not held out (design + range check) | 18 | 910 | −1.94 % | +0.68 % | 3.49 % |
-| every session except the angle experiment | 27 | 1,499 | −3.48 % | +0.16 % | 5.15 % |
-| every session | 32 | 2,927 | −5.91 % | −0.59 % | 9.20 % |
+| accuracy cohort (rule) | 13 | 793 | −2.16 % | +0.12 % | 3.68 % |
+| every session not held out (design + range check) | 18 | 910 | −2.11 % | +0.48 % | 3.64 % |
+| every session except the angle experiment | 27 | 1,499 | −3.80 % | +0.10 % | 5.32 % |
+| every session | 32 | 2,927 | −6.08 % | −0.60 % | 9.29 % |
 
 ```latex
 \begin{table}[t]
   \caption{Percent length error over the accuracy cohort and over wider selections.
   The hold-outs do the rejecting and the $2.5$-point band the tightening: admitting the
-  sessions the band alone excludes costs $p_{90}$ while leaving the median marginally
-  better, whereas dropping the hold-outs runs the mean error from $3.5\,\%$ to $9.2\,\%$.
-  $p_{90}$ stays within $\pm0.7\,\%$ of zero throughout.}
+  sessions the range check alone excludes costs the median while leaving $p_{90}$ where it
+  was, whereas dropping the hold-outs runs the mean error from $3.7\,\%$ to $9.3\,\%$.
+  $p_{90}$ stays within $\pm0.6\,\%$ of zero throughout.}
   \label{tab:accuracy}
   \begin{tabular}{lrrrrr}
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 13 &   771 & $-2.19$ & $+0.06$ & 3.71 \\
-    not held out (design + range check)  & 18 &   910 & $-1.94$ & $+0.68$ & 3.49 \\
-    all but the angle experiment         & 27 & 1{,}499 & $-3.48$ & $+0.16$ & 5.15 \\
-    every session                        & 32 & 2{,}927 & $-5.91$ & $-0.59$ & 9.20 \\
+    accuracy cohort (rule)               & 13 &   793 & $-2.16$ & $+0.12$ & 3.68 \\
+    not held out (design + range check)  & 18 &   910 & $-2.11$ & $+0.48$ & 3.64 \\
+    all but the angle experiment         & 27 & 1{,}499 & $-3.80$ & $+0.10$ & 5.32 \\
+    every session                        & 32 & 2{,}927 & $-6.08$ & $-0.60$ & 9.29 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -376,20 +377,33 @@ comparable to the 2.9 % above.
 #### Sessions the rule rejects
 
 *(For the paper's limitations paragraph, or an appendix; Figure A gives every session.)*
-Ten sessions fall outside the band or the range check, and every one has an explanation. The
-instructive one read 14 % short with correct labels and a calibration that reproduced its
-own checkerboard perfectly: its folder held a board burst shot five minutes *after* its
-target frames, and the laser had rotated 0.82° in the plane that reprojection cannot see.
-Re-measured under the calibration burst that preceded the frames by nine seconds, it reads
-−1.7 %. Three sessions borrow a calibration across such a movement (−5.8, −3.5, −2.7); two borrow
-a calibration whose fitted baseline is 14 % short and read −14 % up close rising to zero
-at 4 m, which the range check catches and a median would not; the rest sit within a
-point of the band on either side (−2.8; +2.9, +3.1, +4.0). None is
-a ranging failure the diver could see: an in-plane calibration error is invisible to
-reprojection residual, which is why the calibration procedure of §3.3 photographs the
+Nine sessions fall outside the band or the range check, and every one has an explanation of
+the same kind. **All nine now carry a plausible baseline** — 10.24 to 10.51 cm, inside the
+fleet's range — because the implausible fits that once dominated this list have since been
+refitted or retired by the checks of §4.1. What is left is the parameter those checks
+cannot see: six of the nine are flagged by the range trend, with implied in-plane errors of
+0.10° to 0.37°, and six of the nine borrow their calibration from another session.
+
+The instructive case is one the rule no longer rejects, and it is worth following because
+the same movement still rejects two others. One session read 14 % short with correct labels
+and a calibration that reproduced its own checkerboard perfectly: its folder held a board
+burst shot five minutes *after* its target frames, and the laser had rotated 0.82° in the
+plane reprojection cannot see. Re-measured under the burst that preceded the frames by nine
+seconds it reads −1.7 %, and it is now a cohort member. But two sessions shot minutes
+earlier still borrow the *later* burst — the calibration from the far side of the movement
+— and read −5.9 % and −9.9 %, with range trends of −3.8 and −2.8 % per metre implying
+0.17° and 0.22°. The repair fixed the session that owned the frames; it could not fix the
+neighbours that borrowed across the same event.
+
+The extreme case shows what a cross-epoch borrow costs when nothing constrains it: one
+session borrows a calibration whose implied in-plane error is 8°, and its lengths vary by
+134 % per metre of range. The remaining three fail the session-effect bound with flat
+trends — a constant offset rather than a range-dependent one. None of the nine is a ranging
+failure the diver could see, which is the point: an in-plane calibration error is invisible
+to reprojection residual, which is why the calibration procedure of §3.3 photographs the
 target at several ranges, why a calibration is discarded whenever the unit has been
 handled, and why a rigid reference photographed at two ranges after calibrating is the one
-check that would have caught this in the field.
+check that would have caught any of this in the field.
 
 #### Edits elsewhere in the draft
 
@@ -412,7 +426,7 @@ check that would have caught this in the field.
 
 #### Figure captions
 
-- **Figure 1** — Measured against known length, accuracy cohort (13 sessions, 771 frames).
+- **Figure 1** — Measured against known length, accuracy cohort (13 sessions, 793 frames).
   Six targets separate along the abscissa by their own lengths. Error bars are the
   interquartile range of frames; the diamond is the $p_{90}$.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level
