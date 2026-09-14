@@ -136,8 +136,46 @@ def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
     assert cal.CORPUS_ACCURACY_DIVES == (
-        59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 520, 521, 522
+        61, 84, 495, 498, 500, 501, 507, 519, 520, 521, 522
     )
+
+
+def test_correcting_one_reference_costs_two_cohort_members():
+    """The analysis's headline sensitivity, pinned so it cannot be lost.
+
+    Measuring the Weasly Fish (0.310 -> 0.3127 m, +0.86 %) drops dives 59 and
+    497. Neither measures that model — 59 is Grouper/Snook/Shark/Purple Angel
+    and 497 is all Box — so their calibrations did not change. The grid is
+    unbalanced (8 of 32 dives measure only the Weasly Fish), so a per-model
+    change moves every dive effect by ~0.5 pp, and those two sat 0.42 and
+    0.46 pp inside the 2.5 pp bound."""
+    raw = cal.to_frame(cal.load_rows(DATA / "corpus.csv"), corrected_references=False)
+    corrected = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert cal.accuracy_cohort(raw) == cal.CORPUS_ACCURACY_DIVES_AS_EXPORTED
+    assert set(cal.accuracy_cohort(raw)) - set(cal.accuracy_cohort(corrected)) == {59, 497}
+
+
+def test_the_measured_reference_is_the_tape_value():
+    """Two independent tape readings, snout to fork: 12 5/16 in = 312.74 mm and
+    312-313 mm metric. Adopted 312.7, and the cohort is the same for any value
+    in that spread."""
+    assert cal.MEASURED_REFERENCES_M["Weasly Fish"] == 0.3127
+    rows = cal.load_rows(DATA / "corpus.csv")
+    for metres in (0.3125, 0.3127, 0.3127375):
+        df = cal.to_frame(rows, corrected_references=False)
+        mask = df.model_name == "Weasly Fish"
+        df.loc[mask, "known_length_m"] = metres
+        df["pct_error"] = 100 * (df.length_m / df.known_length_m - 1)
+        assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
+
+
+def test_the_range_trend_filter_does_not_depend_on_any_reference():
+    """It compares a rigid target against ITSELF across range, so no reference
+    length enters. Pinned because it is what makes the pre-filter trustworthy
+    when a reference moves."""
+    raw = cal.to_frame(cal.load_rows(DATA / "corpus.csv"), corrected_references=False)
+    corrected = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert cal.range_trend_flagged_dives(raw) == cal.range_trend_flagged_dives(corrected)
 
 
 # --- range-trend pre-filter ------------------------------------------------
@@ -183,11 +221,15 @@ def test_range_trend_flagged_dives_on_the_corpus():
     assert cal.range_trend_flagged_dives(df) == (76, 491, 492, 494, 503, 504, 509)
 
 
-def test_the_pre_filter_is_what_removes_503():
+def test_the_pre_filter_is_what_removes_three_short_baseline_dives():
+    """491, 503 and 504 clear the dive-effect bound and are removed by the
+    range trend alone. It was 503 only against the as-exported reference; the
+    other two came inside the bound when it moved, which is exactly the case
+    the scale-free filter exists to catch."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     with_filter = cal.accuracy_cohort(df)
     without = cal.accuracy_cohort(df, range_trend_filter=False)
-    assert set(without) - set(with_filter) == {503}
+    assert set(without) - set(with_filter) == {491, 503, 504}
 
 
 def test_corpus_is_a_superset_of_the_august_export():

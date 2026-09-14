@@ -247,8 +247,34 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
     return out
 
 
-def to_frame(rows: Sequence[dict]):
-    """Tidy per-frame DataFrame for the distribution figures."""
+#: Reference lengths measured after `data/corpus.csv` was exported, applied on
+#: load so the export stays exactly as it came out of prod.
+#:
+#: The Weasly Fish carried 0.310 m, which prod's own note recorded as
+#: provisional: "the true fork length is known only to lie in [300, 310] mm and
+#: has never been calipered", with 310 the TOP of that interval, and "a POSITIVE
+#: reading beyond it ... would say 310 mm is too short."
+#:
+#: Measured 2026-09-14 with a tape, snout tip to tail fork on the fish's side —
+#: the landmarks the labelers click — on two independent scales: 12 5/16 in =
+#: 312.74 mm, and 312–313 mm on a metric tape. Adopted as **312.7 ± 0.5 mm**.
+#: That is 2.7 mm above the top of the assumed interval, so it both moves the
+#: reference and retires the one-sided 0.00…−3.23 % band the provisional range
+#: implied — the reference-induced component is now a fixed −0.86 %.
+#:
+#: The cohort and the reported numbers are insensitive to which reading is
+#: taken: 312.5, 312.7 and 312.74 all give the same 11 dives, n = 643, and
+#: agree to 0.02 pp on the median.
+MEASURED_REFERENCES_M = {"Weasly Fish": 0.3127}
+
+
+def to_frame(rows: Sequence[dict], *, corrected_references: bool = True):
+    """Tidy per-frame DataFrame for the distribution figures.
+
+    `corrected_references` applies `MEASURED_REFERENCES_M`. Pass False to
+    reproduce a number computed against the as-exported references — the
+    August tables and anything quoting the 13-dive cohort.
+    """
     import pandas as pd
 
     df = pd.DataFrame(
@@ -264,6 +290,9 @@ def to_frame(rows: Sequence[dict]):
             ],
         }
     )
+    if corrected_references:
+        for model, metres in MEASURED_REFERENCES_M.items():
+            df.loc[df.model_name == model, "known_length_m"] = metres
     df["error_m"] = df.length_m - df.known_length_m
     df["pct_error"] = 100 * df.error_m / df.known_length_m
     return df
@@ -337,6 +366,27 @@ RANGE_TREND_MIN_DEPTH_M = 0.8
 # stays: its interval [+2.0, +3.8] does not clear the threshold. The rule is
 # not tuned to keep or drop any of them.
 CORPUS_ACCURACY_DIVES = (
+    61, 84, 495, 498, 500, 501, 507, 519, 520, 521, 522,
+)
+#: What the rule selected against the as-exported 0.310 m Weasly reference,
+#: kept because the difference is the headline sensitivity of the whole
+#: analysis rather than a footnote.
+#:
+#: Correcting that one reference by 0.86 % moves every dive effect by about
+#: 0.5 pp — the grid is unbalanced (8 of 32 dives measure only the Weasly
+#: Fish), so a per-model change does not cancel out of the decomposition — and
+#: dives 59 and 497 sat 0.42 and 0.46 pp below the 2.5 pp bound. They cross it
+#: and drop out. Neither dive measures the Weasly Fish at all (59 is
+#: Grouper/Snook/Shark/Purple Angel, 497 is all Box), so their *calibrations*
+#: did not change; the cut moved under them.
+#:
+#: Re-centring the dive effects on their median does not fix it (tested), and
+#: re-referencing Snook or Box by a comparable amount changes nothing. The
+#: honest reading is that two of the thirteen were marginal, and a cohort rule
+#: that thresholds a jointly-estimated effect has this sensitivity wherever a
+#: member sits within a gauge shift of the bound. Report it; do not tune it
+#: away.
+CORPUS_ACCURACY_DIVES_AS_EXPORTED = (
     59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 520, 521, 522,
 )
 

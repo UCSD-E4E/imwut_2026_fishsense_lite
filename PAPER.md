@@ -28,15 +28,20 @@ stylised rainbow trout (310 mm; "Weasly Fish" in the data), a grouper (360 mm), 
 target's reference length is the snout-to-tail-fork distance a labeler is asked to click,
 measured with a tape.
 
-Two of those references carry a stated uncertainty, and we report them rather than adjust
-them. The **trout's 310 mm** is inherited and undocumented, and two independent
-reconstructions of the physical model both place it longer: a dense photogrammetric point
-cloud, scaled on the box's 150 mm span, gives a snout-to-fork chord of 315 ± 1 mm, and 66
-frames of the model captured with two LiDAR phones — different cameras, independently
-published intrinsics, scale taken from the sensors' own metric depth and so sharing no
-scale chain with the box — give 319 ± 2 mm. We keep 310 mm because neither reconstruction
-is a direct measurement and the two disagree by more than either one's precision, and we
-quote the consequence in §4.3. The **shark's 605 mm** is likewise undocumented and the
+One of those references was inherited rather than measured, and we measured it. The
+trout's **310 mm** came from a prior publication and was recorded as provisional: its true
+fork length was known only to lie in 300–310 mm, with 310 the top of that interval. Two
+independent reconstructions of the physical model both placed it longer — a dense
+photogrammetric point cloud scaled on the box's 150 mm span gives a snout-to-fork chord of
+315 ± 1 mm, and 66 frames from two LiDAR phones, with different cameras, independently
+published intrinsics and scale taken from the sensors' own metric depth so sharing no
+scale chain with the box, give 319 ± 2 mm — but neither is a direct measurement. A tape
+now settles it: **312.7 ± 0.5 mm**, from two independent readings of the same landmarks
+the labelers click (12 5/16 in on an imperial tape, 312–313 mm on a metric one). We adopt
+that value, which both moves the reference 2.7 mm above the top of the assumed interval
+and retires the one-sided 0…−3.2 % band that interval implied. It also adjudicates the
+reconstructions: both read long, by 2.3 and 6.3 mm, in the direction a straight chord
+between two surface points must err when the snout and the fork do not lie in one plane. The **shark's 605 mm** is likewise undocumented and the
 model is no longer available; §4.3 reports its offset rather than correcting it.
 
 It is worth being explicit about which half of the measurement chain those uncertainties
@@ -197,22 +202,40 @@ than the instrument, and a high quantile is the estimator that rejects the pose 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
-Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.06 %; 78 % of
-frames are within 5 % of the reference, 98 % within 10 %, and 99 % within 15 %. The
-per-target $p_{90}$ — Box −0.1 %, Purple Angel +0.9 %, Weasly Fish −1.9 %, Grouper +0.3 %,
-Snook −0.9 %, Shark +4.3 % — shows no trend with size across a four-fold range of lengths.
-The polish attributes +3.2 points of the Shark's figure to the target itself rather than to
-any session; the model is no longer available to re-measure, and it is 25 of 771 frames,
-so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.24 %.
+Over the cohort the median frame error is −2.6 % and the $p_{90}$ is −0.42 %; 71 % of
+frames are within 5 % of the reference, 96 % within 10 %, and 99 % within 15 %. The
+per-target $p_{90}$ — Box −0.3 %, Grouper −0.1 %, Purple Angel +0.6 %, Snook −1.2 %,
+Weasly Fish −2.7 %, Shark +2.6 % — shows no trend with size across a four-fold range of
+lengths. The polish attributes +3.2 points of the Shark's figure to the target itself
+rather than to any session; the model is no longer available to re-measure, and it is 7 of
+643 frames, so excluding it moves the cohort $p_{90}$ only from −0.42 % to −0.44 %.
 
-The trout's reference uncertainty (§4.1) works the other way and is worth stating plainly,
-because that target is 291 of the 771 cohort frames. At 310 mm the cohort reads median
-−2.19 %, $p_{90}$ +0.06 %. At the photogrammetric 315 mm every trout frame reads 1.34
-points shorter, three sessions leave the cohort as their offsets re-sort, and the cohort
-reads median −2.88 %, $p_{90}$ −0.45 % over 615 frames; at the LiDAR's 319 mm, median
-−3.41 %, $p_{90}$ −0.60 %. The reference is therefore worth about half a point of the
-headline, in the pessimistic direction, and it does not change any conclusion here: the
-$p_{90}$ stays inside ±1 % and 99 % of frames stay within 15 % at every value.
+How much the trout's reference is worth is worth stating plainly, because that target is
+291 of the 643 cohort frames, and measuring it (§4.1) is what fixed the numbers above. At
+the inherited 310 mm the same rule selected thirteen sessions and read median −2.19 %,
+$p_{90}$ +0.06 %; at the measured 312.7 mm it selects eleven and reads −2.63 % and
+−0.42 %. Two sessions leave the cohort, and neither measures the trout at all — one is
+Grouper, Snook, Shark and Purple Angel, the other only the box. The grid is unbalanced,
+with eight of the thirty-two sessions measuring only the trout, so correcting one target's
+reference moves every session effect by about half a point, and those two sat 0.42 and
+0.46 points inside the 2.5-point bound. That is a property of thresholding a
+jointly-estimated effect, not of those sessions' calibrations, and it is the honest measure
+of how marginal a cohort member can be: we report both sets rather than presenting the
+larger one. No conclusion here turns on it — the $p_{90}$ stays inside ±1 % and 99 % of
+frames stay within 15 % under either reference.
+
+The trout's own $p_{90}$ of −2.7 % is the largest of any target, and we can say what it is
+*not* rather than what it is. Two of the targets are solid — the trout, 58.7 mm across the
+mid-body, and the snook — while the rest are flat plates, so a natural explanation is
+parallax: the near flank sits closer to the camera than the plane the length is measured
+in, which would read short by a term in $1/z$. Fitting $a + b/z$ per target over the cohort
+gives the trout $b = -1.9$ %·m (95 % CI $-2.3$ to $-1.4$), real but about five times
+smaller than the $-9.4$ its thickness alone predicts, while a *flat* target, the grouper,
+shows a larger $b = -3.7$ ($-5.7$ to $-1.1$). Each target is measured on its own sessions,
+so $b$ cannot be separated from whatever range dependence those sessions' calibrations
+retain. We therefore report the per-target offsets as target effects — which is what the
+polish estimates them as, separately from session effects — and do not attribute them to
+thickness on this evidence.
 
 Figure 3 plots error against laser range. Triangulation conditioning degrades as $Z^2$
 (Eq. 5), so a range dependence surviving into the delivered length would appear as a
@@ -230,14 +253,14 @@ applies to a real fish and is small at survey range: a 40 cm fish 4 cm thick at 
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
-admitting the five sessions the band alone excludes costs $p_{90}$ (+0.06 % to +0.68 %) while
+admitting the three sessions the range trend alone excludes costs the median (−2.63 % to −3.20 %) while
 leaving the median and mean marginally better, whereas dropping the hold-outs as well runs
 the mean error from 3.5 % to 5.2 % and then 9.2 %. $p_{90}$ stays within ±0.7 % of zero
 throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 13 | 771 | −2.19 % | +0.06 % | 3.71 % |
+| accuracy cohort (rule) | 11 | 643 | −2.63 % | −0.42 % | 9.14 % |
 | every session not held out (design + range check) | 18 | 910 | −1.94 % | +0.68 % | 3.49 % |
 | every session except the angle experiment | 27 | 1,499 | −3.48 % | +0.16 % | 5.15 % |
 | every session | 32 | 2,927 | −5.91 % | −0.59 % | 9.20 % |
@@ -369,8 +392,8 @@ check that would have caught this in the field.
   measurement leaves the 15 % budget when the fish is more than 30° from broadside
   (Figure 8)."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.06 %.
-  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.06 % over 771
+  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is −0.42 %.
+  Consider stating the broadside figure directly: "median −2.6 %, $p_{90}$ −0.42 % over 643
   measurements of six targets at 0.27–4.7 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3's promise about refraction is still unmet.** The hardware paragraph says of the
