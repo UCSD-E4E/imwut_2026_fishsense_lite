@@ -94,6 +94,22 @@ def one_way(per_camera):
                 between_sd=float(np.sqrt(between_var)))
 
 
+def per_camera_frames():
+    """camera id -> per-frame percent error, cohort only, target offset removed.
+
+    Removing each target's own median is what makes the units comparable: unit 1
+    saw only the 2023 fish models and units 2/3/4/10 only the box and the trout,
+    so the raw per-unit medians span 3.2 points of target ladder before any
+    property of a unit is involved. Centring each target drops that to 1.7.
+    """
+    rows = cal.load_rows(CORPUS)
+    df = cal.to_frame(rows)
+    df["camera_id"] = [int(r["camera_id"]) for r in rows]
+    s = df[df.dive_id.isin(cal.accuracy_cohort(df))].copy()
+    s["e"] = s.pct_error - s.groupby("model_name").pct_error.transform("median")
+    return {int(c): g.e.values for c, g in s.groupby("camera_id")}
+
+
 def main() -> None:
     pubfig.use_publication_style()
     per_camera = per_camera_offsets()
@@ -117,6 +133,17 @@ def main() -> None:
         p_value=stat["p"],
     )
     for path in pubfig.save_figure(fig, "fig10_no_rig_bias", outdir=OUTDIR):
+        print("wrote", path)
+
+    # Companion view: the frame-level distributions behind those session points.
+    frames = per_camera_frames()
+    meds = {c: float(np.median(v)) for c, v in frames.items()}
+    span = max(meds.values()) - min(meds.values())
+    print(f"\nper-frame, target-centred: unit medians span {span:.2f} points")
+    fig2 = pubfig.fig_error_by_camera(
+        frames, span_note=f"unit medians span {span:.1f} points", ylim=(-15, 10)
+    )
+    for path in pubfig.save_figure(fig2, "fig10b_error_by_camera", outdir=OUTDIR):
         print("wrote", path)
 
 

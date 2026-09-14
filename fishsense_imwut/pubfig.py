@@ -1055,3 +1055,77 @@ def fig_no_rig_bias(
         borderpad=0.2, labelspacing=0.35, framealpha=0.0)
     fig.tight_layout()
     return fig
+
+
+def fig_error_by_camera(
+    per_camera,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.7),
+    span_note: str | None = None,
+    ylim: tuple[float, float] | None = None,
+) -> plt.Figure:
+    """Percent-error distribution per camera unit, as violins.
+
+    `per_camera` maps camera id -> array of per-frame percent errors.
+
+    **One hue, not seven.** The reader's question is whether these differ, and
+    the answer is no; giving each unit its own colour would assert that unit
+    identity carries meaning. Identity is on the axis, where it belongs.
+
+    The KDE is clipped to each unit's observed range, so no violin shows density
+    where no frame was measured -- the usual way a violin overstates a small
+    sample. Bodies are hollow for the same reason the boxes elsewhere are:
+    saturated fill is for small marks.
+
+    The quantity should be percent error with each target's own offset removed
+    (see `fish_model_analysis/rig_bias.py`). Units photographed different target
+    sets, so raw per-unit error is confounded with the target ladder rather than
+    with the unit.
+    """
+    from scipy.stats import gaussian_kde
+
+    cams = sorted(per_camera)
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="y")
+    _zero_line(ax, orientation="h")
+
+    half = 0.38
+    for i, cam in enumerate(cams):
+        v = np.asarray(per_camera[cam], dtype=float)
+        lo, hi = v.min(), v.max()
+        grid = np.linspace(lo, hi, 200)
+        dens = gaussian_kde(v)(grid)
+        dens = dens / dens.max() * half
+
+        ax.fill_betweenx(grid, i - dens, i + dens, facecolor=SERIES_1,
+                         alpha=0.13, linewidth=0, zorder=2)
+        ax.plot(i - dens, grid, color=SERIES_1, linewidth=0.8, zorder=3)
+        ax.plot(i + dens, grid, color=SERIES_1, linewidth=0.8, zorder=3)
+
+        q1, med, q3 = np.percentile(v, [25, 50, 75])
+        ax.plot([i, i], [q1, q3], color=INK_SECONDARY, linewidth=1.4, zorder=4)
+        ax.plot([i - 0.17, i + 0.17], [med, med], color=SERIES_2,
+                linewidth=2.0, zorder=5, solid_capstyle="butt")
+
+    if ylim is not None:
+        ax.set_ylim(*ylim)
+        hidden = sum(int(((np.asarray(v) < ylim[0]) | (np.asarray(v) > ylim[1])).sum())
+                     for v in per_camera.values())
+        total = sum(len(v) for v in per_camera.values())
+        if hidden:
+            # A clipped axis that does not admit it is a lie about the spread.
+            ax.annotate(f"{hidden} of {total} frames lie beyond the axis",
+                        xy=(0.985, 0.012), xycoords="axes fraction", ha="right",
+                        va="bottom", fontsize=5.5, color=INK_MUTED)
+
+    ax.set_xticks(range(len(cams)))
+    # n goes in the tick label: inside the axes it collides with the tails.
+    ax.set_xticklabels([f"{c}\nn={len(per_camera[c])}" for c in cams])
+    ax.set_xlim(-0.6, len(cams) - 0.4)
+    ax.set_xlabel("Camera unit")
+    ax.set_ylabel("Length error, target offset removed (%)")
+
+    if span_note:
+        ax.annotate(span_note, xy=(0.015, 0.985), xycoords="axes fraction",
+                    ha="left", va="top", fontsize=6.5, color=INK_SECONDARY)
+    fig.tight_layout()
+    return fig
