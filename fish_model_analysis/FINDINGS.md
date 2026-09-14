@@ -784,7 +784,7 @@ within `COARSE_CALIBRATION_TOLERANCE_PX` of that line, refit, run all four gates
 
 | dive | superseded slate dots, offset from the live line | verdict |
 |---|---|---|
-| 466 | 22 dots at **42.6–46.2 px** | reflection line, as dive 77. Reviving would poison the fit; needs **relabelling** |
+| 466 | 22 dots in **two clusters, 42.6–46.2 and 66.5–72.9 px** | labels are CORRECT; the laser moved twice. Unrecoverable — see §9.2 |
 | 103 | none — its fit spans **0.02 m** of range, baseline 6.25 cm | single-distance burst, refused by geom+baseline |
 | 427 | none — **0.05 m**, baseline 16.01 cm | same |
 | 279 | 6 dots, four at 0.7–2.8 px, two at 10.1 | refit gives **29.6 cm** baseline → refused. Leave |
@@ -819,12 +819,43 @@ The two tasks have different error costs, so a revival must be validated per div
 gates and, where a second range exists, by the independent PnP range test. Dives 347 and 349
 clear that bar; nothing else in the corpus does.
 
-**One live lead.** Dive 466 (`121024_Alligator2_FSL06`, HIGH, camera 6, slate 8) is otherwise
-ready to measure: 107 completed species labels (68 real fish, 24 top-three), 60 completed
-head/tail labels with 30 coordinate pairs, and LABEL_STUDIO clusters already present. Its only
-blocker is that all 22 of its slate-frame laser labels are on the specular reflection. If the
-true dot is visible in those 11 frames, relabelling them is a small job that would add a
-**new deployment** to the field set — the only remaining recovery in the corpus that would add
-field data rather than re-derive existing numbers. Note the plumbing: superseded rows do not
-accept Label Studio corrections, so this needs an operator un-supersede before a labeller can
-fix the positions.
+### 9.2 Correction: dive 466's labels are right, and that is why it is unrecoverable
+
+§9.1 as first written called dive 466's 22 superseded slate dots specular-reflection
+mislabels, by analogy with dive 77 and on the strength of a ~45 px offset from the dive's
+fish-frame line. **That was wrong, and looking at the frames is what showed it.**
+
+Rectified with the dive's stored intrinsics and zoomed 4x, every stored label sits on a
+real, compact, saturated dot on the slate, and the position the fish-frame line predicts
+sits on blank slate. (The red-excess test that worked on the Florida head/tail frames is
+uninformative here: max red excess is −2 and 0 at the labels, because a laser dot on a white
+slate at close range saturates all three channels rather than staying red-dominant.)
+
+The offsets are not one cluster but **two**, and they partition exactly by burst:
+
+    burst 1, 09:17:16-39, 6 frames (12 rows with duplicates)   42.6-46.2 px
+    burst 2, 10:09:37-51, 5 frames (10 rows with duplicates)   66.5-72.9 px
+    fish frames, 71 live dots                                  own line, MAD 0.64 px
+
+Three distinguishable laser states in one dive: each slate burst is internally tight, they
+disagree with each other, and neither lies on the line the fish frames define. So the labels
+need no fixing — **relabelling would achieve nothing** — and no fit from these bursts can
+describe the frames 466 would measure. `check_calibration_describes_dive` refuses them
+correctly and for the right reason.
+
+This is also the strongest single piece of evidence in the corpus for PAPER.md §4.2's claim
+that a session is not a safe unit: stronger than the dive-490 example (two calibrations 7
+minutes apart differing by 0.82°), because here one dive contains three states separated by
+52 minutes, each self-consistent, with the disagreement measured against the dive's own
+fish dots rather than against another fit.
+
+**Method note, and it is the third time today the same error shape appeared.** Reasoning
+from an offset *magnitude* to a *cause* — 45 px therefore reflection — failed here, exactly
+as extrapolating a length change from a baseline ratio failed on dive 107 (the axis co-varies)
+and as leave-one-out failed as a conditioning screen (the held-out sample carries no new
+information). In all three the number was real and the mechanism inferred from it was wrong.
+The check that settles a mechanism question is the one that looks at the mechanism: the
+frames, the kernel, or an evaluation at a different range.
+
+**Recovery status of the corpus, final:** dives 347 and 349 are recovered and measured. No
+other dive is recoverable from existing data, and no relabelling would change that.
