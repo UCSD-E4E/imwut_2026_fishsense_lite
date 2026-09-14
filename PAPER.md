@@ -290,8 +290,8 @@ Figures 5–6, the mount failures and the in-field recalibration procedure — g
 unchanged. What follows replaces the stereo-comparison paragraph, which the data does not
 support; see the note at the end of this subsection.)*
 
-Volunteer divers measured wild fish on seven deployments at one Florida reef, yielding 164
-measurements of 74 individuals on six camera units, across nine named species and one
+Volunteer divers measured wild fish on seven deployments at one Florida reef, yielding 162
+measurements of 73 individuals on six camera units, across nine named species and one
 nontarget category. Two of the seven calibrations initially failed the conditioning
 criterion of §4.2 — one fitted from a single frame, the other from two dots 26 cm apart in
 range — and both were repaired rather than excluded. The frames they needed existed but had
@@ -307,12 +307,15 @@ directly, and this is the one field figure that needs nothing external: a calibr
 is common to all frames of one fish and cancels in a relative spread, as does any error in
 the length convention, and no comparison population is involved. (It is therefore the one
 result the two repaired calibrations could not have changed, and indeed did not: it stands at
-3.3 % before and 3.2 % after.) Over 25 such individuals the within-fish coefficient of
-variation is **3.2 % (median; bootstrap 95 % CI 2.0–4.3 %), with a $p_{90}$ of 14 %**. The
+3.3 % before and 2.9 % after.) Over 25 such individuals the within-fish coefficient of
+variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a $p_{90}$ of 9.1 %**. The
 identical statistic on the pool cohort — repeat frames of one target in one session, 23
 cells — is **1.4 % (95 % CI 1.2–2.2 %), $p_{90}$ 4.5 %**. So a
-repeat measurement of a wild fish varies about 2.4 times more than a repeat measurement of a
-posed model, and its tail is three times worse. That penalty is what the field adds: the
+repeat measurement of a wild fish varies about twice as much as a repeat measurement of a
+posed model, and its tail about twice as badly. The two bootstrap intervals overlap at the
+margin (1.6–4.1 % against 1.2–2.2 %), so this is a difference in point estimate rather than
+a cleanly separated one; with 25 field individuals it is the sample size and not the effect
+that limits the claim. That penalty is what the field adds: the
 animal moves between frames, the water is turbid, and the snout and fork are harder to place.
 It is consistent with §4.4 — a few degrees of pose change between frames is worth a few
 percent of length — and it is the number a survey designer should use when deciding how many
@@ -340,7 +343,7 @@ cautions belong with it: the two systems' spreads are the same (between-fish CV 
 against 19.1 %), so no claim of a narrower distribution is supported; and the stereo's
 quoted precision is a propagated click-error (1.0 % of length) rather than a measured
 repeatability, with essentially one measurement per individual in the archive, so it is not
-comparable to the 3.2 % above.
+comparable to the 2.9 % above.
 
 #### Sessions the rule rejects
 

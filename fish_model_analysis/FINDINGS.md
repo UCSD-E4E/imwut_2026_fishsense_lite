@@ -666,8 +666,15 @@ population is involved.
 |---|---|---|---|---|
 | pool, repeat frames of one target in one session | 23 cells | **1.36 %** | [1.24, 2.16] | 4.49 % |
 | field, repeat frames of one wild fish | 24 fish | **3.28 %** | [2.36, 4.25] | 14.19 % |
+| field, recomputed 2026-09-14 after the recovery and the orphan fix | 25 fish | **2.91 %** | [1.63, 4.06] | 9.11 % |
 
-The intervals do not overlap: field repeatability is ~2.4× the pool's, with a 3× worse tail.
+The 2026-09-13 intervals did not overlap. **On the corrected 2026-09-14 figures they do**
+(field 1.63-4.06 % against pool 1.24-2.16 %), so the separation claim does not survive: it
+is a ~2x difference in point estimate limited by 25 field individuals, not a clean split.
+Two causes, both recorded elsewhere: dives 347 and 349 were recovered (§9), and two orphaned
+measurement rows left by re-clustering were removed from the count (§9.4) -- one of them
+gave fish 176 a duplicated 193.4 mm frame beside frames up to 298 mm, which was the old
+p90's main driver.
 That is the measured cost of the field — the animal moves, the water is turbid, the landmarks
 are harder — and it is consistent with §7.5 (a few degrees of pose change between frames is
 worth a few percent). At ≥2 frames the field figure is 3.14 % median over 40 fish. By species
@@ -900,3 +907,45 @@ Two honest options, and the first is what the submission should do:
 
 Do not do the third thing — quietly re-running the rule against new data while quoting the
 old cohort — which is how a stated rule and a stated result come apart.
+
+
+### 9.4 Two orphaned measurement rows, and the paper numbers they moved (2026-09-14)
+
+Reconciling prod after the recovery turned up two measurement rows that no cohort and no
+activity will ever revisit, and they had already reached a draft.
+
+    dive 341  image 101302   fish 176 @ NULL provenance  AND  fish 305 @ ext 10   both 193.4 mm
+    dive 383  image 111926   fish 283 @ NULL             AND  fish 323 @ ext 16   both 484.9 mm
+
+Both frames were re-assigned between Fish rows and the old binding stayed. `measure_fish_activity`
+has a self-heal for exactly this, but it was guarded by `if model_name is not None` -- a
+model's Fish is knowable from its name up front, while a real fish's comes from its
+LABEL_STUDIO cluster, resolved *after* the "already measured with the current calibration"
+skip. So the corrected row satisfies the skip on every later run and the loop never reaches
+the point where it could notice the old one. `post_measurement` upserts on
+(image_id, fish_id), so the correction was added alongside rather than replacing. Fixed in
+fishsense-lite PR #905 by reading the expected binding off the cluster's own `fish_id`.
+
+**What they cost.** Fish 176 keeps three other current frames, so it is a real individual;
+fish 283's only frame moved away, leaving it as an individual with nothing current. Hence
+removing two rows drops the individual count by one, not two:
+
+| | measurements | individuals | within-fish CV, >=3 frames | $p_{90}$ |
+|---|---|---|---|---|
+| as counted | 164 | 74 | 3.19 % [2.03, 4.25] | 13.80 % |
+| corrected | **162** | **73** | **2.91 % [1.63, 4.06]** | **9.11 %** |
+
+The p90 moved most because fish 176's set carried the duplicated 193.4 mm beside frames up
+to 298 mm, inflating its CV.
+
+**And it costs a claim.** §4.5 said the field and pool repeatability intervals do not
+overlap. On the corrected figures they do -- field 1.63-4.06 % against pool 1.24-2.16 % --
+so the honest statement is a ~2x difference in point estimate (2.9 % against 1.4 %) limited
+by 25 field individuals, not a clean separation. PAPER.md §4.5 now says that. This is a
+weakening of a result caused by fixing a data defect, which is the right direction for the
+error to have been found in, but it is a weakening and it is not buried.
+
+**Still to do in prod:** the two rows predate the fix and the activity will not revisit those
+frames, so they need an operator delete -- `scratchpad/delete_orphaned_measurements.sql`.
+Until then the live database still reports 164/74 while the paper reports 162/73, and the
+discrepancy is exactly those two rows.
