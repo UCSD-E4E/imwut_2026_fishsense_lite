@@ -158,11 +158,13 @@ def test_correcting_one_reference_costs_two_cohort_members():
 
 def test_the_measured_reference_is_the_tape_value():
     """Two independent tape readings, snout to fork: 12 5/16 in = 312.74 mm and
-    312-313 mm metric. Adopted 312.7, and the cohort is the same for any value
-    in that spread."""
-    assert cal.MEASURED_REFERENCES_M["Weasly Fish"] == 0.3127
+    312-313 mm metric, so 312.7 +- 0.5 mm. Adopted 313 mm -- three significant
+    figures like every other reference, which the +-0.5 mm supports and a
+    tenth-millimetre digit does not. The cohort is the same for any value in
+    that spread, so the rounding costs nothing."""
+    assert cal.MEASURED_REFERENCES_M["Weasly Fish"] == 0.313
     rows = cal.load_rows(DATA / "corpus.csv")
-    for metres in (0.3125, 0.3127, 0.3127375):
+    for metres in (0.3125, 0.3127, 0.3127375, 0.313):
         df = cal.to_frame(rows, corrected_references=False)
         mask = df.model_name == "Weasly Fish"
         df.loc[mask, "known_length_m"] = metres

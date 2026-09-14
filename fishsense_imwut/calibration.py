@@ -257,15 +257,18 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
 #:
 #: Measured 2026-09-14 with a tape, snout tip to tail fork on the fish's side —
 #: the landmarks the labelers click — on two independent scales: 12 5/16 in =
-#: 312.74 mm, and 312–313 mm on a metric tape. Adopted as **312.7 ± 0.5 mm**.
-#: That is 2.7 mm above the top of the assumed interval, so it both moves the
+#: 312.74 mm, and 312–313 mm on a metric tape, so 312.7 ± 0.5 mm. **Adopted as
+#: 313 mm**: the ±0.5 mm does not support a tenth-millimetre digit, and every
+#: other reference in the corpus is quoted to three significant figures.
+#: That is 3 mm above the top of the assumed interval, so it both moves the
 #: reference and retires the one-sided 0.00…−3.23 % band the provisional range
-#: implied — the reference-induced component is now a fixed −0.86 %.
+#: implied — the reference-induced component is now a fixed −0.96 %.
 #:
 #: The cohort and the reported numbers are insensitive to which reading is
-#: taken: 312.5, 312.7 and 312.74 all give the same 11 dives, n = 643, and
-#: agree to 0.02 pp on the median.
-MEASURED_REFERENCES_M = {"Weasly Fish": 0.3127}
+#: taken: 312.5, 312.7, 312.74 and 313 all select the same 13 dives, n = 793,
+#: and agree to 0.04 pp on the median and 0.04 pp on the p90. The rounding to
+#: three figures is therefore immaterial as well as tidier.
+MEASURED_REFERENCES_M = {"Weasly Fish": 0.313}
 
 
 def to_frame(rows: Sequence[dict], *, corrected_references: bool = True):

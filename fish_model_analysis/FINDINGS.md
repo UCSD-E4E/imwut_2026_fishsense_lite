@@ -1004,7 +1004,7 @@ reference-sensitivity result below is only reproducible against it.
 Four prod changes land together, all of them improvements and none of them the reference
 alone:
 
-    the Weasly reference is now 312.7 mm, measured (§9.x, prod row 8 updated)
+    the Weasly reference is now 313 mm, measured (§9.x, prod row 8 updated)
     dive 498 re-measured under dive 496's calibration -- its own session's board
         burst -- after its 0.34 m-lever fit was retired (§9.3)
     dive 502 REFITTED BY THE PIPELINE, 8.90 -> 10.354 cm, once the shipped baseline

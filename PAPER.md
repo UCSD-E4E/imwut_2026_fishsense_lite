@@ -23,7 +23,7 @@ field-deployment text.
 #### 4.1 Known-length targets
 
 Six rigid targets were measured: five painted fish models — a purple angelfish (192 mm), a
-stylised rainbow trout (312.7 mm; "Weasly Fish" in the data), a grouper (360 mm), a snook
+stylised rainbow trout (313 mm; "Weasly Fish" in the data), a grouper (360 mm), a snook
 (455 mm), a shark (605 mm) — and a 150 mm box. Each
 target's reference length is the snout-to-tail-fork distance a labeler is asked to click,
 measured with a tape.
@@ -36,11 +36,14 @@ photogrammetric point cloud scaled on the box's 150 mm span gives a snout-to-for
 315 ± 1 mm, and 66 frames from two LiDAR phones, with different cameras, independently
 published intrinsics and scale taken from the sensors' own metric depth so sharing no
 scale chain with the box, give 319 ± 2 mm — but neither is a direct measurement. A tape
-now settles it: **312.7 ± 0.5 mm**, from two independent readings of the same landmarks
+now settles it at **312.7 ± 0.5 mm**, from two independent readings of the same landmarks
 the labelers click (12 5/16 in on an imperial tape, 312–313 mm on a metric one). We adopt
-that value, which both moves the reference 2.7 mm above the top of the assumed interval
-and retires the one-sided 0…−3.2 % band that interval implied. It also adjudicates the
-reconstructions: both read long, by 2.3 and 6.3 mm, in the direction a straight chord
+**313 mm**, to the three significant figures the tolerance supports and the other
+references carry; every value across that spread selects the same cohort and moves the
+figures below by at most 0.04 points. The reference therefore moves 3 mm above the top of
+the assumed interval and
+retires the one-sided 0…−3.2 % band that interval implied. It also adjudicates the
+reconstructions: both read long, by 2 and 6 mm, in the direction a straight chord
 between two surface points must err when the snout and the fork do not lie in one plane. The **shark's 605 mm** is likewise undocumented and the
 model is no longer available; §4.3 reports its offset rather than correcting it.
 
@@ -203,16 +206,16 @@ than the instrument, and a high quantile is the estimator that rejects the pose 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
-Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.12 %; 79 % of
+Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.09 %; 79 % of
 frames are within 5 % of the reference, 97 % within 10 %, and 99 % within 15 %. The
 per-target $p_{90}$ — Box −0.1 %, Grouper +0.3 %, Purple Angel +0.9 %, Snook −0.9 %,
-Weasly Fish −1.3 %, Shark +4.3 % — shows no trend with size across a four-fold range of
+Weasly Fish −1.4 %, Shark +4.3 % — shows no trend with size across a four-fold range of
 lengths. The polish attributes +3.2 points of the Shark's figure to the target itself
 rather than to any session; the model is no longer available to re-measure, and it is 25 of
-793 frames, so excluding it moves the cohort $p_{90}$ from +0.12 % to −0.14 %.
+793 frames, so excluding it moves the cohort $p_{90}$ from +0.09 % to −0.14 %.
 
 How sensitive those figures are to the rule's one free parameter is worth stating, because
-the cohort is selected rather than chosen. Moving the bound from 2.25 to 2.75 points
+the cohort is selected rather than chosen. Moving the bound from 2.3 to 2.75 points
 selects the same thirteen sessions and the same 793 frames; below 2.0 it drops to ten and
 at 3.0 it admits an eleventh. The chosen 2.5 therefore sits in the middle of a plateau, not
 on a knife edge — though four sessions do lie within half a point of it, three inside and
@@ -220,7 +223,7 @@ one out, so a cohort member can be marginal even when the membership is not.
 
 The reference matters as much as the bound, and by a route worth recording. On the earlier
 export, against the inherited 310 mm, this rule selected thirteen sessions reading median
-−2.19 %; correcting the reference alone moved it to eleven sessions and −2.63 %, dropping
+−2.19 %; correcting the reference alone moved it to eleven sessions and −2.64 %, dropping
 two sessions that do not measure the trout at all. The grid is unbalanced — eight of the
 thirty-two sessions measure only the trout — so correcting one target's reference shifts
 every session effect by about half a point, which is enough to move a marginal member
@@ -230,7 +233,7 @@ happen to push the decomposition in opposite directions, landing within 0.03 poi
 original median. That is a coincidence of two independent fixes and not evidence that the
 original was right: the cohort membership differs.
 
-The trout's own median of −4.4 % is the most negative of any target, and we can say what it is
+The trout's own median of −4.5 % is the most negative of any target, and we can say what it is
 *not* rather than what it is. Two of the targets are solid — the trout, 58.7 mm across the
 mid-body, and the snook — while the rest are flat plates, so a natural explanation is
 parallax: the near flank sits closer to the camera than the plane the length is measured
@@ -245,27 +248,27 @@ thickness on this evidence.
 
 Figure 3 plots error against laser range. Triangulation conditioning degrades as $Z^2$
 (Eq. 5), so a range dependence surviving into the delivered length would appear as a
-widening band; instead the interquartile range is 2.5 to 3.5 points in every bin beyond
+widening band; instead the interquartile range is 2.5 to 3.6 points in every bin beyond
 0.85 m and does not grow with distance, and the binned median is flat between −2.4 % and
-−1.6 % from 0.85 m out to 5.0 m. The one departure is the nearest bin, where the median is
-−5.1 %. Only two targets reach those ranges and they disagree — over the same frames the
-trout reads −7.4 % and the box −2.2 % — so the departure follows the target, not the range,
+−1.7 % from 0.85 m out to 5.0 m. The one departure is the nearest bin, where the median is
+−5.2 %. Only two targets reach those ranges and they disagree — over the same frames the
+trout reads −7.5 % and the box −2.2 % — so the departure follows the target, not the range,
 and falls to the paragraph above. It is also below the working range of a diver measuring
 wild fish.
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
-admitting the two sessions the range trend alone excludes costs the median (−2.16 % to
-−2.37 %) and leaves $p_{90}$ where it was, whereas dropping the hold-outs as well runs the
-mean error from 3.7 % to 5.3 % and then 9.3 %. $p_{90}$ stays within ±0.6 % of zero
+admitting the two sessions the range trend alone excludes costs the median (−2.18 % to
+−2.38 %) and leaves $p_{90}$ where it was, whereas dropping the hold-outs as well runs the
+mean error from 3.7 % to 5.4 % and then 9.3 %. $p_{90}$ stays within ±0.7 % of zero
 throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 13 | 793 | −2.16 % | +0.12 % | 3.68 % |
-| every session not held out (design + range check) | 18 | 910 | −2.11 % | +0.48 % | 3.64 % |
-| every session except the angle experiment | 27 | 1,499 | −3.80 % | +0.10 % | 5.32 % |
-| every session | 32 | 2,927 | −6.08 % | −0.60 % | 9.29 % |
+| accuracy cohort (rule) | 13 | 793 | −2.18 % | +0.09 % | 3.71 % |
+| every session not held out (design + range check) | 18 | 910 | −2.13 % | +0.48 % | 3.68 % |
+| every session except the angle experiment | 27 | 1,499 | −3.85 % | +0.09 % | 5.35 % |
+| every session | 32 | 2,927 | −6.11 % | −0.61 % | 9.30 % |
 
 ```latex
 \begin{table}[t]
@@ -273,16 +276,16 @@ throughout.
   The hold-outs do the rejecting and the $2.5$-point band the tightening: admitting the
   sessions the range check alone excludes costs the median while leaving $p_{90}$ where it
   was, whereas dropping the hold-outs runs the mean error from $3.7\,\%$ to $9.3\,\%$.
-  $p_{90}$ stays within $\pm0.6\,\%$ of zero throughout.}
+  $p_{90}$ stays within $\pm0.7\,\%$ of zero throughout.}
   \label{tab:accuracy}
   \begin{tabular}{lrrrrr}
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 13 &   793 & $-2.16$ & $+0.12$ & 3.68 \\
-    not held out (design + range check)  & 18 &   910 & $-2.11$ & $+0.48$ & 3.64 \\
-    all but the angle experiment         & 27 & 1{,}499 & $-3.80$ & $+0.10$ & 5.32 \\
-    every session                        & 32 & 2{,}927 & $-6.08$ & $-0.60$ & 9.29 \\
+    accuracy cohort (rule)               & 13 &   793 & $-2.18$ & $+0.09$ & 3.71 \\
+    not held out (design + range check)  & 18 &   910 & $-2.13$ & $+0.48$ & 3.68 \\
+    all but the angle experiment         & 27 & 1{,}499 & $-3.85$ & $+0.09$ & 5.35 \\
+    every session                        & 32 & 2{,}927 & $-6.11$ & $-0.61$ & 9.30 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -407,8 +410,8 @@ check that would have caught any of this in the field.
   measurement leaves the 15 % budget when the fish is more than 30° from broadside
   (Figure 8)."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.12 %.
-  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.12 % over 793
+  claims are supported: 99 % of cohort frames are within 15 % and the $p_{90}$ is +0.09 %.
+  Consider stating the broadside figure directly: "median −2.2 %, $p_{90}$ +0.09 % over 793
   measurements of six targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3's promise about refraction is still unmet.** The hardware paragraph says of the
