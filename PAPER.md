@@ -222,7 +222,8 @@ $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed
 reports.
 
 Over the cohort the median frame error is −2.2 % and the $p_{90}$ is +0.06 %; 79 % of
-frames are within 5 % of the reference, 98 % within 10 %, and every frame within 15 %. The
+frames are within 5 % of the reference, 98 % within 10 %, and every frame within 15 % —
+the worst single frame in the cohort is 13.2 % short. The
 per-target $p_{90}$ — Box −0.2 %, Grouper +0.3 %, Purple Angel +0.9 %, Snook −0.9 %,
 Weasly Fish −1.4 %, Shark +4.3 % — shows no trend with size across a four-fold range of
 lengths. The polish attributes +3.2 points of the Shark's figure to the target itself
