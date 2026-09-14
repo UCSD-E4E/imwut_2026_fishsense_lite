@@ -1093,7 +1093,14 @@ def fig_error_by_camera(
         v = np.asarray(per_camera[cam], dtype=float)
         lo, hi = v.min(), v.max()
         grid = np.linspace(lo, hi, 200)
-        dens = gaussian_kde(v)(grid)
+        # Silverman's rule on the ROBUST scale, min(sd, IQR/1.34), not on the sd
+        # alone. scipy's default bandwidth is proportional to the sample sd, so a
+        # couple of gross frames widen the kernel and smear the whole violin --
+        # the bulk then looks different between units whose bulks are the same.
+        q1v, q3v = np.percentile(v, [25, 75])
+        scale = min(v.std(ddof=1), (q3v - q1v) / 1.349)
+        bw = 0.9 * scale * v.size ** (-0.2)
+        dens = gaussian_kde(v, bw_method=bw / v.std(ddof=1))(grid)
         dens = dens / dens.max() * half
 
         ax.fill_betweenx(grid, i - dens, i + dens, facecolor=SERIES_1,
@@ -1114,7 +1121,7 @@ def fig_error_by_camera(
         if hidden:
             # A clipped axis that does not admit it is a lie about the spread.
             ax.annotate(f"{hidden} of {total} frames lie beyond the axis",
-                        xy=(0.985, 0.012), xycoords="axes fraction", ha="right",
+                        xy=(0.015, 0.012), xycoords="axes fraction", ha="left",
                         va="bottom", fontsize=5.5, color=INK_MUTED)
 
     ax.set_xticks(range(len(cams)))
@@ -1122,7 +1129,7 @@ def fig_error_by_camera(
     ax.set_xticklabels([f"{c}\nn={len(per_camera[c])}" for c in cams])
     ax.set_xlim(-0.6, len(cams) - 0.4)
     ax.set_xlabel("Camera unit")
-    ax.set_ylabel("Length error, target offset removed (%)")
+    ax.set_ylabel("Target-centred error (%)")
 
     if span_note:
         ax.annotate(span_note, xy=(0.015, 0.985), xycoords="axes fraction",
