@@ -949,3 +949,47 @@ error to have been found in, but it is a weakening and it is not buried.
 frames, so they need an operator delete -- `scratchpad/delete_orphaned_measurements.sql`.
 Until then the live database still reports 164/74 while the paper reports 162/73, and the
 discrepancy is exactly those two rows.
+
+
+### 9.5 Half-thickness parallax is not testable on this corpus (2026-09-14, null)
+
+Two of the targets are solid — the Weasly Fish, 58.69 mm across the mid-body (calipered
+2026-08-20), and the Snook, whose thickness has not been measured — while the rest are flat
+plates. Parallax predicts a solid target reads short by a term in $1/z$, since its near
+flank sits closer to the camera than the plane the length is measured in. Two tests, both
+null.
+
+**Per-target fit of `pct_error = a + b/z` over the cohort** (b in percent·metres):
+
+| target | | b | 95 % CI |
+|---|---|---|---|
+| Weasly Fish | solid, 58.7 mm | −1.87 | [−2.34, −1.42] |
+| Snook | solid | −2.65 | [−5.13, +0.16] |
+| Grouper | flat | **−3.71** | [−5.65, −1.08] |
+| Box | flat | −0.59 | [−0.90, −0.25] |
+| Purple Angel | flat | +0.70 | [−5.49, +4.10] |
+
+A *flat* target carries the largest significant term, and the trout's −1.87 is **five times
+smaller** than the −9.4 its own thickness predicts. Each target is also measured on its own
+sessions, so b mixes parallax with whatever range dependence those calibrations retain.
+
+**Within-session differential**, which removes that confound: inside one session the
+calibration is common to every target, so the difference in b between a solid and a flat
+target isolates the target effect, and it needs no thickness value. Sessions 59, 60, 61,
+66, 76, 84 pair the Snook with flats; 509, 521 and 522 pair the trout with the Box. (An
+earlier note here said the trout had no within-session comparator — wrong, it has three.)
+
+    solid - flat   n=17 pairs   median +1.79 %·m   <- WRONG SIGN for parallax
+    flat  - flat   n=11 pairs   median -0.70 %·m   spanning -14.6 to +16.6
+
+**The control is the result.** Flat-versus-flat pairs scatter as widely as
+solid-versus-flat, so the instrument has no resolving power here: individual b estimates
+carry intervals like [−73.8, +82.5] on 10–30 frames over a 1.4–2× range spread. The three
+trout-vs-box pairs are −7.9, −2.0 and +1.8, inconsistent in sign.
+
+So the hypothesis is neither supported nor refuted, and PAPER.md §4.3 is written to that —
+it reports the per-target offsets as target effects, which is what the polish estimates
+them as, and says what they are *not*. What would settle it is not more of this corpus: it
+is one session that photographs a solid and a flat target together over a wide range spread
+with enough frames on each, or the Snook's thickness plus a session pairing both solids
+(their lengths differ 1.5×, so the same mechanism predicts different percentages).
