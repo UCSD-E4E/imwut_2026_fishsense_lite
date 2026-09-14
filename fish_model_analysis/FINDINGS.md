@@ -11,7 +11,12 @@ of building it. Nothing here has been written to prod.
 | path | what it is |
 |---|---|
 | `data/all.csv` | 464 per-frame measurements + per-frame geometry. `\|`-delimited: the geometry columns are JSON and contain commas. Carries a trailing psql `(n rows)` footer, dropped on load. |
-| `data/corpus.csv` | **every** rigid-target measurement in prod as of 2026-09-12: 2,927 frames, 32 dives. Same schema; strict superset of `all.csv` (pinned by a test). Extracted by `sql/extract_corpus.sql`. |
+| `data/corpus.csv` | **every** rigid-target measurement in prod, re-exported 2026-09-14 (§9.6): 2,927 frames, 32 dives. Same schema. Extracted by `sql/extract_corpus.sql`. It is *not* a superset of `all.csv` — the six mislabel corrections of §10 differ from it deliberately, which is why the superset test was deleted (§11). |
+| `data/corpus_20260912.csv` | the frozen 2026-09-12 export. Kept because §9.6's reference-sensitivity result is only reproducible against it, and for nothing else. |
+| `data/field.csv` | the seven Florida-reef deployments behind PAPER.md §4.5: 162 wild-fish measurements of 73 individuals, exported 2026-09-14. Extracted by `sql/extract_field.sql`. |
+| `sql/extract_field.sql` | the field extraction, so §4.5's numbers can be re-pulled rather than re-typed |
+| `../fishsense_imwut/repeatability.py` | the within-group CV estimator behind §4.5, with the bootstrap and the nearest-rank p90 |
+| `../tests/test_repeatability.py` | pins §4.5's field and pool figures against the two committed extractions |
 | `data/angles.csv` | the foreshortening experiment: 1,428 frames of one Snook at 0–45° (dives 87/94/103/107/114) |
 | `sql/extract_corpus.sql` | the psql extraction, so the corpus can be re-pulled |
 | `../tests/test_calibration.py` | pins the median polish, the cohort rule, and the published cohort |
@@ -1091,3 +1096,86 @@ mislabelled — the comparison is within-session. No detector built on length fi
 The corrected median and p90 coincide with the originally published −2.19 % / +0.06 % — the
 third such coincidence in this analysis and, like the others, arithmetic rather than
 corroboration: the cohort membership and the frame count both differ from the original.
+
+
+## 11. Section 4.5 re-derived from the database (2026-09-14)
+
+Every number in §4.5 had been computed in a notebook cell against an export that no longer
+existed on disk, which is the one condition under which a paper number cannot be checked.
+They are now computed by `fishsense_imwut/repeatability.py` from `data/field.csv`
+(`sql/extract_field.sql`, pulled from prod today) and pinned by
+`tests/test_repeatability.py`. Five of them were wrong.
+
+**The headline figure survived exactly.** 162 measurements of 73 individuals; 25 with three
+or more frames; within-fish CV median **2.91 %**, bootstrap 95 % CI **[1.63, 4.06]**. That
+is the same to two decimals as the figure §9.4 arrived at, and the orphaned-row delete has
+held: no measurement in the field set carries NULL provenance, and dives 347 and 349 are
+measured under extrinsics 54 and 55 — their refits, not the retired fits.
+
+**What was wrong:**
+
+1. **The $p_{90}$ was interpolated, not nearest-rank: 9.1 % where the paper's own
+   convention gives 11.4 %.** §9.6 closes with "Do not mix them", and §4.5 was mixing them
+   — because §4.5's figure came down a computation path with no `pubfig` call in it, so the
+   convention was never applied. A convention stated in prose does not propagate; only a
+   shared function does, which is the reason the estimator is now a module.
+2. **The pool comparison was computed from the frozen August export.** On
+   `corpus_20260912.csv` it is median 1.48 %, p90 4.56 % — the draft's "1.4 %, p90 4.5 %".
+   On the current corpus it is **1.33 %, p90 3.03 %**. The pool repeatability improved
+   because the six mislabelled frames of §10 were corrected: a frame labelled as the wrong
+   target lands in the wrong (session, target) cell and inflates that cell's spread.
+   Consequence for the claim: the field/pool ratio is 2.2× on the median and 3.8× on the
+   tail, not "about twice" on both.
+3. **The laser range was reported as a span when it is a 5th-to-95th percentile.** "0.71–
+   3.14 m" is p5–p95; the actual span is **0.46–3.90 m**, median 1.49 m. Both are true
+   statements, but only one is what the sentence said.
+4. **The two repaired baselines were said to be inside "the 9.99–10.45 cm the fleet
+   occupies", and 10.52 cm is not.** 9.99–10.45 was the fleet IQR at the time, quoted as
+   though it were the range. The fleet now holds 31 fits spanning 9.87–12.95 cm; 30 of them
+   lie in 9.87–10.54 and both repairs are inside that. The single outlier is dive 107 at
+   12.95 cm, whose observations span 2.8 cm along the ray — rejected by the conditioning
+   criterion without reference to its baseline, which is the useful thing to say about it.
+5. **The unit-to-unit bound of "≤ 9 % (95 % upper limit, 34 hogfish)" does not reproduce,
+   and is replaced by a weaker, correct statement.** It is 33 hogfish now, and no standard
+   construction gives 9 %: the $F$-based interval is degenerate (the point estimate is
+   1.5 % between cameras with $F = 1.03$, $p = 0.42$, so the lower bound on the variance
+   component is zero and the upper is unbounded at 95 %), a $\chi^2$-on-MSB upper limit
+   gives 15 %, and a nonparametric bootstrap over individuals gives 13 % by camera and
+   16 % by deployment. So there is **no detectable unit effect**, and the sample cannot
+   bound one below the between-fish spread it sits in. That is a real weakening: the draft
+   claimed field lengths agree across units to 9 %, and the data does not support a number
+   that small in either direction.
+
+Two smaller corrections went with them: the within-fish range spread ("no wild fish spans
+more than 1.5×" — the best is 1.9× over all 73 individuals, 1.6× among the 25 with three
+frames) and the six-vs-seven units question. There are **six cameras across seven
+deployments** — camera 3 shot both 383 and 471 — so §8's per-rig hogfish split, which lists
+seven groups, is split by *deployment*. PAPER.md §4.5 says "six camera units" and is right;
+it now reports both groupings for the variance fit rather than picking one silently.
+
+**One thing §4.5 gained.** The paragraph asserting that the field figure needs nothing
+external now has a test behind it rather than a before/after anecdote:
+`test_rescaling_one_dives_lengths_leaves_the_field_figure_alone` multiplies dive 347's
+lengths by 1.18 and asserts the median, the p90 and the group count are unmoved. That is
+the invariance the claim rests on, stated as an executable property. It also explains the
+anecdote the paragraph used to lean on: the repair moved the figure from 3.3 % to 2.9 %
+rather than not at all, because a refit turns the axis as well as changing the baseline, so
+its correction factor varies with range instead of being exactly common to a fish's frames.
+
+**A sixth error, found on the way past.** The limitations paragraph ("Sessions the rule
+rejects") says six of the nine rejected sessions borrow their calibration from another
+session. **Eight of the nine do** — every one but 509, which fitted its own. That makes
+borrowing the strongest single predictor of rejection in the corpus rather than one factor
+among several, which strengthens §4.2's recommendation instead of weakening it, and it is
+now pinned by `test_the_rejected_sessions_are_what_the_limitations_paragraph_reports`
+along with the other two counts in that sentence (nine rejected, six range-trend flagged,
+baselines 10.24–10.51 cm — all three of which do hold).
+
+**And one limit §4.5 was missing**, now written into the paper: the species attributions are
+unverified. The mislabel detector of §10 compares a frame's implied head-to-tail pixel
+separation, $Lf/z$, against what the named species would require, and it needs a known
+length — no wild fish has one. So a systematic confusion between two similarly-shaped
+species would appear as a per-species offset indistinguishable from a measurement bias,
+which is a second reason §8's stereo comparison cannot carry a conclusion. The
+repeatability is the one field result immune to it, being computed within an individual
+whatever that individual turns out to be.

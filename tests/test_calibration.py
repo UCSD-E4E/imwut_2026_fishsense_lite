@@ -297,3 +297,30 @@ def test_binned_angle_error_uses_symmetric_bins_and_min_count():
     assert binned.loc[0, "median"] == pytest.approx(-3.0)
     assert binned.loc[20, "median"] == pytest.approx(-10.0)
     assert np.isnan(binned.loc[45, "median"])  # 1 frame < min_count
+
+
+def test_the_rejected_sessions_are_what_the_limitations_paragraph_reports():
+    """PAPER.md's "Sessions the rule rejects" states three counts about the same
+    nine dives. A draft said six of them borrow their calibration; eight do,
+    which makes borrowing the strongest predictor of rejection in the corpus
+    rather than a co-equal one. Pin all three so the next edit cannot drift."""
+    rows = cal.load_rows(DATA / "corpus.csv")
+    df = cal.to_frame(rows, corrected_references=True)
+    polished = cal.median_polish(cal.cell_p90_grid(df, cal.POLISH_MIN_FRAMES))
+    considered = {int(d) for d in polished.dive_effect.index}
+    rejected = sorted(
+        considered - set(cal.accuracy_cohort(df)) - set(cal.DESIGN_EXCLUDED_DIVES)
+    )
+    assert rejected == [58, 491, 492, 494, 503, 504, 506, 509, 520]
+
+    flagged = set(cal.range_trend_flagged_dives(df))
+    assert len(set(rejected) & flagged) == 6
+
+    source = df.groupby("dive_id").calibration_dive_id.first()
+    borrowed = [d for d in rejected if int(source[d]) != d]
+    assert len(borrowed) == 8
+    assert [d for d in rejected if d not in borrowed] == [509]
+
+    baselines = df.groupby("dive_id").baseline_m.first() * 100
+    assert baselines[rejected].min() == pytest.approx(10.24, abs=0.01)
+    assert baselines[rejected].max() == pytest.approx(10.51, abs=0.01)

@@ -176,8 +176,8 @@ gives a per-frame distance that does not involve the laser at all, so laser-tria
 range can be compared against it frame by frame. For one session of 16 observations
 spanning 0.03 m of range, the stored calibration reproduces its own working distance to
 $-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and $n=15$ frames);
-its fitted baseline, 12.95 cm, is the widest in a fleet whose sound calibrations lie
-within 9.99–10.45 cm.
+its fitted baseline, 12.95 cm, is the widest in the fleet by a wide margin — the other
+thirty fits lie within 9.87–10.54 cm.
 
 Three checks miss it, and the pattern in how they miss is the point. The known-length
 targets in that session all sit within 0.1 m of its calibration distance and read
@@ -341,39 +341,60 @@ criterion of §4.2 — one fitted from a single frame, the other from two dots 2
 range — and both were repaired rather than excluded. The frames they needed existed but had
 been removed by the per-dive outlier filter, which judged the calibration frames against a
 line its measurement frames dominate; reinstating them gives lever arms of 2.41 m and 1.30 m
-and baselines of 10.10 and 10.52 cm, inside the 9.99–10.45 cm the fleet occupies. All seven
-deployments therefore carry calibrations that pass every check in §4.1–4.2. Laser range was
-0.71–3.14 m (median 1.48 m), closer than the pool median.
+and baselines of 10.10 and 10.52 cm. Thirty of the fleet's thirty-one fitted baselines lie
+in 9.87–10.54 cm and both repairs land inside that band; the single exception is a pool
+session whose observations span 2.8 cm along the ray, which the conditioning criterion of
+§4.2 rejects without reference to its baseline at all. All seven deployments therefore carry
+calibrations that pass every check in §4.1–4.2. Laser range spans 0.46–3.90 m with a median
+of 1.49 m — closer than the pool median — and 90 % of the frames fall between 0.72 and
+3.16 m.
 
-**Repeatability transfers to the field with a measurable penalty.** Where a diver captured
-the same individual in three or more frames we can measure the system's repeatability
-directly, and this is the one field figure that needs nothing external: a calibration error
-is common to all frames of one fish and cancels in a relative spread, as does any error in
-the length convention, and no comparison population is involved. (It is therefore the one
-result the two repaired calibrations could not have changed, and indeed did not: it stands at
-3.3 % before and 2.9 % after.) Over 25 such individuals the within-fish coefficient of
-variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a $p_{90}$ of 9.1 %**. The
-identical statistic on the pool cohort — repeat frames of one target in one session, 23
-cells — is **1.4 % (95 % CI 1.2–2.2 %), $p_{90}$ 4.5 %**. So a
-repeat measurement of a wild fish varies about twice as much as a repeat measurement of a
-posed model, and its tail about twice as badly. The two bootstrap intervals overlap at the
-margin (1.6–4.1 % against 1.2–2.2 %), so this is a difference in point estimate rather than
-a cleanly separated one; with 25 field individuals it is the sample size and not the effect
-that limits the claim. That penalty is what the field adds: the
-animal moves between frames, the water is turbid, and the snout and fork are harder to place.
-It is consistent with §4.4 — a few degrees of pose change between frames is worth a few
-percent of length — and it is the number a survey designer should use when deciding how many
-frames per fish to require.
+**Repeatability transfers to the field with a measurable penalty.** Where a diver captured the
+same individual in three or more frames we can measure the system's repeatability directly, and
+this is the one field figure that needs nothing external: a calibration error is common to all
+frames of one fish and cancels in a relative spread, as does any error in the length
+convention, and no comparison population is involved. (The cancellation is exact for a pure
+scale error, which is why the two repaired calibrations barely moved it: 3.3 % before and 2.9 %
+after. It is only *barely* rather than not at all because a refit turns the laser axis as well
+as changing the baseline, so the correction factor varies a little with range instead of being
+exactly common to a fish's frames.) Over 25 such individuals — 97 of the 162 measurements — the
+within-fish coefficient of variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a
+$p_{90}$ of 11.4 %**. The identical statistic on the pool cohort — repeat frames of one target
+in one session, 23 cells — is **1.3 % (95 % CI 1.2–1.9 %), $p_{90}$ 3.0 %**. So a repeat
+measurement of a wild fish varies about 2.2× as much as a repeat measurement of a posed model,
+and its tail nearly 4× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
+against 1.2–1.9 %), so this is a difference in point estimate rather than a cleanly separated
+one; with 25 field individuals it is the sample size and not the effect that limits the claim.
+That penalty is what the field adds: the animal moves between frames, the water is turbid, and
+the snout and fork are harder to place. It is consistent with §4.4 — a few degrees of pose
+change between frames is worth a few percent of length — and it is the number a survey designer
+should use when deciding how many frames per fish to require.
+
+**The species attributions are unverified, and the per-species comparison below inherits
+that.** A labeler names the animal from the frame, and nothing in the field data can check
+the name: the one detector we have for a mislabel compares the head-to-tail pixel separation
+a frame implies, $L f / z$, against what the named species' length would require — which
+found six mislabelled frames in the pool corpus, and needs a known length to run at all. No
+wild fish has one. So a species column here is a labeler's judgement, not a measurement, and
+a systematic confusion between two similarly-shaped species would appear as a per-species
+offset we would have no way to distinguish from a measurement bias. Only the repeatability
+above is immune, because it is computed within one individual whatever that individual is.
 
 **What this sample cannot do is measure field accuracy**, and we state the limit rather than
 work around it. No known-length reference was in the water on these dives, so the scale-free
 range check of §4.1 cannot be applied to them: it needs one rigid object measured repeatedly
-across a wide range spread, and no wild fish in the set spans more than 1.5× in range. The
-per-unit sample is 4 to 18 fish, and with the observed 19 % between-fish size spread the
-standard error on a unit's median length is 7 % at ten fish and 14 % at three — larger than
-any bias worth detecting. A variance-components fit across the seven units bounds
-unit-to-unit variation in field lengths at **≤ 9 % (95 % upper limit, 34 hogfish)**, with a
-point estimate of 5 % that is not distinguishable from sampling.
+across a wide range spread, and the best-spanned wild individual in the set covers only
+1.9× — 1.6× among those with the three frames the repeatability needs, and 1.04× for the one
+fish with eight. The per-unit sample is 4 to 18 fish, and with the 18 % between-fish size
+spread observed among hogfish the standard error on a unit's median length is 7 % at ten
+fish and 13 % at three — larger than any bias worth detecting. A one-way variance-components
+fit on 33 hogfish finds **no detectable unit effect** ($F = 1.03$ across the six camera
+units, $p = 0.42$; $F = 1.55$, $p = 0.20$ if the seven deployments are taken separately),
+with a point estimate of 1.5 % between cameras against 18 % between fish. What it cannot do
+is bound that tightly: a nonparametric bootstrap over individuals puts the 95 % upper limit
+at 13 % between cameras and 16 % between deployments, and the $F$-based interval is
+degenerate at these sample sizes. A unit-to-unit bias of order the fish spread itself is
+therefore not excluded, which is a statement about the sample and not about the instrument.
 
 **A comparison against stereo video is available and comes out inconclusive.** Our
 collaborators measured the same species at the same reef in the same seasons with a
@@ -397,7 +418,9 @@ the same kind. **All nine now carry a plausible baseline** — 10.24 to 10.51 cm
 fleet's range — because the implausible fits that once dominated this list have since been
 refitted or retired by the checks of §4.1. What is left is the parameter those checks
 cannot see: six of the nine are flagged by the range trend, with implied in-plane errors of
-0.10° to 0.37°, and six of the nine borrow their calibration from another session.
+0.10° to 0.37°, and **eight of the nine borrow** their calibration from another session —
+every one but 509, which fitted its own. Borrowing is therefore the single strongest
+predictor of rejection in the corpus, and §4.2's recommendation follows from it directly.
 
 The instructive case is one the rule no longer rejects, and it is worth following because
 the same movement still rejects two others. One session read 14 % short with correct labels
