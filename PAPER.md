@@ -231,11 +231,12 @@ it is the only target whose reference is traceable to a printed scale rather tha
 
 The nine frames beyond 15 % are the reason the reported estimator is a high quantile and
 not a mean. They are concentrated in two of the cohort's targets rather than spread across
-it, and their magnitudes correspond to poses of 32° to 46°, past the 30° at which §4.4
-measures the budget being crossed. We cannot verify that independently — the corpus frames
-carry no measured angle, so the implied pose is inferred from the error it is meant to
-explain — which is precisely why the accuracy claim is stated at $p_{90}$ and the pose
-claim is made in §4.4, where the angle was read off a card in frame.
+it, and their magnitudes correspond to poses of 32° to 46° — well beyond the 15° §4.4 asks
+divers for, and past the 25° at which that experiment sees its first breach. We cannot
+verify that independently — the corpus frames carry no measured angle, so the implied pose
+is inferred from the error it is meant to explain — which is precisely why the accuracy
+claim is stated at $p_{90}$ and the pose claim is made in §4.4, where the angle was read
+off a card in frame.
 
 The rule has no free parameter to tune, which is the point of stating it that way. Its
 one threshold sits in the scale-free range check, and §4.1 reports that the selection is
@@ -312,13 +313,21 @@ a thin line, the pooled median and interquartile range in black, and $\cos\theta
 dashed.
 
 Three things are visible. The five sessions agree within the pooled interquartile range at
-every angle, at both ranges, so the curve is a property of the geometry and not of a unit or
-a diver. The pooled median follows $\cos\theta - 1$ offset by a near-constant −3.5 % — the
-same broadside bias the cohort shows — from 0° (−3.8 %) through 15° (−5.8 %), 30°
-(−15.0 %) and 45° (−31.4 %). And the 15 % error budget is crossed at 30°. A diver who
-photographs a fish within ±30° of broadside therefore stays inside the budget with no pose
-correction at all; beyond that the correction is a known function of a quantity that
+every angle, at both ranges, so the curve is a property of the geometry and not of a unit
+or a diver. The pooled median follows $\cos\theta - 1$ offset by a near-constant −3.5 % —
+the same broadside bias the cohort shows — from 0° (−3.8 %) through 15° (−5.8 %), 30°
+(−15.0 %) and 45° (−31.4 %). And the guidance that follows is stated with margin rather
+than at the boundary: **present the fish within 15° of broadside.** Over the 542 frames
+inside that limit the median error is −4.7 %, the $p_{90}$ is −0.8 %, and not one frame
+falls short of the 15 % budget — the worst reads −10.7 %. The margin is real rather than
+nominal. The limit could be relaxed to 20° before any frame breaches (684 frames, worst
+−14.2 %); the first breaches appear at 25° (32 of 833); and the pooled median does not
+cross 15 % until 30°. Beyond that the correction is a known function of a quantity
 single-image fish-pose estimators are beginning to recover [29].
+
+Two of those 542 frames do exceed 15 %, at +28.9 % and +22.2 %. Foreshortening cannot read
+long, so a large positive error is a labelling or calibration fault rather than a pose one,
+which is why the guidance is stated on the short side.
 
 #### 4.5 Field deployments
 
@@ -440,12 +449,12 @@ check that would have caught any of this in the field.
 
 #### Edits elsewhere in the draft
 
-- **Limitations paragraph (currently "beyond (??) degrees")**: "with our model fish, the
-  measurement leaves the 15 % budget when the fish is more than 30° from broadside
-  (Figure 8)."
+- **Limitations paragraph (currently "beyond (??) degrees")**: "with our model fish, no
+  measurement taken within 20° of broadside leaves the 15 % budget, and the guidance we give
+  divers is 15° (Figure 8); the pooled median crosses the budget at 30°."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims hold in the form §4.4 establishes them: within 15 % provided the fish is within
-  30° of broadside. Over the cohort the $p_{90}$ is +0.09 % and 99 % of frames are within
+  claims hold in the form §4.4 establishes them: no measurement within 20° of broadside
+  leaves the 15 % budget, and the guidance given to divers is 15°. Over the cohort the $p_{90}$ is +0.09 % and 99 % of frames are within
   15 %. Consider stating the broadside figure directly: "median −2.4 %, $p_{90}$ +0.09 %
   over 908 measurements of six targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
@@ -494,7 +503,8 @@ check that would have caught any of this in the field.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
   black: pooled median and interquartile range; dashed: $\cos\theta - 1$; dotted: the 15 %
-  budget, crossed at 30°.
+  budget. No frame within 20° of broadside breaches it; the pooled median crosses at 30°.
+  The guidance in the text is 15°.
 - **Figure A (appendix)** — Percent length error for every session with ≥ 8 frames,
   ordered by median. The held-out and rejected sessions are the wide, negative rows.
 
