@@ -171,10 +171,11 @@ def test_the_pool_repeatability_is_what_section_4_5_reports():
     rows = cal.load_rows(DATA / "corpus.csv")
     df = cal.to_frame(rows, corrected_references=True)
     df = df[df["dive_id"].isin(cal.CORPUS_ACCURACY_DIVES)]
+    df = df[~df.model_name.isin(cal.HELD_OUT_MODELS)]
     result = rep.repeatability(rep.by_session_target(df))
-    assert result.n_groups == 23
+    assert result.n_groups == 29
     assert result.median_percent == pytest.approx(1.33, abs=0.01)
-    assert result.p90_percent == pytest.approx(3.03, abs=0.01)
+    assert result.p90_percent == pytest.approx(3.27, abs=0.01)
 
 
 def test_the_field_and_pool_intervals_overlap(field):
@@ -183,6 +184,7 @@ def test_the_field_and_pool_intervals_overlap(field):
     rows = cal.load_rows(DATA / "corpus.csv")
     pool_df = cal.to_frame(rows, corrected_references=True)
     pool_df = pool_df[pool_df["dive_id"].isin(cal.CORPUS_ACCURACY_DIVES)]
+    pool_df = pool_df[~pool_df.model_name.isin(cal.HELD_OUT_MODELS)]
     pool = rep.repeatability(rep.by_session_target(pool_df))
     field_result = rep.repeatability(rep.by_individual(field))
     assert field_result.ci_percent[0] < pool.ci_percent[1]

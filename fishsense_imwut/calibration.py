@@ -357,24 +357,47 @@ ANGLE_TEST_KNOWN_M = 0.455
 UNRESOLVED_DIVES: tuple[int, ...] = ()
 SPLIT_DIVES = {490: 527}  # original -> the dive its fish frames became
 
-# Dives held out of the accuracy cohort BY DESIGN, decided before any corpus
-# number was looked at, so the threshold below cannot be tuned around them:
-#   * the angle experiment (above);
-#   * 60 and 76, whose borrowed calibration the August analysis repaired --
-#     keeping their raw rows would assert the borrow was fine, contradicting
-#     the repair the paper reports;
-#   * 66, whose ruler and models disagree by ~4 % (unresolved, reported).
-# They still take part in the polish: every extra (dive, model) cell sharpens
-# the model effects, and the polish is robust to the rows it is about to drop.
-DESIGN_EXCLUDED_DIVES = ANGLE_TEST_DIVES + tuple(REPAIR_PHI_DEG) + DISPUTED_DIVES
+# Dives held out of the accuracy cohort. Every entry states how the session was
+# PRODUCED, never how large its error came out: a rule that drops sessions for
+# disagreeing with the references and then reports agreement with the references
+# selects on its own outcome, and no amount of "it barely changes the numbers"
+# repairs that. There is deliberately no error-magnitude threshold here.
+#
+#   * the angle experiment (above). Not an exclusion in the same sense -- it is
+#     a different experiment, one target driven through 0-45 deg on purpose, and
+#     its result is section 4.4 rather than section 4.3. Its broadside frames
+#     are published there (0 deg reads -3.8 %).
+#
+#   * dive 60, on the SCALE-FREE range trend, which spends no reference length.
+#     Two independent targets agree: Purple Angelfish -2.23 %/m (CI -3.11 to
+#     -1.20) and the Ruler -2.32 %/m (CI -2.75 to -1.14), implying -0.133 and
+#     -0.139 deg against the -0.1458 deg the August repair fitted. The automatic
+#     filter misses it only because RANGE_TREND_FLAG_PCT_PER_M asks the whole
+#     interval to clear +-2 %/m and these reach -1.2, so it is named here rather
+#     than the threshold being loosened to catch it -- loosening a filter until
+#     it returns the wanted answer is the same error in another costume.
+#
+# Dive 76 is NOT named: the range-trend filter catches it on its own (Shark,
+# +5.33 %/m). Dive 66 is NOT excluded at all. It was, as "ruler and models
+# disagree by ~4 %", but that rested on medians including a 4-frame Grouper cell
+# that never enters the polish grid. On the paper's own estimator its three
+# qualifying targets land within 0.8 pp of each other (-3.01, -3.80, -3.83) and
+# its polish residual is 0.49 pp, among the smallest in the corpus. Its tail is
+# concentrated in two of four targets (Snook 6/17 and Grouper 3/4 beyond 15 %,
+# Angelfish 0/11, Ruler 0/6), which is not what a calibration fault looks like.
+# Nothing non-circular excludes it, so it stays.
+#
+# Held-out dives still take part in the polish: every extra (dive, model) cell
+# sharpens the model effects, and the polish is robust to the rows it drops.
+DESIGN_EXCLUDED_DIVES = ANGLE_TEST_DIVES + (60,)
 
-# The accuracy-cohort rule. A dive is accuracy evidence when its calibration
-# offset -- the dive effect of a Tukey median polish over the p90 of each
-# (dive, model) cell, fitted on the whole corpus -- is within this many
-# percentage points of the corpus median. One number applied uniformly to all
-# 32 dives, in place of the August hand-pick, and model-agnostic: a per-model
-# reference error lands in the model effect and cannot get a dive in or out.
-MAX_DIVE_EFFECT_PP = 2.5
+# INVARIANT, easy to break while tidying: the range-trend filter runs on EVERY
+# target, HELD_OUT_MODELS included. It compares a rigid object against itself
+# across range and spends no reference length, so a target whose reference is
+# wrong is still a perfectly good witness. The Shark is held out for having a
+# bad reference, not unusable measurements, and it is the only cell that flags
+# dive 76 -- filter the held-out models out before calling accuracy_cohort and
+# dive 76 silently rejoins the cohort.
 POLISH_MIN_FRAMES = 5
 
 # The scale-free pre-filter. A rigid object must read the same length at every
@@ -393,13 +416,14 @@ RANGE_TREND_MIN_RATIO = 2.0
 RANGE_TREND_MIN_DEPTH_M = 0.8
 
 # What the rule selects on the corpus, pinned as data so a change is a diff.
-# 2026-09-12, after the 490 -> 527 split and the range-trend pre-filter: 503
-# is removed by the pre-filter (+5.3 %/m on an 8.90 cm baseline); 491 (-2.73)
-# and 527 (+2.95) sit just outside the polish band. 498 (9.51 cm, +2.8 %/m)
-# stays: its interval [+2.0, +3.8] does not clear the threshold. The rule is
-# not tuned to keep or drop any of them.
+# 2026-09-15, after removing the error-magnitude band: seventeen dives. The
+# range-trend pre-filter does the rejecting (503 at +5.3 %/m on an 8.90 cm
+# baseline, 76 via the Shark at +5.33), the angle experiment and dive 60 are
+# named above, and nothing is excluded for reading far from the references.
+# 498 stays despite 9.51 cm and +2.8 %/m: its interval [+2.0, +3.8] does not
+# clear the threshold, and the filter is not tuned to keep or drop it.
 CORPUS_ACCURACY_DIVES = (
-    59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 521, 522, 527,
+    58, 59, 61, 66, 84, 495, 497, 498, 500, 501, 506, 507, 519, 520, 521, 522, 527,
 )
 #: What the rule selected on the 2026-09-12 export (`corpus_20260912.csv`)
 #: against the as-exported 0.310 m trout reference,
@@ -593,28 +617,29 @@ HELD_OUT_MODELS = ("Shark",)
 
 def accuracy_cohort(
     df,
-    max_dive_effect_pp: float = MAX_DIVE_EFFECT_PP,
     exclude: Sequence[int] = DESIGN_EXCLUDED_DIVES,
     min_frames: int = POLISH_MIN_FRAMES,
     range_trend_filter: bool = True,
 ) -> tuple[int, ...]:
-    """The dives whose calibration offset is within `max_dive_effect_pp` of
-    the corpus median, less the dives held out by design and, with
-    `range_trend_filter`, less the dives whose own rigid targets show a
-    range trend (a scale-free calibration failure the polish cannot see).
+    """The dives that are accuracy evidence: everything with a polish cell,
+    less `exclude` and, with `range_trend_filter`, less the dives whose own
+    rigid targets show a range trend.
 
-    The polish is fitted on every dive, `exclude` included, and both
-    hold-outs are applied to the result. Returned sorted, as a tuple, so it
-    compares directly to CORPUS_ACCURACY_DIVES.
+    There is no error-magnitude criterion, by design. Both filters are
+    statements about how a session was produced -- a different experiment, or
+    a scale-free calibration failure measured without spending any reference
+    length -- so none of them selects on the quantity the paper reports.
+
+    `df` must carry EVERY target, `HELD_OUT_MODELS` included: see the invariant
+    note above DESIGN_EXCLUDED_DIVES. The polish is fitted on every dive,
+    `exclude` included. Returned sorted, as a tuple, so it compares directly to
+    CORPUS_ACCURACY_DIVES.
     """
     dropped = set(exclude)
     if range_trend_filter:
         dropped |= set(range_trend_flagged_dives(df))
     fit = median_polish(cell_p90_grid(df, min_frames))
-    return tuple(
-        int(d) for d in sorted(fit.dive_effect.index)
-        if abs(fit.dive_effect[d]) <= max_dive_effect_pp and int(d) not in dropped
-    )
+    return tuple(int(d) for d in sorted(fit.dive_effect.index) if int(d) not in dropped)
 
 
 def load_angles(path, known_m: float = ANGLE_TEST_KNOWN_M):

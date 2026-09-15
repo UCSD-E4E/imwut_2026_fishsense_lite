@@ -36,15 +36,15 @@ calibrated both ways must report the same baseline either way. Over the five uni
 both (19 calibrations, five distinct slate scans) the mean checkerboard-minus-slate
 difference is **−0.27 % of baseline (95 % CI −1.1 % to +0.6 %)**, below the scatter between
 two calibrations of one unit under one standard (sd 0.12 cm). The session calibration
-offsets agree as closely: a median **+1.20 pp** over the ten checkerboard sessions of the
-cohort against **+1.09 pp** over the three slate sessions. The deployable object therefore
+offsets agree as closely: a median **+1.20 pp** over the twelve checkerboard sessions of the
+cohort against **+1.09 pp** over the five slate sessions. The deployable object therefore
 reproduces the standard one to about a percent, which is what licenses the substitution,
 and it places the dominant uncertainty in §4.3's accuracy figures on the target lengths
 rather than on the calibration.
 
-Two limits belong with that. Only three of the thirteen cohort sessions are
+Two limits belong with that. Only five of the seventeen cohort sessions are
 slate-calibrated, so the deployable path carries the smaller share of the accuracy
-evidence and its offset spread (sd 0.77 pp against the checkerboard's 1.38) rests on three
+evidence and its offset spread (sd 2.10 pp against the checkerboard's 1.94) rests on five
 points. And neither check can see an error common to both objects, or one in the camera
 intrinsics, which rescale the calibration object and the laser together. We do not compare
 the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
@@ -98,8 +98,10 @@ single scale.
 A reference error common to one group's targets would therefore shift that group's session
 offsets bodily against the other's; within a group it could not.
 
-A session enters the accuracy cohort when its calibration offset is within 2.5 percentage
-points of the corpus median. Two hold-outs precede that test. By design, before any number
+A session is accuracy evidence unless something about *how it was produced* disqualifies
+it. There is deliberately no threshold on how large its error came out: a rule that drops
+sessions for disagreeing with the references, and then reports the survivors' agreement
+with the references, selects on its own outcome. Two hold-outs precede that test. By design, before any number
 was computed: the five angle-experiment sessions of §4.4 (a single target at deliberately
 oblique poses) and three sessions whose calibration a separate analysis had already
 repaired or disputed. And by a scale-free check that uses no reference length: a rigid
@@ -112,13 +114,13 @@ compensating angle cancel at mid-range. Five of the seven carry a single target 
 reference lengths independently grade every one of them as wrong; the remaining two are
 rejected on one target while a second target in the same session shows no trend, and both
 are already outside the cohort for other reasons, so nothing in the reported figures turns
-on them. The rule admits 13 sessions and 768 measurements; ten are checkerboard-calibrated and
-three slate-calibrated.
+on them. The rule admits 17 sessions and 908 measurements; twelve are checkerboard-calibrated and
+five slate-calibrated. Every session it rejects is rejected by the scale-free check alone.
 
 Neither free number is delicate. Moving the polish threshold from 1.5 to 3.5 points changes
 membership from 8 to 15 sessions and the cohort $p_{90}$ by less than half a point. The
 range check is insensitive over a wider band still: any trend threshold from 2 to 4 % per
-metre selects the identical 13 sessions and the identical figures, and neither the 0.8 m
+metre selects the identical 17 sessions and the identical figures, and neither the 0.8 m
 floor (0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions it rejects.
 
 #### 4.2 Calibration stability
@@ -154,8 +156,9 @@ Three consequences follow, and they shape the rest of the paper. The pipeline re
 laser per dive rather than trusting a stored calibration. A per-session validation target
 remains good practice, because the failure is silent — this is what the range check of §4.1
 supplies, and it needs no reference length. And calibration state is the dominant reason a
-session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 11
-fail one of the two criteria in §4.1. An instrument whose scale parameter drifts by more
+session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 8
+fail a calibration criterion in §4.1 — seven flagged by the scale-free range check, and
+one more held out on the same evidence. An instrument whose scale parameter drifts by more
 than its own measurement error between uses is one that must be calibrated, and validated,
 at the point of use.
 
@@ -219,26 +222,30 @@ than the instrument, and a high quantile is the estimator that rejects the pose 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
-Over the cohort the median frame error is −2.3 % and the $p_{90}$ is −0.18 %; 79 % of
-frames are within 5 % of the reference, 98 % within 10 %, and every frame within 15 % —
-the worst single frame in the cohort is 13.2 % short. The per-target $p_{90}$ — Box −0.2 %,
-Purple Angelfish +0.8 %, Rainbow Trout −1.4 %, Grouper +0.3 %, Snook −0.9 % — shows no
-trend with size across a three-fold range of lengths.
+Over the cohort the median frame error is −2.4 % and the $p_{90}$ is +0.09 %; 75 % of
+frames are within 5 % of the reference, 97 % within 10 % and 99 % within 15 %. The
+per-target $p_{90}$ — Box +0.4 %, Purple Angelfish +0.8 %, Rainbow Trout −1.7 %, Ruler
+−3.8 %, Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range
+of lengths. The ruler is one session and six frames, so its entry carries little weight;
+it is the only target whose reference is traceable to a printed scale rather than a tape.
 
-How sensitive those figures are to the rule's one free parameter is worth stating, because
-the cohort is selected rather than chosen. Moving the bound from 2.3 to 2.75 points
-selects the same thirteen sessions and the same 768 frames; below 2.0 it drops to ten and
-at 3.0 it admits an eleventh. The chosen 2.5 therefore sits in the middle of a plateau, not
-on a knife edge — though four sessions do lie within half a point of it, three inside and
-one out, so a cohort member can be marginal even when the membership is not.
+The nine frames beyond 15 % are the reason the reported estimator is a high quantile and
+not a mean. They are concentrated in two of the cohort's targets rather than spread across
+it, and their magnitudes correspond to poses of 32° to 46°, past the 30° at which §4.4
+measures the budget being crossed. We cannot verify that independently — the corpus frames
+carry no measured angle, so the implied pose is inferred from the error it is meant to
+explain — which is precisely why the accuracy claim is stated at $p_{90}$ and the pose
+claim is made in §4.4, where the angle was read off a card in frame.
 
-One sensitivity of the rule is worth stating, because it is a property of the corpus rather
-than of the instrument. The grid is unbalanced — eight of the thirty-two sessions measure a
-single target — so an error in one target's reference does not cancel out of the
-decomposition: it shifts every session effect by roughly half a point per percent of
-reference error, which is enough to move a session sitting near the bound across it. The
-cohort membership is therefore more sensitive to the references than the reported error
-figures are.
+The rule has no free parameter to tune, which is the point of stating it that way. Its
+one threshold sits in the scale-free range check, and §4.1 reports that the selection is
+unchanged for any trend bound from 2 to 4 % per metre. A stronger property follows from
+having no error-magnitude criterion at all: the cohort does not depend on the reference
+lengths. Re-running the selection against the earlier, inherited trout reference — 3 mm
+different, and enough under the old rule to move two sessions in or out — returns the
+identical seventeen sessions. Membership is decided entirely by the angle experiment, one
+named hold-out and a check that spends no known length, so no session is in this cohort
+because it agreed with a reference.
 
 The trout's own median of −4.5 % is the most negative of any target, and we can say what it is
 *not* rather than what it is. Two of the targets are solid — the trout, 58.7 mm across the
@@ -264,33 +271,29 @@ and falls to the paragraph above. It is also below the working range of a diver 
 wild fish.
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
-selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
-admitting the sessions the range trend alone excludes leaves the median and $p_{90}$
-essentially where they were, whereas dropping the hold-outs as well runs the mean error
-from 3.1 % to 5.1 % and then 9.3 %. $p_{90}$ stays within ±0.9 % of zero throughout.
+selections. The scale-free range check does all of the rejecting: dropping it, together
+with the angle experiment, runs the mean error from 3.4 % to 5.1 % and then 9.3 %.
+$p_{90}$ stays within ±0.9 % of zero throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 13 | 768 | −2.28 % | −0.18 % | 3.13 % |
-| every session not held out (design + range check) | 17 | 872 | −2.26 % | +0.10 % | 3.16 % |
-| every session except the angle experiment | 26 | 1,400 | −3.98 % | −0.32 % | 5.10 % |
+| accuracy cohort (rule) | 17 | 908 | −2.38 % | +0.09 % | 3.43 % |
+| every session except the angle experiment | 26 | 1,400 | −3.98 % | −0.32 % | 5.09 % |
 | every session | 31 | 2,828 | −6.22 % | −0.88 % | 9.31 % |
 
 ```latex
 \begin{table}[t]
   \caption{Percent length error over the accuracy cohort and over wider selections.
-  The hold-outs do the rejecting and the $2.5$-point band the tightening: admitting the
-  sessions the range check alone excludes barely moves the median or $p_{90}$, whereas
-  dropping the hold-outs runs the mean error from $3.1\,\%$ to $9.3\,\%$.
-  $p_{90}$ stays within $\pm0.9\,\%$ of zero throughout.}
+  The scale-free range check does all of the rejecting: dropping it, with the angle
+  experiment, runs the mean error from $3.4\,\%$ to $9.3\,\%$. $p_{90}$ stays within
+  $\pm0.9\,\%$ of zero throughout.}
   \label{tab:accuracy}
   \begin{tabular}{lrrrrr}
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 13 &   768 & $-2.28$ & $-0.18$ & 3.13 \\
-    not held out (design + range check)  & 17 &   872 & $-2.26$ & $+0.10$ & 3.16 \\
-    all but the angle experiment         & 26 & 1{,}400 & $-3.98$ & $-0.32$ & 5.10 \\
+    accuracy cohort (rule)               & 17 &   908 & $-2.38$ & $+0.09$ & 3.43 \\
+    all but the angle experiment         & 26 & 1{,}400 & $-3.98$ & $-0.32$ & 5.09 \\
     every session                        & 31 & 2{,}828 & $-6.22$ & $-0.88$ & 9.31 \\
     \bottomrule
   \end{tabular}
@@ -350,7 +353,7 @@ as changing the baseline, so the correction factor varies a little with range in
 exactly common to a fish's frames.) Over 25 such individuals — 97 of the 162 measurements — the
 within-fish coefficient of variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a
 $p_{90}$ of 11.4 %**. The identical statistic on the pool cohort — repeat frames of one target
-in one session, 23 cells — is **1.3 % (95 % CI 1.2–1.9 %), $p_{90}$ 3.0 %**. So a repeat
+in one session, 29 cells — is **1.3 % (95 % CI 1.2–2.0 %), $p_{90}$ 3.3 %**. So a repeat
 measurement of a wild fish varies about 2.2× as much as a repeat measurement of a posed model,
 and its tail nearly 4× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
 against 1.2–1.9 %), so this is a difference in point estimate rather than a cleanly separated
@@ -403,14 +406,16 @@ comparable to the 2.9 % above.
 #### Sessions the rule rejects
 
 *(For the paper's limitations paragraph, or an appendix; Figure A gives every session.)*
-Nine sessions fall outside the band or the range check, and every one has an explanation of
-the same kind. **All nine now carry a plausible baseline** — 10.24 to 10.51 cm, inside the
-fleet's range — because the implausible fits that once dominated this list have since been
-refitted or retired by the checks of §4.1. What is left is the parameter those checks
-cannot see: six of the nine are flagged by the range trend, with implied in-plane errors of
-0.10° to 0.37°, and **eight of the nine borrow** their calibration from another session —
-every one but 509, which fitted its own. Borrowing is therefore the single strongest
-predictor of rejection in the corpus, and §4.2's recommendation follows from it directly.
+Seven sessions are rejected, and **every one of them by the scale-free range check** —
+none is excluded for reading far from a reference. All seven carry a plausible baseline
+(10.24 to 10.51 cm, inside the fleet's range), because the implausible fits that once
+dominated this list have since been refitted or retired. What is left is the parameter no
+reprojection test can see, with implied in-plane errors of 0.10° to 0.37°. **Six of the
+seven borrow** their calibration from another session — every one but 509, which fitted
+its own. Borrowing is therefore the single strongest predictor of rejection in the corpus,
+and §4.2's recommendation follows from it directly. Dive 60 is held out on the same
+evidence, its two independently-measured targets agreeing on −2.2 and −2.3 % per metre,
+where the flag rule asks the whole interval to clear ±2 and these reach −1.2.
 
 The instructive case is one the rule no longer rejects, and it is worth following because
 the same movement still rejects two others. One session read 14 % short with correct labels
@@ -439,9 +444,10 @@ check that would have caught any of this in the field.
   measurement leaves the 15 % budget when the fish is more than 30° from broadside
   (Figure 8)."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
-  claims are supported: every cohort frame is within 15 % and the $p_{90}$ is −0.18 %.
-  Consider stating the broadside figure directly: "median −2.3 %, $p_{90}$ −0.18 % over 768
-  measurements of five targets at 0.27–5.0 m".
+  claims hold in the form §4.4 establishes them: within 15 % provided the fish is within
+  30° of broadside. Over the cohort the $p_{90}$ is +0.09 % and 99 % of frames are within
+  15 %. Consider stating the broadside figure directly: "median −2.4 %, $p_{90}$ +0.09 %
+  over 908 measurements of six targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3's promise about refraction is still unmet.** The hardware paragraph says of the
   M52 air lens "we quantify the distortion this corrects in Section 4", and no section here
@@ -454,8 +460,8 @@ check that would have caught any of this in the field.
 
 #### Figure captions
 
-- **Figure 1** — Measured against known length, accuracy cohort (13 sessions, 768 frames).
-  Five targets separate along the abscissa by their own lengths. Error bars are the
+- **Figure 1** — Measured against known length, accuracy cohort (17 sessions, 908 frames).
+  Six targets separate along the abscissa by their own lengths. Error bars are the
   interquartile range of frames; the diamond is the $p_{90}$.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level
   interquartile range and whiskers; diamond: $p_{90}$, the reported estimator. The gap

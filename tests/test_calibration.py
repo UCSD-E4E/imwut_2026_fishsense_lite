@@ -82,38 +82,33 @@ def _frame(cells):
     return pd.DataFrame(rows)
 
 
-def test_accuracy_cohort_keeps_dives_within_the_dive_effect_threshold():
-    good = [0.0] * 6
-    df = _frame(
-        [
-            (1, "A", good), (1, "B", good),
-            (2, "A", [1.0] * 6), (2, "B", [1.0] * 6),  # +1 pp dive effect
-            (3, "A", [-6.0] * 6), (3, "B", [-6.0] * 6),  # -6 pp: out
-            (4, "A", [4.0] * 6), (4, "B", [4.0] * 6),  # +4 pp: out
-        ]
-    )
-    assert cal.accuracy_cohort(df, max_dive_effect_pp=2.5, exclude=()) == (1, 2)
+def test_the_cohort_has_no_error_magnitude_criterion():
+    """The rule must never drop a dive for reading far from the references.
 
-
-def test_accuracy_cohort_holds_out_named_dives_but_still_polishes_them():
+    Selecting sessions by their agreement with the references and then
+    reporting agreement with the references is selection on the outcome. A
+    dive whose every measurement is 30 % short is still admitted here; only
+    how a session was PRODUCED can exclude it."""
     good = [0.0] * 6
     df = _frame(
         [
             (1, "A", good), (1, "B", good),
             (2, "A", good), (2, "B", good),
-            (87, "A", good), (87, "B", [3.0] * 6),  # held out; still a row
+            (3, "A", [-30.0] * 6), (3, "B", [-30.0] * 6),   # hugely wrong, kept
         ]
     )
-    assert cal.accuracy_cohort(df, exclude=(87,)) == (1, 2)
-    assert cal.accuracy_cohort(df, exclude=()) == (1, 2, 87)
-    # The held-out dive's cells still inform the model effects.
-    fit = cal.median_polish(cal.cell_p90_grid(df))
-    assert 87 in fit.dive_effect.index
+    assert cal.accuracy_cohort(df, exclude=(), range_trend_filter=False) == (1, 2, 3)
+    assert not hasattr(cal, "MAX_DIVE_EFFECT_PP")
+    # ... and a held-out dive's cells still inform the model effects.
+    assert cal.accuracy_cohort(df, exclude=(3,), range_trend_filter=False) == (1, 2)
+    assert 3 in cal.median_polish(cal.cell_p90_grid(df)).dive_effect.index
 
 
 def test_design_exclusions_are_fixed_before_any_corpus_number():
     assert set(cal.ANGLE_TEST_DIVES) <= set(cal.DESIGN_EXCLUDED_DIVES)
-    assert {60, 76, 66} <= set(cal.DESIGN_EXCLUDED_DIVES)
+    assert 60 in cal.DESIGN_EXCLUDED_DIVES      # scale-free range trend, filter near-miss
+    assert 76 not in cal.DESIGN_EXCLUDED_DIVES  # the filter catches it unaided
+    assert 66 not in cal.DESIGN_EXCLUDED_DIVES  # nothing non-circular excludes it
     assert 490 not in cal.DESIGN_EXCLUDED_DIVES  # was never a design call
     assert cal.SPLIT_DIVES == {490: 527}
 
@@ -127,8 +122,10 @@ def test_accuracy_cohort_ignores_cells_below_min_frames():
             (3, "A", good), (3, "B", [-30.0] * 2),  # 2 frames: not a cell
         ]
     )
-    assert cal.accuracy_cohort(df, min_frames=5, exclude=()) == (1, 2, 3)
-    assert cal.accuracy_cohort(df, min_frames=2, exclude=()) == (1, 2)
+    # min_frames decides which cells EXIST, which is what the polish sees.
+    assert "B" not in cal.cell_p90_grid(df, min_frames=5).loc[3].dropna().index
+    assert "B" in cal.cell_p90_grid(df, min_frames=2).loc[3].dropna().index
+    assert cal.accuracy_cohort(df, min_frames=5, exclude=(), range_trend_filter=False) == (1, 2, 3)
 
 
 def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
@@ -136,7 +133,7 @@ def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
     assert cal.CORPUS_ACCURACY_DIVES == (
-        59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 521, 522, 527
+        58, 59, 61, 66, 84, 495, 497, 498, 500, 501, 506, 507, 519, 520, 521, 522, 527
     )
 
 
@@ -179,38 +176,44 @@ def test_the_reef_frame_is_not_part_of_the_pool_corpus():
 
 
 def test_holding_out_the_shark_removes_frames_not_sessions():
-    """The shark is a corpus entry, not a validation target: its 605 mm is
-    undocumented and the model is gone, so nothing can verify it.
-
-    Pinned because the exclusion must stay immaterial to the structure. Dropping
-    it BEFORE the median polish has to select the identical thirteen sessions --
-    if that ever stops being true the hold-out is doing work, and Section 4 has
-    to say so rather than pass over it."""
+    """The shark is a corpus entry, not a validation target. Dropping it must
+    remove frames and no sessions."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.HELD_OUT_MODELS == ("Shark",)
-    without = df[~df.model_name.isin(cal.HELD_OUT_MODELS)]
-    assert cal.accuracy_cohort(without) == cal.CORPUS_ACCURACY_DIVES
-    # and no session measures it alone, so no session is lost with it
     cohort = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
-    for dive, g in cohort.groupby("dive_id"):
+    assert len(cohort) == 958
+    assert len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 908
+    for dive, g in cohort.groupby("dive_id"):          # no dive measures it alone
         assert set(g.model_name) - set(cal.HELD_OUT_MODELS), dive
-    assert len(cohort) == 793 and len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 768
 
 
-def test_correcting_one_reference_costs_two_cohort_members():
-    """The analysis's headline sensitivity, pinned so it cannot be lost.
+def test_the_range_trend_filter_must_see_the_held_out_targets():
+    """INVARIANT, and load-bearing: the range-trend check spends no reference
+    length, so a target whose reference is wrong is still a valid witness. The
+    Shark is the only cell that flags dive 76. Filter HELD_OUT_MODELS out
+    before calling accuracy_cohort and dive 76 silently rejoins the cohort --
+    which is exactly the tidy-up someone will eventually attempt."""
+    df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
+    wrong = cal.accuracy_cohort(df[~df.model_name.isin(cal.HELD_OUT_MODELS)])
+    assert 76 in wrong and 76 not in cal.CORPUS_ACCURACY_DIVES
+    assert set(wrong) - set(cal.CORPUS_ACCURACY_DIVES) == {76}
 
-    Measuring the trout (0.310 -> 0.3127 m, +0.86 %) drops dives 59 and
-    497. Neither measures that model — 59 is Grouper/Snook/Shark/Angelfish
-    and 497 is all Box — so their calibrations did not change. The grid is
-    unbalanced (8 of 32 dives measure only the trout), so a per-model
-    change moves every dive effect by ~0.5 pp, and those two sat 0.42 and
-    0.46 pp inside the 2.5 pp bound."""
+
+def test_the_cohort_does_not_depend_on_the_reference_lengths():
+    """This used to be the analysis's headline sensitivity: correcting the
+    trout from 0.310 to 0.313 m moved two dives across the 2.5 pp band.
+
+    Removing the band removed the mechanism. Membership is now decided by the
+    angle experiment, one named scale-free hold-out and the range-trend filter,
+    none of which reads a reference length -- so the cohort is invariant to
+    them, which is the strongest available answer to the charge that sessions
+    were selected for agreeing with the references."""
     frozen = DATA / "corpus_20260912.csv"
     raw = cal.to_frame(cal.load_rows(frozen), corrected_references=False)
     corrected = cal.to_frame(cal.load_rows(frozen))
-    assert cal.accuracy_cohort(raw) == cal.CORPUS_ACCURACY_DIVES_AS_EXPORTED
-    assert set(cal.accuracy_cohort(raw)) - set(cal.accuracy_cohort(corrected)) == {59, 497}
+    assert cal.accuracy_cohort(raw) == cal.accuracy_cohort(corrected)
+    assert cal.accuracy_cohort(raw) == cal.CORPUS_ACCURACY_DIVES
 
 
 def test_the_measured_reference_is_the_tape_value():
@@ -300,7 +303,7 @@ def test_the_pre_filter_is_what_removes_491_503_and_504():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     with_filter = cal.accuracy_cohort(df)
     without = cal.accuracy_cohort(df, range_trend_filter=False)
-    assert set(without) - set(with_filter) == {491, 503, 504}
+    assert set(without) - set(with_filter) == {76, 491, 492, 494, 503, 504, 509}
 
 
 def test_the_dive_84_relabels_are_in_the_corpus():
@@ -368,14 +371,14 @@ def test_the_rejected_sessions_are_what_the_limitations_paragraph_reports():
     rejected = sorted(
         considered - set(cal.accuracy_cohort(df)) - set(cal.DESIGN_EXCLUDED_DIVES)
     )
-    assert rejected == [58, 491, 492, 494, 503, 504, 506, 509, 520]
+    assert rejected == [76, 491, 492, 494, 503, 504, 509]
 
     flagged = set(cal.range_trend_flagged_dives(df))
-    assert len(set(rejected) & flagged) == 6
+    assert set(rejected) <= flagged, "every rejection is now scale-free"
 
     source = df.groupby("dive_id").calibration_dive_id.first()
     borrowed = [d for d in rejected if int(source[d]) != d]
-    assert len(borrowed) == 8
+    assert len(borrowed) == 6
     assert [d for d in rejected if d not in borrowed] == [509]
 
     baselines = df.groupby("dive_id").baseline_m.first() * 100
