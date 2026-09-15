@@ -330,19 +330,23 @@ Three things are visible. The five sessions agree within the pooled interquartil
 every angle, at both ranges, so the curve is a property of the geometry and not of a unit
 or a diver. The pooled median follows $\cos\theta - 1$ offset by a near-constant −2.4
 points, from 0° (−3.8 %) through 15° (−5.8 %), 30° (−15.0 %) and 45° (−31.4 %). That 0°
-figure is worth isolating: it is the only measurement in this paper taken at a *known*
-pose, so it is the one place the instrument's broadside reading is separated from the
-diver's aim by design rather than by estimator. It is one target in five sessions and
-carries their calibrations with it, so it is not directly comparable to §4.3's cohort,
-which is different sessions, different targets, and pose included. And the guidance that
-follows is stated with margin rather than at the boundary: **present the fish within 15°
-of broadside.** Over the 542 frames inside that limit the median error is −4.7 %, the
-$p_{90}$ is −0.8 %, and not one frame falls short of the 15 % budget — the worst reads
-−10.7 %. The margin is real rather than nominal. The limit could be relaxed to 20° before
-any frame breaches (684 frames, worst −14.2 %); the first breaches appear at 25° (32 of
-833); and the pooled median does not cross 15 % until 30°. Beyond that the correction is a
-known function of a quantity single-image fish-pose estimators are beginning to recover
-[29].
+figure is the only measurement in this paper taken at a *known* pose, which makes it the
+one place the instrument's reading is separated from the diver's aim by design rather than
+by estimator. It should not be read as the accuracy a user can expect. It was obtained by
+holding a rigid model against a protractor card, and no such condition exists on a wild
+animal: a diver can choose *when* to release the shutter, which is what the guidance below
+asks, but cannot ask the fish to hold a pose. It is also one target in five sessions,
+carrying their calibrations with it. Treat it as a floor — what remains when pose is
+removed entirely — and §4.3's cohort, with the pose real divers achieved, as the
+expectation. And the guidance that follows is stated with margin rather than at the
+boundary, and is about shutter timing rather than about arranging the animal: **release
+the shutter when the fish is within 15° of broadside.** Over the 542 frames inside that
+limit the median error is −4.7 %, the $p_{90}$ is −0.8 %, and not one frame falls short of
+the 15 % budget — the worst reads −10.7 %. The margin is real rather than nominal. The
+limit could be relaxed to 20° before any frame breaches (684 frames, worst −14.2 %); the
+first breaches appear at 25° (32 of 833); and the pooled median does not cross 15 % until
+30°. Beyond that the correction is a known function of a quantity single-image fish-pose
+estimators are beginning to recover [29].
 
 Two of those 542 frames do exceed 15 %, at +28.9 % and +22.2 %. Foreshortening cannot read
 long, so a large positive error is a labelling or calibration fault rather than a pose one,
