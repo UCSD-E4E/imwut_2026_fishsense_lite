@@ -218,16 +218,30 @@ frames rather than a mean, and the reason is physical: the pipeline back-project
 tail at the single laser-derived depth, so it measures the target's *projection*, and a
 target that is not broadside to the camera can only read short, never long. The error
 distribution is therefore one-sided, a mean measures the diver's pose distribution rather
-than the instrument, and a high quantile is the estimator that rejects the pose tail.
+than the instrument, and a high quantile is robust to that tail in a way a mean is not.
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
+
+It is an upper quantile, and we are careful not to read it as a recovery of the true
+length. A quantile sits above the centre of whatever distribution it is given, pose or no
+pose: on Gaussian noise at the within-cell spread we measure (1.3 %), the expected
+$p_{90}$ is $+1.6\,\%$ with no foreshortening present at all. The angle experiment makes
+the same point with real frames — at a *measured* $0°$ the median is $-3.8\,\%$ and the
+$p_{90}$ is $+0.6\,\%$, a gap of 4.4 points containing no foreshortening whatever. So a
+$p_{90}$ near zero does not establish that the instrument is unbiased at broadside; it
+says the pose tail and the measurement spread are of comparable size. What the statistic
+is good for is comparison — between targets, between sessions, and against the same
+statistic computed by the deployed pipeline — not as an absolute accuracy.
 
 Over the cohort the median frame error is −2.4 % and the $p_{90}$ is +0.09 %; 75 % of
 frames are within 5 % of the reference, 97 % within 10 % and 99 % within 15 %. The
 per-target $p_{90}$ — Box +0.4 %, Purple Angelfish +0.8 %, Rainbow Trout −1.7 %, Ruler
 −3.8 %, Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range
-of lengths. The ruler is one session and six frames, so its entry carries little weight;
-it is the only target whose reference is traceable to a printed scale rather than a tape.
+of lengths. The median is the more informative number about the divers: −2.4 % is what a
+typical pose of 12.5° costs, so the corpus corroborates the 15° presentation guidance of
+§4.4 from the other direction — the divers were inside it. The ruler is one session and six
+frames, so its entry carries little weight; it is the only target whose reference is
+traceable to a printed scale rather than a tape.
 
 The nine frames beyond 15 % are the reason the reported estimator is a high quantile and
 not a mean. They are concentrated in two of the cohort's targets rather than spread across
@@ -314,16 +328,21 @@ dashed.
 
 Three things are visible. The five sessions agree within the pooled interquartile range at
 every angle, at both ranges, so the curve is a property of the geometry and not of a unit
-or a diver. The pooled median follows $\cos\theta - 1$ offset by a near-constant −3.5 % —
-the same broadside bias the cohort shows — from 0° (−3.8 %) through 15° (−5.8 %), 30°
-(−15.0 %) and 45° (−31.4 %). And the guidance that follows is stated with margin rather
-than at the boundary: **present the fish within 15° of broadside.** Over the 542 frames
-inside that limit the median error is −4.7 %, the $p_{90}$ is −0.8 %, and not one frame
-falls short of the 15 % budget — the worst reads −10.7 %. The margin is real rather than
-nominal. The limit could be relaxed to 20° before any frame breaches (684 frames, worst
-−14.2 %); the first breaches appear at 25° (32 of 833); and the pooled median does not
-cross 15 % until 30°. Beyond that the correction is a known function of a quantity
-single-image fish-pose estimators are beginning to recover [29].
+or a diver. The pooled median follows $\cos\theta - 1$ offset by a near-constant −2.4
+points, from 0° (−3.8 %) through 15° (−5.8 %), 30° (−15.0 %) and 45° (−31.4 %). That 0°
+figure is worth isolating: it is the only measurement in this paper taken at a *known*
+pose, so it is the one place the instrument's broadside reading is separated from the
+diver's aim by design rather than by estimator. It is one target in five sessions and
+carries their calibrations with it, so it is not directly comparable to §4.3's cohort,
+which is different sessions, different targets, and pose included. And the guidance that
+follows is stated with margin rather than at the boundary: **present the fish within 15°
+of broadside.** Over the 542 frames inside that limit the median error is −4.7 %, the
+$p_{90}$ is −0.8 %, and not one frame falls short of the 15 % budget — the worst reads
+−10.7 %. The margin is real rather than nominal. The limit could be relaxed to 20° before
+any frame breaches (684 frames, worst −14.2 %); the first breaches appear at 25° (32 of
+833); and the pooled median does not cross 15 % until 30°. Beyond that the correction is a
+known function of a quantity single-image fish-pose estimators are beginning to recover
+[29].
 
 Two of those 542 frames do exceed 15 %, at +28.9 % and +22.2 %. Foreshortening cannot read
 long, so a large positive error is a labelling or calibration fault rather than a pose one,
