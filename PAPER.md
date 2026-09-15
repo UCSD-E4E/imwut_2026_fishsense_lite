@@ -27,34 +27,49 @@ stylised rainbow trout (313 mm), a grouper (360 mm) and a snook (455 mm) — and
 Each target's reference length is the snout-to-tail-fork distance a labeler is asked to
 click, measured with a tape.
 
-The references above carry a tolerance, and it is worth being explicit about which half of
-the measurement chain that tolerance sits in, because the other half is checkable and
-checks out. The pipeline's metric scale
-does not come from the targets: it comes from the calibration object — a scanned dive slate
-or a printed checkerboard — and a wrong one would rescale every length invisibly, since
-reprojection residual cannot see scale (§3.3). Those two objects are independent standards,
-and the laser baseline is a property of the rig rather than the dive, so any camera
+Replacing the checkerboard with a dive slate is only defensible if the substitute carries
+the same scale, and that is checkable without reference to any fish. The pipeline's metric
+scale does not come from the targets: it comes from the calibration object, and a wrong one
+would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
+The laser baseline, though, is a property of the rig rather than the dive, so any unit
 calibrated both ways must report the same baseline either way. Over the five units carrying
 both (19 calibrations, five distinct slate scans) the mean checkerboard-minus-slate
 difference is **−0.27 % of baseline (95 % CI −1.1 % to +0.6 %)**, below the scatter between
-two calibrations of one unit under one standard (sd 0.12 cm). The scale chain is therefore
-verified to about a percent without reference to any fish, which places the dominant
-uncertainty in §4.3's accuracy figures on the target lengths — not on the calibration. What neither check can see is an error common to both standards, or one in the
-camera intrinsics, which rescale the calibration object and the laser together.
+two calibrations of one unit under one standard (sd 0.12 cm). The session calibration
+offsets agree as closely: a median **+1.20 pp** over the ten checkerboard sessions of the
+cohort against **+1.09 pp** over the three slate sessions. The deployable object therefore
+reproduces the standard one to about a percent, which is what licenses the substitution,
+and it places the dominant uncertainty in §4.3's accuracy figures on the target lengths
+rather than on the calibration.
 
-Targets were photographed in a university pool over 32 sessions
-between 2023 and 2025 at laser ranges of 0.25–5.47 m (median 2.0 m), by several divers on
-several camera+laser units, at ranges and poses of the diver's choosing rather than on a
-fixture. Every frame passed through the same pipeline as a field image: a labeler marks
-the laser dot and the snout and tail-fork, the laser dot fixes the range (Eq. 5), and the
-length follows from Eqs. 6–8. Calibration was per unit and per session: the 2023 sessions
-used the duct-tape dive slate of §3.3 photographed in a companion session, and the 2025
-sessions a planar checkerboard photographed in the same session. In total 2,829
-measurements were made.
+Two limits belong with that. Only three of the thirteen cohort sessions are
+slate-calibrated, so the deployable path carries the smaller share of the accuracy
+evidence and its offset spread (sd 0.77 pp against the checkerboard's 1.38) rests on three
+points. And neither check can see an error common to both objects, or one in the camera
+intrinsics, which rescale the calibration object and the laser together. We do not compare
+the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
+difference would be the targets rather than the calibration.
+
+Targets were photographed in two pools over 32 sessions spanning seventeen days in August
+2023, at laser ranges of 0.25–5.47 m (median 2.0 m), by several divers on several
+camera+laser units, at ranges and poses of the diver's choosing rather than on a fixture.
+Every frame passed through the same pipeline as a field image: a labeler marks the laser
+dot and the snout and tail-fork, the laser dot fixes the range (Eq. 5), and the length
+follows from Eqs. 6–8. In total 2,829 measurements were made.
+
+Calibration was per unit and per session throughout, but the calibration *object* changed
+partway through, and the direction of that change is the point. The first twenty sessions
+(14–18 August) used a planar checkerboard photographed in the same session — the standard
+tool, and one that has to be kept flat, dry and undamaged. The remaining twelve (29–31
+August) used the duct-tape dive slate of §3.3, photographed in a companion session. We
+moved *away* from the checkerboard deliberately: a slate is something a volunteer diver
+already carries and can photograph in situ, and a system meant to be operated by citizen
+scientists cannot depend on a printed board surviving a dive bag. §4.2 reports what that
+substitution costs.
 
 Spreading the corpus over many sessions, sites and weather is only useful if no single
 unit dominates it, so we check that directly. Seven camera+laser units contributed, six of
-them across both campaigns, and Figure 10 plots each session's calibration offset grouped
+them at both pools, and Figure 10 plots each session's calibration offset grouped
 by unit — the session term of the polish below, which is comparable across units that
 photographed different targets in a way a raw per-unit mean is not. The five
 angle-experiment sessions of §4.4 are left out: a single target at deliberately oblique
@@ -76,9 +91,10 @@ least five frames [Tukey 1977]. Fifty-two cells are observed over 30 sessions an
 and the additive fit accounts for them closely: the median absolute residual is 0.15
 percentage points, and 0.45 points over the ten sessions that carry more than one target and
 so can exhibit a residual at all. One caveat follows from which targets went in the water
-when: the 2023 sessions photographed the fish models and the 2025 sessions the box and one
-model, with no target in common, so the session and target terms are anchored separately
-within each group and the polish's centring is what places the two groups on a single scale.
+where: the checkerboard sessions photographed the box and the trout, and the slate sessions
+the fish models, with no target in common, so the session and target terms are anchored
+separately within each group and the polish's centring is what places the two groups on a
+single scale.
 A reference error common to one group's targets would therefore shift that group's session
 offsets bodily against the other's; within a group it could not.
 
@@ -96,8 +112,8 @@ compensating angle cancel at mid-range. Five of the seven carry a single target 
 reference lengths independently grade every one of them as wrong; the remaining two are
 rejected on one target while a second target in the same session shows no trend, and both
 are already outside the cohort for other reasons, so nothing in the reported figures turns
-on them. The rule admits 13 sessions and 768 measurements; three are slate-calibrated
-2023 sessions and ten are checkerboard-calibrated 2025 sessions.
+on them. The rule admits 13 sessions and 768 measurements; ten are checkerboard-calibrated and
+three slate-calibrated.
 
 Neither free number is delicate. Moving the polish threshold from 1.5 to 3.5 points changes
 membership from 8 to 15 sessions and the cohort $p_{90}$ by less than half a point. The
@@ -116,7 +132,9 @@ session, for seven sessions of one unit.
 
 It is also not stable. Across those seven sessions the angle spans 0.27°, against a
 sensitivity of $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m — so the
-between-session spread alone exceeds the accuracy we report below. Nor is a session a safe
+between-session spread alone exceeds the accuracy we report below. The whole corpus spans
+seventeen days, so this is drift within a fortnight of ordinary handling rather than
+ageing over years. Nor is a session a safe
 unit. In one session two calibrations of the same rig, taken seven minutes apart, differ by
 0.82°; the target frames shot between them agree with the earlier one, while frames from
 25 minutes before agree with neither, placing the mount in a third state.
