@@ -155,7 +155,7 @@ def main() -> None:
     span = max(meds.values()) - min(meds.values())
     print(f"\nper-frame, target-centred: unit medians span {span:.2f} points")
     fig2 = pubfig.fig_error_by_camera(
-        frames, span_note=f"unit medians span {span:.1f} points", ylim=(-15, 10)
+        frames, span_note=f"unit medians span {span:.1f} points"
     )
     for path in pubfig.save_figure(fig2, "fig10b_error_by_camera", outdir=OUTDIR):
         print("wrote", path)

@@ -81,7 +81,7 @@ angle-experiment sessions of §4.4 are left out: a single target at deliberately
 poses gives the polish no way to separate that session from that target, so what it returns
 for them is pose rather than a calibration offset. No unit stands apart among the 25 that
 remain. A one-way fit puts the between-unit variance component at zero against a
-within-unit spread of 2.6 points ($F(6,18) = 0.71$, $p = 0.64$): the units differ from one
+within-unit spread of 2.6 points ($F(6,18) = 0.74$, $p = 0.63$): the units differ from one
 another by less than sessions of the same unit differ among themselves. The sessions that
 fail the checks below are likewise spread across five of the seven units rather than
 concentrated on one, which is what a bad unit, as opposed to a bad session, would look
@@ -228,7 +228,7 @@ per-target $p_{90}$ — Box −0.2 %, Grouper +0.3 %, Purple Angel +0.9 %, Snook
 Weasly Fish −1.4 %, Shark +4.3 % — shows no trend with size across a four-fold range of
 lengths. The polish attributes +3.2 points of the Shark's figure to the target itself
 rather than to any session; the model is no longer available to re-measure, and it is 25 of
-793 frames, so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.17 %.
+793 frames, so excluding it moves the cohort $p_{90}$ from +0.06 % to −0.18 %.
 
 How sensitive those figures are to the rule's one free parameter is worth stating, because
 the cohort is selected rather than chosen. Moving the bound from 2.3 to 2.75 points
@@ -274,9 +274,9 @@ wild fish.
 
 **Table 1.** Percent length error over the accuracy cohort and, for comparison, over wider
 selections. The two hold-outs do the rejecting and the 2.5-point band does the tightening:
-admitting the two sessions the range trend alone excludes costs the median (−2.18 % to
-−2.38 %) and leaves $p_{90}$ where it was, whereas dropping the hold-outs as well runs the
-mean error from 3.7 % to 5.4 % and then 9.3 %. $p_{90}$ stays within ±0.7 % of zero
+admitting the three sessions the range trend alone excludes costs the median (−2.19 % to
+−2.54 %) and leaves $p_{90}$ where it was, whereas dropping the hold-outs as well runs the
+mean error from 3.1 % to 5.0 % and then 9.1 %. $p_{90}$ stays within ±0.7 % of zero
 throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
@@ -291,7 +291,7 @@ throughout.
   \caption{Percent length error over the accuracy cohort and over wider selections.
   The hold-outs do the rejecting and the $2.5$-point band the tightening: admitting the
   sessions the range check alone excludes costs the median while leaving $p_{90}$ where it
-  was, whereas dropping the hold-outs runs the mean error from $3.7\,\%$ to $9.3\,\%$.
+  was, whereas dropping the hold-outs runs the mean error from $3.1\,\%$ to $9.1\,\%$.
   $p_{90}$ stays within $\pm0.7\,\%$ of zero throughout.}
   \label{tab:accuracy}
   \begin{tabular}{lrrrrr}
