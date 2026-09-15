@@ -544,6 +544,16 @@ check that would have caught any of this in the field.
   between-fish spread. Plotting all 74 measurements instead of the 33 animals returns
   $F(5,68) = 4.05$, $p = 0.004$ — an apparently significant unit effect that is entirely
   pseudo-replication.
+- **Figure 14** — Per-species median length, FishSense Lite against the independent
+  stereo-video archive, with the 1:1 line. Bars are bootstrap intervals on each median; the
+  vertical ones are computed per *animal*, not per frame. **Read this differently from
+  Figure 1.** There, one object is compared with its own known length, so a departure from
+  1:1 is error. Here the two axes are different animals — ours and theirs, same reef and
+  season but never the same individual — so a departure is error *or* a difference in which
+  fish each encountered, and nothing in the data separates them. Five species with at least
+  five of our fish: Hogfish (33 vs 119), Stoplight Parrotfish (16 vs 391), Nassau Grouper
+  (7 vs 8), Black Grouper (6 vs 51), Rainbow Parrotfish (5 vs 59). Medians differ by
+  −21 % to +9 %.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
   black: pooled median and interquartile range; dashed: $\cos\theta - 1$; dotted: the 15 %

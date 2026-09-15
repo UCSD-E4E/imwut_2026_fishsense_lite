@@ -1288,3 +1288,91 @@ def fig_field_by_camera(
         ax.spines[sp].set_visible(False)
     fig.tight_layout()
     return fig
+
+
+def fig_field_vs_stereo(
+    ours,
+    stereo,
+    figsize: tuple[float, float] = (COL_WIDTH, 3.0),
+    min_fish: int = 5,
+    seed: int = 0,
+) -> plt.Figure:
+    """Our per-species median against an independent stereo-video archive.
+
+    The field analogue of Figure 1, with one crucial difference the caption must
+    carry: Figure 1 measures ONE object against its own known length, so a
+    departure from the 1:1 line is error. Here the two axes are *different
+    animals* -- our fish and theirs, drawn from the same reef and season but
+    never the same individual -- so a departure is error OR a difference in
+    which fish each happened to encounter, and nothing in the data separates
+    them. It is a consistency check, not a bias measurement.
+
+    Both axes therefore carry bootstrap intervals on the median, and the
+    vertical one is computed per ANIMAL rather than per frame: repeat frames of
+    one fish are not independent and would shrink the interval spuriously.
+
+    `ours` maps species -> per-animal lengths (cm); `stereo` maps species ->
+    archive lengths (cm).
+    """
+    rng = np.random.default_rng(seed)
+
+    def ci(v):
+        d = np.median(rng.choice(v, size=(20000, len(v)), replace=True), axis=1)
+        return np.percentile(d, [2.5, 97.5])
+
+    sp = sorted(set(ours) & set(stereo), key=lambda k: np.median(stereo[k]))
+    sp = [k for k in sp if len(ours[k]) >= min_fish]
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="both")
+
+    lo = min(min(np.min(ours[k]), np.min(stereo[k])) for k in sp) * 0.85
+    hi = max(max(np.median(ours[k]), np.median(stereo[k])) for k in sp) * 1.25
+    ax.plot([lo, hi], [lo, hi], color=INK_MUTED, linewidth=0.9,
+            linestyle=(0, (5, 4)), zorder=1, label="1:1 (agreement)")
+
+    pts = []
+    for k in sp:
+        o, t = np.asarray(ours[k], float), np.asarray(stereo[k], float)
+        om, tm = float(np.median(o)), float(np.median(t))
+        ol, oh = ci(o)
+        tl, th = ci(t)
+        ax.plot([tm, tm], [ol, oh], color=SERIES_1, linewidth=1.0, zorder=3)
+        ax.plot([tl, th], [om, om], color=SERIES_1, linewidth=1.0, zorder=3)
+        ax.scatter([tm], [om], s=26, facecolor=SERIES_2, edgecolor=SURFACE,
+                   linewidth=0.7, zorder=4)
+        pts.append((tm, om, k))          # counts go in the caption, not the plot
+
+    # Greedy label placement. Hogfish and Stoplight Parrotfish sit almost on top
+    # of one another, so a fixed offset overlaps whatever is drawn next; try
+    # candidate positions around each point and take the first that is clear.
+    span = hi - lo
+    placed: list[tuple[float, float, float, float]] = []
+    cands = [(8, -3, "left", "top"), (8, 5, "left", "bottom"),
+             (-8, -3, "right", "top"), (-8, 5, "right", "bottom"),
+             (8, -16, "left", "top"), (-8, -16, "right", "top"),
+             (8, 16, "left", "bottom"), (-8, 16, "right", "bottom")]
+    for x, y, text in pts:
+        w = 0.014 * span * len(text)                 # rough text box, in data units
+        h = 0.055 * span
+        for dx, dy, ha, va in cands:
+            cx = x + dx / 72 / fig.get_size_inches()[0] * span
+            cy = y + dy / 72 / fig.get_size_inches()[1] * span
+            x0 = cx if ha == "left" else cx - w
+            y0 = cy if va == "bottom" else cy - h
+            if all(x0 + w < q[0] or q[0] + q[2] < x0 or y0 + h < q[1] or q[1] + q[3] < y0
+                   for q in placed):
+                break
+        placed.append((x0, y0, w, h))
+        ax.annotate(text, xy=(x, y), xytext=(dx, dy), textcoords="offset points",
+                    fontsize=6.2, color=INK_SECONDARY, ha=ha, va=va, zorder=6)
+
+    ax.set_xlim(lo, hi)
+    ax.set_ylim(lo, hi)
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlabel("Stereo-video archive, median (cm)")
+    ax.set_ylabel("FishSense Lite, median (cm)")
+    ax.legend(loc="upper left", frameon=False, fontsize=7)
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    fig.tight_layout()
+    return fig
