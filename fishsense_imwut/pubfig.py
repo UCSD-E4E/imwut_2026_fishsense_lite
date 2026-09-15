@@ -1336,8 +1336,12 @@ def fig_field_vs_stereo(
         om, tm = float(np.median(o)), float(np.median(t))
         ol, oh = ci(o)
         tl, th = ci(t)
-        ax.plot([tm, tm], [ol, oh], color=SERIES_1, linewidth=1.0, zorder=3)
-        ax.plot([tl, th], [om, om], color=SERIES_1, linewidth=1.0, zorder=3)
+        # Capped, so a 2 cm arm still reads as an interval next to a 23 cm one.
+        # The arms differ by 12x across these five species because the samples
+        # do (5 to 391 fish); that asymmetry IS the result, so it must be legible.
+        ax.errorbar([tm], [om], yerr=[[om - ol], [oh - om]], xerr=[[tm - tl], [th - tm]],
+                    fmt="none", ecolor=SERIES_1, elinewidth=1.0, capsize=2.2,
+                    capthick=1.0, zorder=3)
         ax.scatter([tm], [om], s=26, facecolor=SERIES_2, edgecolor=SURFACE,
                    linewidth=0.7, zorder=4)
         pts.append((tm, om, k))          # counts go in the caption, not the plot
