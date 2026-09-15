@@ -324,3 +324,58 @@ def test_the_rejected_sessions_are_what_the_limitations_paragraph_reports():
     baselines = df.groupby("dive_id").baseline_m.first() * 100
     assert baselines[rejected].min() == pytest.approx(10.24, abs=0.01)
     assert baselines[rejected].max() == pytest.approx(10.51, abs=0.01)
+
+
+# --- the notebook is the only figure generator ------------------------------
+
+
+def _notebook_saved_figures() -> set[str]:
+    """Figure stems the analysis notebook writes, parsed from its source."""
+    import json
+    import re
+
+    nb = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "fish_model_analysis"
+            / "fish_model_measurements.ipynb"
+        ).read_text()
+    )
+    source = "\n".join(
+        "".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code"
+    )
+    return set(re.findall(r'save_figure\(\s*\w+\s*,\s*"([^"]+)"', source))
+
+
+def test_every_committed_figure_is_generated_by_the_notebook():
+    """No figure may outlive the cell that draws it.
+
+    Figures 7, 9, 10 and 10b were each produced by a standalone script at some
+    point, and 10/10b went stale against a corrected export because the
+    regeneration pass ran the notebook and the scripts were not in it. One
+    generator, checked here, is the fix: if a figure is in `figures/` and the
+    notebook does not save it, either the cell was lost or the figure is an
+    orphan, and both are bugs.
+    """
+    figures = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "figures"
+    # The fork-probe frame renders are one-off overlays drawn from NAS imagery by
+    # `fork_render.py`, not plots of the corpus; they have no cell and need none.
+    on_disk = {
+        p.stem
+        for p in figures.glob("*.pdf")
+        if not p.stem.startswith(("full_", "tail_", "wide_"))
+    }
+    orphans = on_disk - _notebook_saved_figures()
+    assert not orphans, f"figures with no generating cell: {sorted(orphans)}"
+
+
+def test_the_notebook_draws_every_figure_the_paper_captions():
+    """Every `**Figure N**` caption in PAPER.md has a cell behind it."""
+    import re
+
+    paper = (Path(__file__).resolve().parents[1] / "PAPER.md").read_text()
+    captioned = set(re.findall(r"^- \*\*Figure (\w+)\*\*", paper, re.M))
+    saved = _notebook_saved_figures()
+    # "fig10b_error_by_camera" -> "10b"; "figA_all_dives_percent" -> "A".
+    drawn = {re.match(r"fig([0-9A-Za-z]+?)_", s).group(1) for s in saved}
+    assert captioned <= drawn, f"captioned but not drawn: {sorted(captioned - drawn)}"

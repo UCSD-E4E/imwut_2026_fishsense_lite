@@ -270,3 +270,97 @@ def measure_length(pixels_head, pixels_tail, depth, back_project) -> np.ndarray:
     tail_point = origin + tail * ((depth - origin[2]) / tail[..., 2])[..., None]
 
     return np.linalg.norm(head_point - tail_point, axis=-1)
+
+
+# --- the paper's scenario ---------------------------------------------------
+#
+# Figure 9 asks one question of the model above: what does a length read if the
+# in-air calibration is used underwater with no correction at all? That is the
+# number the corrective optic at the housing port exists to prevent.
+#
+# !! THE HOUSING IS NOT MEASURED !!
+# GLASS_THICKNESS_M and N_GLASS are placeholders carried over from the WUWNet
+# simulation, and the pane is assumed to sit at its optimal camera-to-glass
+# spacing. The headline is driven by the index ratio and the field of view
+# rather than by the pane, so it should be robust to these -- but it has not
+# been checked against the real housing. Put calipers on the TG6 before this
+# figure goes in a submission.
+
+IMAGE_WIDTH_PX, IMAGE_HEIGHT_PX = 4014, 3016
+FOCAL_LENGTH_PX = 2850.0
+GLASS_THICKNESS_M = 0.006  # 6 mm acrylic pane -- PLACEHOLDER, not measured
+N_GLASS = 1.49  # acrylic
+LASER_POSITION_M = np.array([-0.04, -0.11, 0.0])
+LASER_DIRECTION = np.array([0.0, 0.0, 1.0])
+FISH_LENGTH_M = 0.30
+MEASUREMENT_DEPTH_M = 2.0
+MAX_FRAME_FRACTION = 0.75  # of the half-frame; beyond this a fish is clipped
+
+
+def camera_intrinsics(
+    focal_px: float = FOCAL_LENGTH_PX,
+    width: int = IMAGE_WIDTH_PX,
+    height: int = IMAGE_HEIGHT_PX,
+) -> np.ndarray:
+    return np.array(
+        [[focal_px, 0.0, width / 2], [0.0, focal_px, height / 2], [0.0, 0.0, 1.0]]
+    )
+
+
+def flat_port_cost(
+    n_water: float = SALTY_WATER,
+    glass_thickness_m: float = GLASS_THICKNESS_M,
+    n_glass: float = N_GLASS,
+    fish_length_m: float = FISH_LENGTH_M,
+    depth_m: float = MEASUREMENT_DEPTH_M,
+    n_points: int = 60,
+) -> dict:
+    """Length error against position in the frame, with no refraction correction.
+
+    Returns `field_angle_deg`, `length_pct_error`, `range_pct_error` and the
+    fitted `d0_star`.
+
+    The range error is taken the way the pipeline would take it -- triangulated
+    from the laser dot with the same uncorrected back-projection, not the true
+    depth -- because that is what makes the two errors cancel on the optical
+    axis. Ignoring refraction expands the scene transversely by `n_water` and
+    shortens the range by very nearly its reciprocal; on axis those cancel, so a
+    centred target measures correctly by accident and the error appears only off
+    axis, where the angular compression stops being a pure scale.
+    """
+    K = camera_intrinsics()
+    half_fov = np.arctan(
+        np.hypot(IMAGE_WIDTH_PX / 2, IMAGE_HEIGHT_PX / 2) / FOCAL_LENGTH_PX
+    )
+    d0_star, _, _ = optimal_d0(glass_thickness_m, n_glass, n_water, half_fov)
+    port = FlatPort(d0_star, glass_thickness_m, n_glass, n_water)
+
+    back_project = lambda q: back_project_uncorrected(q, K)
+
+    def to_pixels(points):
+        alpha, azimuth = project_water_points(points, port)
+        return alpha_azimuth_to_pixel(alpha, azimuth, K)
+
+    laser_point = LASER_POSITION_M + depth_m * LASER_DIRECTION
+    _, laser_dirs = back_project(to_pixels(laser_point))
+    measured_depth = reconstruct_points(
+        laser_dirs, np.zeros(3), LASER_POSITION_M, LASER_DIRECTION
+    )[0][2]
+
+    half_frame = water_radius(
+        np.arctan((IMAGE_WIDTH_PX / 2) / FOCAL_LENGTH_PX), depth_m, port
+    )
+    offsets = np.linspace(0.0, MAX_FRAME_FRACTION * half_frame, n_points)
+    zeros = np.zeros_like(offsets)
+    depths = np.full_like(offsets, depth_m)
+
+    head = to_pixels(np.stack([offsets + fish_length_m / 2, zeros, depths], -1))
+    tail = to_pixels(np.stack([offsets - fish_length_m / 2, zeros, depths], -1))
+    measured = measure_length(head, tail, measured_depth, back_project)
+
+    return dict(
+        field_angle_deg=np.degrees(np.arctan(offsets / depth_m)),
+        length_pct_error=100 * (measured - fish_length_m) / fish_length_m,
+        range_pct_error=float(100 * (measured_depth - depth_m) / depth_m),
+        d0_star=float(d0_star),
+    )

@@ -484,6 +484,11 @@ check that would have caught any of this in the field.
   between-unit variance component is zero, and the sessions the rule rejects are spread
   across five of the seven units. Unit 1 contributed a single non-angle session, so its
   marker and median coincide.
+- **Figure 10b** *(repository only; no section references it)* — The frame-level companion
+  to Figure 10: percent error per camera unit over the cohort, each target centred on its own
+  median so units that photographed different targets are comparable. One hue throughout —
+  the question is whether the units differ and the answer is no. Kept for the record rather
+  than the paper, alongside Figures 5, 6 and 7.
 - **Figure 9** *(no section references it yet — see the note under "Edits elsewhere")* —
   Length error against position in the frame with no refraction correction,
   simulated for this camera and housing. Ignoring the water's index expands the scene
