@@ -572,6 +572,22 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
 #: instead. This removes frames, not sessions: dropping the shark before the
 #: median polish selects the identical thirteen dives, pinned in the tests, and
 #: no dive measures it alone.
+#: Sessions outside the pool corpus entirely. Dive 436 is a single frame of the
+#: Yellow Anthias model held by a diver at Alligator Reef on 2024-10-16 (EXIF)
+#: -- a real known-length measurement, not a mislabel, but fourteen months after
+#: every other session and in the ocean rather than a pool. Keeping it makes
+#: Section 4.1's "two pools over seventeen days in August 2023" false twice for
+#: no analytical gain: one frame cannot enter any reported statistic, because
+#: the median polish and the cohort rule both need five frames in a cell, so it
+#: reaches only the raw session and frame counts that it corrupts.
+#:
+#: Worth knowing rather than forgetting: it is the only known-length target ever
+#: photographed in the field. Section 4.5 says no reference was in the water on
+#: its seven deployments, which is true of those, but someone did try it once
+#: here and it read -8.7 %. The head/tail labels stop short of the caudal fin,
+#: so that figure should not be read as a field-accuracy estimate.
+NON_POOL_DIVES = (436,)
+
 HELD_OUT_MODELS = ("Shark",)
 
 

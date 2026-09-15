@@ -50,12 +50,12 @@ intrinsics, which rescale the calibration object and the laser together. We do n
 the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
 difference would be the targets rather than the calibration.
 
-Targets were photographed in two pools over 32 sessions spanning seventeen days in August
+Targets were photographed in two pools over 31 sessions spanning seventeen days in August
 2023, at laser ranges of 0.25–5.47 m (median 2.0 m), by several divers on several
 camera+laser units, at ranges and poses of the diver's choosing rather than on a fixture.
 Every frame passed through the same pipeline as a field image: a labeler marks the laser
 dot and the snout and tail-fork, the laser dot fixes the range (Eq. 5), and the length
-follows from Eqs. 6–8. In total 2,829 measurements were made.
+follows from Eqs. 6–8. In total 2,828 measurements were made.
 
 Calibration was per unit and per session throughout, but the calibration *object* changed
 partway through, and the direction of that change is the point. The first twenty sessions
@@ -272,9 +272,9 @@ from 3.1 % to 5.1 % and then 9.3 %. $p_{90}$ stays within ±0.9 % of zero throug
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
 | accuracy cohort (rule) | 13 | 768 | −2.28 % | −0.18 % | 3.13 % |
-| every session not held out (design + range check) | 18 | 873 | −2.26 % | +0.10 % | 3.16 % |
-| every session except the angle experiment | 27 | 1,401 | −3.98 % | −0.32 % | 5.10 % |
-| every session | 32 | 2,829 | −6.22 % | −0.88 % | 9.31 % |
+| every session not held out (design + range check) | 17 | 872 | −2.26 % | +0.10 % | 3.16 % |
+| every session except the angle experiment | 26 | 1,400 | −3.98 % | −0.32 % | 5.10 % |
+| every session | 31 | 2,828 | −6.22 % | −0.88 % | 9.31 % |
 
 ```latex
 \begin{table}[t]
@@ -289,9 +289,9 @@ from 3.1 % to 5.1 % and then 9.3 %. $p_{90}$ stays within ±0.9 % of zero throug
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
     accuracy cohort (rule)               & 13 &   768 & $-2.28$ & $-0.18$ & 3.13 \\
-    not held out (design + range check)  & 18 &   873 & $-2.26$ & $+0.10$ & 3.16 \\
-    all but the angle experiment         & 27 & 1{,}401 & $-3.98$ & $-0.32$ & 5.10 \\
-    every session                        & 32 & 2{,}829 & $-6.22$ & $-0.88$ & 9.31 \\
+    not held out (design + range check)  & 17 &   872 & $-2.26$ & $+0.10$ & 3.16 \\
+    all but the angle experiment         & 26 & 1{,}400 & $-3.98$ & $-0.32$ & 5.10 \\
+    every session                        & 31 & 2{,}828 & $-6.22$ & $-0.88$ & 9.31 \\
     \bottomrule
   \end{tabular}
 \end{table}

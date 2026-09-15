@@ -159,6 +159,25 @@ def test_prods_target_names_never_reach_a_figure():
             assert shown in models
 
 
+def test_the_reef_frame_is_not_part_of_the_pool_corpus():
+    """Dive 436 is one frame of a fish model held at Alligator Reef on
+    2024-10-16, fourteen months after every other session and not in a pool.
+
+    Pinned on both sides: the export still carries it, because corpus.csv is
+    verbatim sql/extract_corpus.sql output, and it must stay a single frame --
+    if it ever gains frames it becomes a real field session and the decision to
+    drop it has to be revisited rather than inherited."""
+    rows = cal.load_rows(DATA / "corpus.csv")
+    assert cal.NON_POOL_DIVES == (436,)
+    reef = [r for r in rows if int(r["dive_id"]) in cal.NON_POOL_DIVES]
+    assert len(reef) == 1, f"dive 436 now has {len(reef)} frames; revisit the exclusion"
+    assert reef[0]["model"] == "Yellow Anthias"
+    pool = [r for r in rows if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(pool)
+    assert df.dive_id.nunique() == 31
+    assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
+
+
 def test_holding_out_the_shark_removes_frames_not_sessions():
     """The shark is a corpus entry, not a validation target: its 605 mm is
     undocumented and the model is gone, so nothing can verify it.
