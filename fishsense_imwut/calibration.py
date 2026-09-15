@@ -227,17 +227,47 @@ METHOD_DEMO_DIVES = (76,)  # the repair works here; not accuracy evidence
 DISPUTED_DIVES = (66,)  # ruler and models disagree by ~4 %, unresolved
 
 
+#: Prod's name for a target, mapped to the name that reaches a figure or the
+#: paper. The trout's `fishmodelreference.name` is an internal joke that no
+#: reader can be expected to parse, and it was appearing on the y-axis of
+#: Figures 2 and 2b straight from the data. "Purple Angel" is not a joke, only
+#: a labeler's shorthand, but it disagreed with the prose's "purple angelfish"
+#: -- and a target named one thing in the text and another on the axis is the
+#: same defect at lower cost.
+#:
+#: Renamed on load rather than in prod or in the CSV, for two reasons. The
+#: export stays byte-identical to what `sql/extract_corpus.sql` produced, so a
+#: re-export -- which happens often -- cannot silently revert the fix. And in
+#: prod the name is not a key: `extract_corpus.sql` joins
+#: `fishmodelreference.name` to `split_part(specieslabel.content_of_image, ...)`
+#: by string equality, so a rename there must move 644 `specieslabel` rows, the
+#: reference row and the `fish` row together or the inner join drops every
+#: frame of that target without erroring.
+#:
+#: `data/corpus_20260912.csv`, the frozen pre-correction export, carries the old
+#: string too and is normalised by the same map, so the sensitivity tests read
+#: in the new vocabulary while the file itself stays untouched.
+DISPLAY_NAMES = {"Weasly Fish": "Rainbow Trout", "Purple Angel": "Purple Angelfish"}
+
+
 def load_rows(path) -> list[dict]:
     """Read a '|'-delimited handoff CSV into row dicts.
 
     Pipe-delimited because the geometry columns are JSON and contain commas.
     Rows without a `dot` are dropped, which also discards psql's trailing
     `(437 rows)` footer.
+
+    `DISPLAY_NAMES` is applied here, the corpus's single ingress, so that every
+    consumer -- `to_frame`, `fit_phi_joint`, `implied_yaw_floors` -- agrees on
+    one spelling and no caller has to remember to translate.
     """
     import csv
 
     with open(path, newline="") as fh:
-        return [r for r in csv.DictReader(fh, delimiter="|") if r.get("dot")]
+        rows = [r for r in csv.DictReader(fh, delimiter="|") if r.get("dot")]
+    for r in rows:
+        r["model"] = DISPLAY_NAMES.get(r["model"], r["model"])
+    return rows
 
 
 def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
@@ -250,7 +280,7 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
 #: Reference lengths measured after `data/corpus.csv` was exported, applied on
 #: load so the export stays exactly as it came out of prod.
 #:
-#: The Weasly Fish carried 0.310 m, which prod's own note recorded as
+#: The trout carried 0.310 m, which prod's own note recorded as
 #: provisional: "the true fork length is known only to lie in [300, 310] mm and
 #: has never been calipered", with 310 the TOP of that interval, and "a POSITIVE
 #: reading beyond it ... would say 310 mm is too short."
@@ -268,7 +298,7 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
 #: taken: 312.5, 312.7, 312.74 and 313 all select the same 13 dives, n = 793,
 #: and agree to 0.04 pp on the median and 0.04 pp on the p90. The rounding to
 #: three figures is therefore immaterial as well as tidier.
-MEASURED_REFERENCES_M = {"Weasly Fish": 0.313}
+MEASURED_REFERENCES_M = {"Rainbow Trout": 0.313}
 
 
 def to_frame(rows: Sequence[dict], *, corrected_references: bool = True):
@@ -372,16 +402,16 @@ CORPUS_ACCURACY_DIVES = (
     59, 61, 84, 495, 497, 498, 500, 501, 507, 519, 521, 522, 527,
 )
 #: What the rule selected on the 2026-09-12 export (`corpus_20260912.csv`)
-#: against the as-exported 0.310 m Weasly reference,
+#: against the as-exported 0.310 m trout reference,
 #: kept because the difference is the headline sensitivity of the whole
 #: analysis rather than a footnote.
 #:
 #: Correcting that one reference by 0.86 % moves every dive effect by about
-#: 0.5 pp — the grid is unbalanced (8 of 32 dives measure only the Weasly
-#: Fish), so a per-model change does not cancel out of the decomposition — and
+#: 0.5 pp — the grid is unbalanced (8 of 32 dives measure only the trout), so
+#: a per-model change does not cancel out of the decomposition — and
 #: dives 59 and 497 sat 0.42 and 0.46 pp below the 2.5 pp bound. They cross it
-#: and drop out. Neither dive measures the Weasly Fish at all (59 is
-#: Grouper/Snook/Shark/Purple Angel, 497 is all Box), so their *calibrations*
+#: and drop out. Neither dive measures the trout at all (59 is
+#: Grouper/Snook/Shark/Angelfish, 497 is all Box), so their *calibrations*
 #: did not change; the cut moved under them.
 #:
 #: Re-centring the dive effects on their median does not fix it (tested), and
@@ -508,6 +538,41 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
         if t is not None and t["flagged"]:
             out.add(int(dive))
     return tuple(sorted(out))
+
+
+#: Targets that are corpus entries rather than validation targets, and so take
+#: no part in the accuracy analysis. The ruler and the anthias rows have never
+#: been reported; the shark is held out because its reference is wrong.
+#:
+#: That is established without assuming this instrument is accurate. A Wildco
+#: 118-E40 fish measuring board was photographed in dives 60 and 66, and all 29
+#: of its frames are clicked on the same two marks. The board's own printed
+#: 1/8-inch ticks fix that clicked span at 341.8 +- 0.3 mm (nine frames; the
+#: ratio of clicked pixels to tick pitch cancels z and f outright), and the
+#: tick pitch at the two ends agrees to 2 %, so it is held square to 3 deg.
+#:
+#: At matched laser range within one session a calibration error cancels in the
+#: ratio, so the rig serves only as a comparator. Its adequacy for that is
+#: demonstrated rather than assumed: against the board, the angelfish reads
+#: 192 mm (on file 192) and the snook 453 mm (on file 455). Through that chain
+#: the shark is 627 and 626 mm in dives 60 and 66; anchored instead on the
+#: snook it is 631, 635 and 628 mm in dives 59, 60 and 66. Five determinations,
+#: two anchors, four sessions: 628 mm, with the dive-to-dive scatter putting the
+#: 95 % interval near 618-640. Pose and girth both make a hand-held solid read
+#: SHORT against a flat board, so the true value sits in the upper half.
+#:
+#: 605 mm would require the shark to be a 3.4 sigma outlier against the five
+#: other targets (p90 +4.3 % where they span -1.4 to +0.9 %); any value in
+#: 618-640 makes it unremarkable. That asymmetry is the argument, and it does
+#: not depend on choosing among the candidates.
+#:
+#: NOT corrected, because a reference set through the instrument would then
+#: reproduce that instrument's error by construction (HANDOFF section 0: known
+#: lengths are the validation set, never a calibration source). Held out
+#: instead. This removes frames, not sessions: dropping the shark before the
+#: median polish selects the identical thirteen dives, pinned in the tests, and
+#: no dive measures it alone.
+HELD_OUT_MODELS = ("Shark",)
 
 
 def accuracy_cohort(

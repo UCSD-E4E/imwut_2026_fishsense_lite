@@ -140,13 +140,51 @@ def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
     )
 
 
+def test_prods_target_names_never_reach_a_figure():
+    """`fishmodelreference.name` reached the y-axis of Figures 2 and 2b
+    straight from the data, and two of the names should not have: the trout's
+    is an internal joke, and "Purple Angel" disagreed with the prose.
+
+    Both halves are pinned. The CSVs must still carry prod's spelling -- they
+    are verbatim `sql/extract_corpus.sql` output and a re-export must stay
+    byte-comparable -- and nothing that survives `load_rows` may. If prod is
+    ever renamed properly, the raw assertion is the one that fails, and the
+    map becomes dead weight rather than wrong."""
+    for name in ("corpus.csv", "corpus_20260912.csv"):
+        raw = (DATA / name).read_text()
+        models = {r["model"] for r in cal.load_rows(DATA / name)}
+        for prod_name, shown in cal.DISPLAY_NAMES.items():
+            assert f"|{prod_name}|" in raw, f"{name} no longer matches the export"
+            assert prod_name not in models
+            assert shown in models
+
+
+def test_holding_out_the_shark_removes_frames_not_sessions():
+    """The shark is a corpus entry, not a validation target: its 605 mm is
+    undocumented and the model is gone, so nothing can verify it.
+
+    Pinned because the exclusion must stay immaterial to the structure. Dropping
+    it BEFORE the median polish has to select the identical thirteen sessions --
+    if that ever stops being true the hold-out is doing work, and Section 4 has
+    to say so rather than pass over it."""
+    df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
+    assert cal.HELD_OUT_MODELS == ("Shark",)
+    without = df[~df.model_name.isin(cal.HELD_OUT_MODELS)]
+    assert cal.accuracy_cohort(without) == cal.CORPUS_ACCURACY_DIVES
+    # and no session measures it alone, so no session is lost with it
+    cohort = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
+    for dive, g in cohort.groupby("dive_id"):
+        assert set(g.model_name) - set(cal.HELD_OUT_MODELS), dive
+    assert len(cohort) == 793 and len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 768
+
+
 def test_correcting_one_reference_costs_two_cohort_members():
     """The analysis's headline sensitivity, pinned so it cannot be lost.
 
-    Measuring the Weasly Fish (0.310 -> 0.3127 m, +0.86 %) drops dives 59 and
-    497. Neither measures that model — 59 is Grouper/Snook/Shark/Purple Angel
+    Measuring the trout (0.310 -> 0.3127 m, +0.86 %) drops dives 59 and
+    497. Neither measures that model — 59 is Grouper/Snook/Shark/Angelfish
     and 497 is all Box — so their calibrations did not change. The grid is
-    unbalanced (8 of 32 dives measure only the Weasly Fish), so a per-model
+    unbalanced (8 of 32 dives measure only the trout), so a per-model
     change moves every dive effect by ~0.5 pp, and those two sat 0.42 and
     0.46 pp inside the 2.5 pp bound."""
     frozen = DATA / "corpus_20260912.csv"
@@ -162,11 +200,11 @@ def test_the_measured_reference_is_the_tape_value():
     figures like every other reference, which the +-0.5 mm supports and a
     tenth-millimetre digit does not. The cohort is the same for any value in
     that spread, so the rounding costs nothing."""
-    assert cal.MEASURED_REFERENCES_M["Weasly Fish"] == 0.313
+    assert cal.MEASURED_REFERENCES_M["Rainbow Trout"] == 0.313
     rows = cal.load_rows(DATA / "corpus.csv")
     for metres in (0.3125, 0.3127, 0.3127375, 0.313):
         df = cal.to_frame(rows, corrected_references=False)
-        mask = df.model_name == "Weasly Fish"
+        mask = df.model_name == "Rainbow Trout"
         df.loc[mask, "known_length_m"] = metres
         df["pct_error"] = 100 * (df.length_m / df.known_length_m - 1)
         assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
@@ -256,10 +294,10 @@ def test_the_dive_84_relabels_are_in_the_corpus():
     corpus = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     d84 = corpus[corpus.dive_id == 84]
     counts = d84.model_name.value_counts().to_dict()
-    assert counts["Purple Angel"] == 16
+    assert counts["Purple Angelfish"] == 16
     assert counts["Snook"] == 13
     assert d84[d84.model_name == "Snook"].length_m.min() > 0.40
-    assert d84[d84.model_name == "Purple Angel"].length_m.max() < 0.20
+    assert d84[d84.model_name == "Purple Angelfish"].length_m.max() < 0.20
 
 
 def test_the_dive_521_relabels_are_in_the_corpus():
@@ -271,7 +309,7 @@ def test_the_dive_521_relabels_are_in_the_corpus():
     d521 = corpus[corpus.dive_id == 521]
     counts = d521.model_name.value_counts().to_dict()
     assert counts["Box"] == 42
-    assert counts["Weasly Fish"] == 37
+    assert counts["Rainbow Trout"] == 37
     assert d521[d521.model_name == "Box"].length_m.max() < 0.20
 
 
