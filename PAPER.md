@@ -27,29 +27,6 @@ stylised rainbow trout (313 mm), a grouper (360 mm) and a snook (455 mm) — and
 Each target's reference length is the snout-to-tail-fork distance a labeler is asked to
 click, measured with a tape.
 
-Replacing the checkerboard with a dive slate is only defensible if the substitute carries
-the same scale, and that is checkable without reference to any fish. The pipeline's metric
-scale does not come from the targets: it comes from the calibration object, and a wrong one
-would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
-The laser baseline, though, is a property of the rig rather than the dive, so any unit
-calibrated both ways must report the same baseline either way. Over the five units carrying
-both (19 calibrations, five distinct slate scans) the mean checkerboard-minus-slate
-difference is **−0.27 % of baseline (95 % CI −1.1 % to +0.6 %)**, below the scatter between
-two calibrations of one unit under one standard (sd 0.12 cm). The session calibration
-offsets agree as closely: a median **+1.20 pp** over the twelve checkerboard sessions of the
-cohort against **+1.09 pp** over the five slate sessions. The deployable object therefore
-reproduces the standard one to about a percent, which is what licenses the substitution,
-and it places the dominant uncertainty in §4.3's accuracy figures on the target lengths
-rather than on the calibration.
-
-Two limits belong with that. Only five of the seventeen cohort sessions are
-slate-calibrated, so the deployable path carries the smaller share of the accuracy
-evidence and its offset spread (sd 2.10 pp against the checkerboard's 1.94) rests on five
-points. And neither check can see an error common to both objects, or one in the camera
-intrinsics, which rescale the calibration object and the laser together. We do not compare
-the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
-difference would be the targets rather than the calibration.
-
 Targets were photographed in two pools over 31 sessions spanning seventeen days in August
 2023, at laser ranges of 0.25–5.47 m (median 2.0 m), by several divers on several
 camera+laser units, at ranges and poses of the diver's choosing rather than on a fixture.
@@ -117,20 +94,47 @@ are already outside the cohort for other reasons, so nothing in the reported fig
 on them. The rule admits 17 sessions and 908 measurements; twelve are checkerboard-calibrated and
 five slate-calibrated. Every session it rejects is rejected by the scale-free check alone.
 
-Neither free number is delicate. Moving the polish threshold from 1.5 to 3.5 points changes
-membership from 8 to 15 sessions and the cohort $p_{90}$ by less than half a point. The
-range check is insensitive over a wider band still: any trend threshold from 2 to 4 % per
-metre selects the identical 17 sessions and the identical figures, and neither the 0.8 m
-floor (0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions it rejects.
+The one threshold this leaves is not delicate. Any trend bound from 2 to 4 % per metre
+selects the identical 17 sessions and the identical figures, and neither the 0.8 m floor
+(0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions it rejects.
 
 #### 4.2 Calibration stability
 
-Both hold-outs above reject sessions on the state of one parameter, and it is worth saying
-plainly why that parameter needs watching. The laser's in-plane pointing angle sets metric
-scale and is invisible to any reprojection check (§3.3): rotating the axis within the
-camera–laser plane moves the projected dot by less than $10^{-12}$ px, so a calibration can
-be wrong by an amount no fit residual can reveal. Figure 4 plots that angle, fitted per
-session, for seven sessions of one unit.
+Two questions sit under every number in §4.1, and they have opposite answers. Is the
+object the calibration is fitted *from* sound? That is checkable, and it checks out. Is
+the parameter it fits stable between uses? It is not, and by more than the accuracy we
+report.
+
+Replacing the checkerboard with a dive slate is only defensible if the substitute carries
+the same scale, and that is checkable without reference to any fish. The pipeline's metric
+scale does not come from the targets: it comes from the calibration object, and a wrong one
+would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
+The laser baseline, though, is a property of the rig rather than the dive, so any unit
+calibrated both ways must report the same baseline either way. Over the five units carrying
+both (19 calibrations, five distinct slate scans) the mean checkerboard-minus-slate
+difference is **−0.27 % of baseline (95 % CI −1.1 % to +0.6 %)**, below the scatter between
+two calibrations of one unit under one standard (sd 0.12 cm). The session calibration
+offsets agree as closely: a median **+1.20 pp** over the twelve checkerboard sessions of the
+cohort against **+1.09 pp** over the five slate sessions. The deployable object therefore
+reproduces the standard one to about a percent, which is what licenses the substitution,
+and it places the dominant uncertainty in §4.3's accuracy figures on the target lengths
+rather than on the calibration.
+
+Two limits belong with that. Only five of the seventeen cohort sessions are
+slate-calibrated, so the deployable path carries the smaller share of the accuracy
+evidence and its offset spread (sd 2.10 pp against the checkerboard's 1.94) rests on five
+points. And neither check can see an error common to both objects, or one in the camera
+intrinsics, which rescale the calibration object and the laser together. We do not compare
+the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
+difference would be the targets rather than the calibration.
+
+A sound calibration object is not a sound calibration, and §4.1 rejects every one of its
+seven excluded sessions on the state of a single parameter. It is worth saying plainly why
+that parameter needs watching. The laser's in-plane pointing angle sets metric scale and
+is invisible to any reprojection check (§3.3): rotating the axis within the camera–laser
+plane moves the projected dot by less than $10^{-12}$ px, so a calibration can be wrong by
+an amount no fit residual can reveal. Figure 4 plots that angle, fitted per session, for
+seven sessions of one unit.
 
 It is also not stable. Across those seven sessions the angle spans 0.27°, against a
 sensitivity of $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m — so the
