@@ -1136,3 +1136,155 @@ def fig_error_by_camera(
                     ha="left", va="top", fontsize=6.5, color=INK_SECONDARY)
     fig.tight_layout()
     return fig
+
+
+# --- field deployments (§4.5) --------------------------------------------
+
+
+def fig_field_repeatability(
+    field_cvs,
+    pool_cvs,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.5),
+) -> plt.Figure:
+    """Within-individual repeatability, wild fish against posed models.
+
+    This is the one field result that needs nothing external: a calibration
+    error is common to every frame of one animal and cancels in a relative
+    spread, as does any error in the length convention, and no comparison
+    population is involved. So it is the only §4.5 number that is a measurement
+    of the system rather than of the sample.
+
+    Each point is one group -- one wild individual, or one (session, target)
+    cell in the pool. Points, not a density: 25 and 29 groups is too few for a
+    KDE to be anything but an assertion, and the reader should be able to count
+    them. The bar is the median and the band its bootstrap interval, which is
+    what §4.5 quotes; the intervals overlap, and the figure should show that
+    rather than hide it behind non-overlapping summary marks.
+    """
+    rng = np.random.default_rng(0)
+    groups = [("Wild fish", np.asarray(field_cvs, float)),
+              ("Pool models", np.asarray(pool_cvs, float))]
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="x")
+
+    for i, (label, v) in enumerate(groups):
+        y = i + rng.uniform(-0.13, 0.13, v.size)          # jitter, so ties are countable
+        ax.scatter(v, y, s=11, facecolor=SERIES_1, edgecolor="none",
+                   alpha=0.55, zorder=3)
+        med = float(np.median(v))
+        draws = np.median(rng.choice(v, size=(20000, v.size), replace=True), axis=1)
+        lo, hi = np.percentile(draws, [2.5, 97.5])
+        ax.plot([lo, hi], [i - 0.30, i - 0.30], color=INK_SECONDARY,
+                linewidth=1.3, solid_capstyle="butt", zorder=4)
+        ax.plot([med, med], [i - 0.38, i - 0.22], color=SERIES_2,
+                linewidth=2.2, solid_capstyle="butt", zorder=5)
+        ax.annotate(f"{med:.1f} %", xy=(med, i - 0.46), ha="center", va="top",
+                    fontsize=7, color=INK_SECONDARY)
+
+    ax.set_yticks(range(len(groups)))
+    ax.set_yticklabels([f"{l}\nn={len(v)}" for l, v in groups])
+    ax.set_ylim(len(groups) - 0.5, -0.75)
+    ax.set_xlabel("Within-individual CV (%)")
+    ax.set_xlim(left=0)
+    for s in ("top", "right", "left"):
+        ax.spines[s].set_visible(False)
+    fig.tight_layout()
+    return fig
+
+
+def fig_field_species(
+    field,
+    figsize: tuple[float, float] = (COL_WIDTH, 3.0),
+    min_fish: int = 2,
+) -> plt.Figure:
+    """Measured length by species, one point per measurement.
+
+    Descriptive only, and the caption must say so: the species is a labeler's
+    judgement that nothing in the field data can check (§4.5), so a per-species
+    offset and a systematic misidentification are the same picture here. Species
+    with fewer than `min_fish` individuals are pooled into "other", because a
+    row that is one animal invites a comparison the sample cannot support.
+    """
+    # NB the corpus already has a species literally called "Other" (identifiable
+    # but nontarget), so the pooled bucket must not be called that too.
+    keep = [s for s, g in field.groupby("species") if g.fish_id.nunique() >= min_fish]
+    f = field.assign(sp=np.where(field.species.isin(keep), field.species,
+                                 "Species with one individual"))
+    order = (f.groupby("sp").length_m.median().sort_values().index.tolist())
+    rng = np.random.default_rng(1)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="x")
+    for i, sp in enumerate(order):
+        v = f.loc[f.sp == sp, "length_m"].to_numpy() * 100
+        ax.scatter(v, i + rng.uniform(-0.15, 0.15, v.size), s=10,
+                   facecolor=SERIES_1, edgecolor="none", alpha=0.55, zorder=3)
+        ax.plot([np.median(v)] * 2, [i - 0.26, i + 0.26], color=SERIES_2,
+                linewidth=2.0, solid_capstyle="butt", zorder=5)
+    ax.set_yticks(range(len(order)))
+    ax.set_yticklabels([f"{sp}\n{f.loc[f.sp == sp].fish_id.nunique()} fish, "
+                        f"{int((f.sp == sp).sum())} meas." for sp in order])
+    ax.set_ylim(len(order) - 0.5, -0.5)
+    ax.set_xlabel("Measured fork length (cm)")
+    ax.set_xlim(left=0)
+    for s in ("top", "right", "left"):
+        ax.spines[s].set_visible(False)
+    fig.tight_layout()
+    return fig
+
+
+def fig_field_by_camera(
+    field,
+    species: str = "Hogfish",
+    figsize: tuple[float, float] = (COL_WIDTH, 2.5),
+) -> plt.Figure:
+    """One species per camera unit -- the field analogue of Figure 10.
+
+    **One point per ANIMAL, not per measurement**, and the distinction decides
+    what the figure says. Repeat frames of one fish are not independent, and
+    plotting all 74 hogfish measurements returns F(5,68) = 4.05, p = 0.004 --
+    an apparently significant unit effect that is pseudo-replication. Collapsed
+    to the 33 individuals §4.5 actually tests, it is F(5,27) = 1.17, p = 0.35.
+
+    The figure is drawn to show that a unit effect is *not resolvable* here, not
+    that there is none: with 4 to 18 fish per unit and an 18 % between-fish size
+    spread, the standard error on a unit's median is larger than any bias worth
+    detecting. The band behind the points is the between-fish interquartile
+    range, so the reader can see what the units are being compared against.
+    """
+    from scipy import stats
+
+    f = field[field.species == species]
+    per_fish = f.groupby(["camera_id", "fish_id"]).length_m.mean().reset_index()
+    cams = sorted(per_fish.camera_id.unique())
+    rng = np.random.default_rng(2)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="y")
+    allv = per_fish.length_m.to_numpy() * 100
+    q1, q3 = np.percentile(allv, [25, 75])
+    ax.axhspan(q1, q3, facecolor=INK_MUTED, alpha=0.10, zorder=0)
+    ax.axhline(np.median(allv), color=INK_MUTED, linewidth=0.8,
+               linestyle=(0, (4, 3)), zorder=1)
+
+    groups = []
+    for i, c in enumerate(cams):
+        v = per_fish.loc[per_fish.camera_id == c, "length_m"].to_numpy() * 100
+        groups.append(v)
+        ax.scatter(i + rng.uniform(-0.15, 0.15, v.size), v, s=14,
+                   facecolor=SERIES_1, edgecolor="none", alpha=0.7, zorder=3)
+        ax.plot([i - 0.28, i + 0.28], [np.median(v)] * 2, color=SERIES_2,
+                linewidth=2.0, solid_capstyle="butt", zorder=5)
+
+    F, pv = stats.f_oneway(*groups)
+    ax.annotate(f"$F({len(cams)-1},{len(allv)-len(cams)}) = {F:.2f}$, $p = {pv:.2f}$",
+                xy=(0.98, 0.04), xycoords="axes fraction", ha="right", va="bottom",
+                fontsize=7, color=INK_SECONDARY)
+    ax.set_xticks(range(len(cams)))
+    ax.set_xticklabels([f"{c}\nn={len(g)}" for c, g in zip(cams, groups)])
+    ax.set_xlabel("Camera unit")
+    ax.set_ylabel(f"{species} fork length (cm)")
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
+    fig.tight_layout()
+    return fig

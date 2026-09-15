@@ -527,6 +527,23 @@ check that would have caught any of this in the field.
   transversely by $n_w$ and shortens the laser range by $1/n_w$; on the optical axis these
   cancel to +0.1 %, so the error appears only off axis and cannot be averaged away. Dotted:
   the 15 % budget, crossed at 18°.
+- **Figure 11** — Within-individual repeatability, wild fish against posed models. Each
+  point is one group: one wild individual (≥ 3 frames), or one (session, target) cell in
+  the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.5
+  figure that measures the system rather than the sample — a calibration error is common to
+  every frame of one animal and cancels in a relative spread — and the intervals overlap at
+  the margin, which the figure shows rather than hides.
+- **Figure 12** — Measured fork length by species over the seven deployments, one point per
+  measurement, bar at the median. **Descriptive only.** The species is a labeler's
+  judgement that nothing in the field data can check, so a genuine per-species offset and a
+  systematic misidentification would look identical here. Species with a single individual
+  are pooled.
+- **Figure 13** — Hogfish fork length by camera unit, **one point per animal**, with the
+  between-fish interquartile range shaded behind. Drawn to show that a unit effect is not
+  resolvable on this sample, not that there is none: 2 to 10 fish per unit against an 18 %
+  between-fish spread. Plotting all 74 measurements instead of the 33 animals returns
+  $F(5,68) = 4.05$, $p = 0.004$ — an apparently significant unit effect that is entirely
+  pseudo-replication.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
   black: pooled median and interquartile range; dashed: $\cos\theta - 1$; dotted: the 15 %
