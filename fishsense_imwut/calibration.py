@@ -634,8 +634,32 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
 
 
 #: Targets that are corpus entries rather than validation targets, and so take
-#: no part in the accuracy analysis. The ruler and the anthias rows have never
-#: been reported; the shark is held out because its reference is wrong.
+#: no part in the accuracy analysis. The anthias is excluded by dive; the shark
+#: is held out because its reference is wrong, and the ruler because its six
+#: frames measure the diver's grip rather than the instrument.
+#:
+#: **Ruler, held out 2026-09-16.** Its reference was corrected first (341 mm,
+#: MEASURED_REFERENCES_M) and that is not what disqualifies it. Solving every
+#: frame for out-of-plane tilt through `reported = 341 mm * cos(theta)` -- and
+#: independently through the clicked pixel span against the fronto-parallel
+#: prediction, which agrees to 0.1 deg -- the board was held 14.7 to 20.0 deg
+#: off square in all six cohort frames, median 15.5. A flat rigid plate
+#: foreshortens by cos(theta) exactly as a fish does; nothing about the board
+#: resists pose, and a diver holding one has no more reason to keep it square.
+#:
+#: That median pose is ORDINARY -- the trout's is 16.7 deg. What disqualifies
+#: the ruler is that p90 cannot see past it. Nearest rank is ceil(0.9n), which
+#: is n itself for every n <= 10, so with six frames the ruler's p90 IS its best
+#: frame, and its best frame is still 14.7 deg off. Every other target carries
+#: 66 to 407 frames and its p90 lands on a frame at 0.0 to 8.7 deg. The residual
+#: -3.3 % is therefore cos(14.7 deg) - 1 and nothing else: a pose measurement
+#: wearing an accuracy figure's clothes.
+#:
+#: POLISH_MIN_FRAMES = 5 admits it to the grid, which is the right call there --
+#: a session effect wants every cell it can get. It is the REPORTED set the six
+#: frames do not belong in. Dropping them leaves the cohort identical (nothing
+#: in the selection rule reads a held-out target) and moves the headline from
+#: -2.06 to -2.00 % median, p90 unchanged at +0.36 %.
 #:
 #: That is established without assuming this instrument is accurate. A Wildco
 #: 118-E40 fish measuring board was photographed in dives 60 and 66, and all 29
@@ -681,7 +705,7 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
 #: so that figure should not be read as a field-accuracy estimate.
 NON_POOL_DIVES = (436,)
 
-HELD_OUT_MODELS = ("Shark",)
+HELD_OUT_MODELS = ("Shark", "Ruler")
 
 
 def accuracy_cohort(

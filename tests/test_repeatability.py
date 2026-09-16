@@ -170,7 +170,11 @@ def test_the_pool_repeatability_is_what_section_4_5_reports():
     were corrected, and both moved when they were.
 
     Re-derived 2026-09-16 after the 0.04217 m pitch correction added dives 503
-    and 504 to the cohort: 29 -> 31 groups and 908 -> 1001 frames. Note this
+    and 504 to the cohort: 29 -> 31 groups and 908 -> 1001 frames. Holding out
+    the ruler later the same day took it to 30 groups and 995 frames; its six
+    frames were one group, and losing it moved the median 1.364 -> 1.426 %
+    while leaving p90 at 3.196 -- the ruler was one of the TIGHTER groups, as a
+    board held at a steady wrong angle would be. Note this
     statistic barely moved (median 1.326 -> 1.364 %, p90 3.271 -> 3.196), which
     is the expected behaviour and worth stating -- repeatability is a SPREAD
     within one session at one scale, so a pitch change is very nearly common
@@ -182,9 +186,9 @@ def test_the_pool_repeatability_is_what_section_4_5_reports():
     df = df[df["dive_id"].isin(cal.CORPUS_ACCURACY_DIVES)]
     df = df[~df.model_name.isin(cal.HELD_OUT_MODELS)]
     result = rep.repeatability(rep.by_session_target(df))
-    assert result.n_groups == 31
-    assert result.n_values == 1001
-    assert result.median_percent == pytest.approx(1.36, abs=0.01)
+    assert result.n_groups == 30
+    assert result.n_values == 995
+    assert result.median_percent == pytest.approx(1.43, abs=0.01)
     assert result.p90_percent == pytest.approx(3.20, abs=0.01)
 
 

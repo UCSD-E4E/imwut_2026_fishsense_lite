@@ -576,9 +576,54 @@ intent, not the clicks.
 since nothing in the selection rule reads a reference. Table 1's second row moves −3.39 →
 −3.34 % and 4.42 → 4.40 %.
 
-**What it does NOT explain.** The ruler still reads −3.7 %, and that is its session, not
-the target: at p90 it sits 0.23 pp from dive 60's other targets and 0.03 pp from dive 66's.
-A reference error was worth 0.65 %, not the 4 % the raw median suggested.
+**What it does NOT explain.** The ruler still read −3.7 % after the correction. That is
+**pose**, and it is why the target is now held out entirely.
+
+### The board was never held square, and with six frames p90 cannot see past it
+
+Solving every ruler frame for out-of-plane tilt through `reported = 341 mm * cos(theta)`,
+and independently through the clicked pixel span against the fronto-parallel prediction
+using camera 10's own focal length — the two agree to 0.1°:
+
+    dive 66 (the cohort session)   14.7  14.8  14.8  16.3  16.9  20.0 deg
+    dive 60                        median 16.2, range 9.4-18.3 deg
+
+A flat rigid plate foreshortens by cos(theta) exactly as a fish does. Nothing about the
+board resists pose, and a diver holding one has no more reason to keep it square than a
+fish has to pose. The repo's own note that "pose and girth both make a hand-held solid read
+SHORT against a flat board" is about GIRTH; it never claimed the board was immune to pose.
+
+**The pose is ordinary. The sample size is not.** Median implied pose by target, and the
+pose of the frame p90 actually selects:
+
+| target | n | rank | median pose | best frame | pose of the p90 frame | p90 |
+|---|---|---|---|---|---|---|
+| Box | 361 | 325/361 | 7.9° | 0.0° | **0.0°** | +0.65 % |
+| Grouper | 83 | 75/83 | 8.8° | 0.0° | **0.0°** | +0.90 % |
+| Purple Angelfish | 66 | 60/66 | 7.0° | 0.0° | **0.0°** | +0.85 % |
+| Snook | 78 | 71/78 | 14.1° | 0.0° | **8.7°** | −1.16 % |
+| Rainbow Trout | 407 | 367/407 | 16.7° | 0.0° | **8.1°** | −1.00 % |
+| **Ruler** | **6** | **6/6** | 15.5° | **14.7°** | **14.7°** | **−3.27 %** |
+
+The trout's median pose is WORSE than the ruler's. What disqualifies the ruler is that
+ceil(0.9n) = n for every n <= 10, so its p90 is its single best frame, and its best frame
+is still 14.7° off. cos(14.7°) - 1 = -3.3 %, the whole of its residual. It is the only
+target in the corpus with fewer than ten frames, so this bites exactly once. (Same
+degeneracy as the field p90 — see the estimator note in §4.3.)
+
+**Held out 2026-09-16**, alongside the shark. Removes frames, never sessions: the cohort is
+identical, dive 66 keeps four other targets in the polish grid, and POLISH_MIN_FRAMES = 5
+still admits the ruler cell there, which is right — a session effect wants every cell it can
+get. It is the REPORTED set the six frames do not belong in.
+
+**What that costs:** 1,001 -> 995 frames, six targets -> five. Cohort median −2.06 ->
+−2.00 %, p90 unchanged at +0.36 %. Table 1's other rows move by <0.1 pp. Pool repeatability
+loses one group, 31 -> 30, and its median moves 1.364 -> 1.426 % — the ruler was one of the
+TIGHTER groups, which is what a board held at a steady wrong angle looks like.
+
+**The reference correction above still stands and is still worth keeping.** Without it the
+pose solution would have been wrong by 0.65 %, and 341 mm is the honest record of what the
+board's clicked span actually is.
 
 ---
 

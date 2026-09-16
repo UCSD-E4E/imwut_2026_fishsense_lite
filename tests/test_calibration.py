@@ -182,13 +182,16 @@ def test_the_reef_frame_is_not_part_of_the_pool_corpus():
 
 
 def test_holding_out_the_shark_removes_frames_not_sessions():
-    """The shark is a corpus entry, not a validation target. Dropping it must
-    remove frames and no sessions."""
+    """Neither held-out target is a validation target. Dropping them must
+    remove frames and no sessions -- the shark because its reference is wrong,
+    the ruler because six frames at 15 deg measure the grip, not the rig."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
-    assert cal.HELD_OUT_MODELS == ("Shark",)
+    assert cal.HELD_OUT_MODELS == ("Shark", "Ruler")
     cohort = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
     assert len(cohort) == 1051
-    assert len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 1001
+    assert len(cohort[cohort.model_name == "Shark"]) == 50
+    assert len(cohort[cohort.model_name == "Ruler"]) == 6
+    assert len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 995
     for dive, g in cohort.groupby("dive_id"):          # no dive measures it alone
         assert set(g.model_name) - set(cal.HELD_OUT_MODELS), dive
 
@@ -277,19 +280,66 @@ def test_the_ruler_reference_is_the_printed_scale_value():
     assert (raw.loc[raw.model_name == "Ruler", "known_length_m"] == 0.3429).all()
     assert (fixed.loc[fixed.model_name == "Ruler", "known_length_m"] == 0.341).all()
 
-    # Six frames of 1,001: the cohort and its headline numbers do not move.
+    # The ruler is now held out of the reported set as well, so the correction
+    # survives only as the record of what the board actually measures.
     assert cal.accuracy_cohort(fixed) == cal.CORPUS_ACCURACY_DIVES
-    for df in (raw, fixed):
-        a = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)
-               & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
-        assert len(a) == 1001
-        assert np.median(a.pct_error) == pytest.approx(-2.06, abs=0.01)
-        assert np.percentile(a.pct_error, 90) == pytest.approx(0.36, abs=0.01)
-
-    # What does move, and by how much.
     r = fixed[fixed.model_name == "Ruler"]
     r = r[r.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
+    assert len(r) == 6
     assert np.median(r.pct_error) == pytest.approx(-3.66, abs=0.05)
+
+
+def test_the_ruler_is_held_out_because_p90_cannot_see_past_its_pose():
+    """Six frames, all 14.7-20.0 deg off square, and nearest rank cannot help.
+
+    The board's median pose is ordinary -- the trout's is worse. What
+    disqualifies it is that ceil(0.9n) is n for every n <= 10, so with six
+    frames the ruler's p90 is its single best frame, and that frame is still
+    14.7 deg off. cos(14.7 deg) - 1 = -3.3 %, which is the whole of its residual
+    error. Every other target's p90 lands on a frame at 0.0-8.7 deg.
+    """
+    rows = cal.load_rows(DATA / "corpus.csv")
+    df = cal.to_frame([r for r in rows
+                       if int(r["dive_id"]) not in cal.NON_POOL_DIVES])
+    a = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
+    pose = np.degrees(np.arccos(np.clip(a.length_m / a.known_length_m, -1, 1)))
+    a = a.assign(pose=pose)
+
+    ruler = a[a.model_name == "Ruler"]
+    assert len(ruler) == 6
+    assert ruler.pose.min() == pytest.approx(14.7, abs=0.2)
+    assert ruler.pose.max() == pytest.approx(20.0, abs=0.2)
+
+    # p90 = the best frame, because ceil(0.9 * 6) == 6.
+    assert int(np.ceil(0.9 * len(ruler))) == len(ruler)
+    best = ruler.pct_error.max()
+    assert best == pytest.approx(100 * (np.cos(np.radians(14.7)) - 1), abs=0.4)
+
+    # Every reported target reaches a frame the ruler's sample never contains.
+    reported = a[~a.model_name.isin(cal.HELD_OUT_MODELS)]
+    for model, g in reported.groupby("model_name"):
+        k = int(np.ceil(0.9 * len(g)))
+        chosen = g.iloc[np.argsort(g.pct_error.values)[k - 1]]
+        assert chosen.pose < 14.0, (model, chosen.pose)
+
+
+def test_holding_out_the_ruler_leaves_the_cohort_and_p90_alone():
+    """It removes frames, never sessions: nothing in the selection rule reads a
+    held-out target, and dive 66 keeps four other targets in the polish grid."""
+    rows = cal.load_rows(DATA / "corpus.csv")
+    df = cal.to_frame([r for r in rows
+                       if int(r["dive_id"]) not in cal.NON_POOL_DIVES])
+    assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
+    assert cal.accuracy_cohort(df[df.model_name != "Ruler"]) \
+        == cal.CORPUS_ACCURACY_DIVES
+
+    a = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)
+           & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+    assert len(a) == 995
+    assert sorted(a.model_name.unique()) == [
+        "Box", "Grouper", "Purple Angelfish", "Rainbow Trout", "Snook"]
+    assert np.median(a.pct_error) == pytest.approx(-2.00, abs=0.01)
+    assert np.percentile(a.pct_error, 90) == pytest.approx(0.36, abs=0.01)
 
 
 def test_the_shark_is_held_out_rather_than_corrected():
@@ -302,7 +352,6 @@ def test_the_shark_is_held_out_rather_than_corrected():
     """
     assert "Shark" not in cal.MEASURED_REFERENCES_M
     assert "Shark" in cal.HELD_OUT_MODELS
-    assert "Ruler" not in cal.HELD_OUT_MODELS
 
 
 def test_the_range_trend_filter_does_not_depend_on_any_reference():

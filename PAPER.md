@@ -39,7 +39,7 @@ Targets were photographed in two pools over 31 sessions spanning seventeen days 
 camera+laser units, at ranges and poses of the diver's choosing rather than on a fixture.
 Every frame passed through the same pipeline as a field image: a labeler marks the laser
 dot and the snout and tail-fork, the laser dot fixes the range (Eq. 5), and the length
-follows from Eqs. 6–8. In total 2,828 measurements were made.
+follows from Eqs. 6–8. In total 2,799 measurements were made.
 
 Calibration was per unit and per session throughout, but the calibration *object* changed
 partway through, and the direction of that change is the point. The first twenty sessions
@@ -102,7 +102,7 @@ narrowly misses it: two of its targets show consistent trends of −2.2 and −2
 metre, implying −0.13°, but each interval reaches −1.2 and so fails the requirement that
 the whole interval clear ±2 %. It is named rather than loosening the threshold until it is
 caught, which would be the same error in another costume. Of the thirty sessions with a
-polish cell, that leaves 19 admitted and 1,001 measurements; fourteen are
+polish cell, that leaves 19 admitted and 995 measurements; fourteen are
 checkerboard-calibrated and five slate-calibrated. Nothing is excluded for reading far
 from a reference.
 
@@ -287,18 +287,23 @@ says the pose tail and the measurement spread are of comparable size. What the s
 is good for is comparison — between targets, between sessions, and against the same
 statistic computed by the deployed pipeline — not as an absolute accuracy.
 
-Over the cohort the median frame error is −2.1 % and the $p_{90}$ is +0.36 %; 80 % of
+Over the cohort the median frame error is −2.0 % and the $p_{90}$ is +0.36 %; 80 % of
 frames are within 5 % of the reference, 98 % within 10 % and 99 % within 15 %. The
-per-target $p_{90}$ — Box +0.7 %, Purple Angelfish +0.9 %, Rainbow Trout −1.0 %, Ruler
-−3.3 %, Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range
-of lengths. The median is the more informative number about the divers: −2.1 % is what a
-typical pose of 11.6° costs, so the corpus corroborates the 15° presentation guidance of
-§4.4 from the other direction — the divers were inside it. The ruler is one session and six
-frames, so its entry carries little weight; it is also the only target whose reference is
-traceable to a printed scale rather than a tape, and the only one measured without
-recourse to a ruler at all: its 341 mm is read off the board's own printed inch ticks in
-nine near-range frames, a ratio of pixels to pixels that cancels range and focal length,
-and it corrects the 343 mm the capture recorded (`calibration.MEASURED_REFERENCES_M`).
+per-target $p_{90}$ — Box +0.7 %, Purple Angelfish +0.9 %, Rainbow Trout −1.0 %,
+Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range of
+lengths. The median is the more informative number about the divers: −2.0 % is what a
+typical pose of 11.5° costs, so the corpus corroborates the 15° presentation guidance of
+§4.4 from the other direction — the divers were inside it.
+
+A sixth target, a printed measuring board, is **held out**, and why is worth one sentence
+because it is the estimator's one failure mode. Its six frames were all shot with the
+board 14.7–20.0° off square — a flat rigid plate foreshortens by $\cos\theta$ exactly as a
+fish does — and that pose is unremarkable, the trout's median being worse. What
+disqualifies it is that nearest rank is $\lceil 0.9n \rceil$, which is $n$ itself for
+$n \le 10$, so over six frames $p_{90}$ is the single best frame, and the best frame is
+still 14.7° off. Its residual −3.3 % is $\cos 14.7° - 1$ and nothing else. Every reported
+target carries 66 to 407 frames and its $p_{90}$ lands on a pose between 0.0 and 8.7°. The
+board is the only target in the corpus with fewer than ten frames, so this bites once.
 
 The nine frames beyond 15 % are the reason the reported estimator is a high quantile and
 not a mean. They are concentrated in two of the cohort's targets rather than spread across
@@ -350,9 +355,9 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 19 | 1,001 | −2.06 % | +0.36 % | 3.09 % |
-| every session except the angle experiment | 26 | 1,400 | −3.34 % | +0.05 % | 4.40 % |
-| every session | 31 | 2,828 | −5.78 % | −0.57 % | 8.97 % |
+| accuracy cohort (rule) | 19 | 995 | −2.00 % | +0.36 % | 3.08 % |
+| every session except the angle experiment | 26 | 1,371 | −3.30 % | +0.08 % | 4.42 % |
+| every session | 31 | 2,799 | −5.84 % | −0.56 % | 9.03 % |
 
 ```latex
 \begin{table}[t]
@@ -365,9 +370,9 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 19 & 1{,}001 & $-2.06$ & $+0.36$ & 3.09 \\
-    all but the angle experiment         & 26 & 1{,}400 & $-3.34$ & $+0.05$ & 4.40 \\
-    every session                        & 31 & 2{,}828 & $-5.78$ & $-0.57$ & 8.97 \\
+    accuracy cohort (rule)               & 19 & 995     & $-2.00$ & $+0.36$ & 3.08 \\
+    all but the angle experiment         & 26 & 1{,}371 & $-3.30$ & $+0.08$ & 4.42 \\
+    every session                        & 31 & 2{,}799 & $-5.84$ & $-0.56$ & 9.03 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -501,7 +506,7 @@ as changing the baseline, so the correction factor varies a little with range in
 exactly common to a fish's frames.) Over 25 such individuals — 97 of the 162 measurements — the
 within-fish coefficient of variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a
 $p_{90}$ of 11.4 %**. The identical statistic on the pool cohort — repeat frames of one target
-in one session, 31 cells — is **1.4 % (95 % CI 1.2–2.0 %), $p_{90}$ 3.2 %**. So a repeat
+in one session, 30 cells — is **1.4 % (95 % CI 1.2–2.1 %), $p_{90}$ 3.2 %**. So a repeat
 measurement of a wild fish varies about 2.1× as much as a repeat measurement of a posed model,
 and its tail about 3.6× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
 against 1.2–2.0 %), so this is a difference in point estimate rather than a cleanly separated
@@ -692,7 +697,7 @@ caught any of this in the field.
   claims hold in the form §4.4 establishes them: no measurement within 20° of broadside
   leaves the 15 % budget, and the guidance given to divers is 15°. Over the cohort the $p_{90}$ is +0.36 % and 99 % of frames are within
   15 %. Consider stating the broadside figure directly: "median −2.1 %, $p_{90}$ +0.36 %
-  over 1,001 measurements of six targets at 0.27–5.0 m".
+  over 995 measurements of five targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3's promise about refraction is now met by §4.5**, written above as "What the port
   correction buys". It is placed after §4.4 rather than earlier so the empirical run
@@ -708,8 +713,8 @@ caught any of this in the field.
 
 #### Figure captions
 
-- **Figure 1** — Measured against known length, accuracy cohort (19 sessions, 1,001 frames).
-  Six targets separate along the abscissa by their own lengths. Error bars are the
+- **Figure 1** — Measured against known length, accuracy cohort (19 sessions, 995 frames).
+  Five targets separate along the abscissa by their own lengths. Error bars are the
   interquartile range of frames; the diamond is the $p_{90}$.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level
   interquartile range and whiskers; diamond: $p_{90}$, the reported estimator. The gap
