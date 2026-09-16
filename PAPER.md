@@ -90,20 +90,26 @@ offsets bodily against the other's; within a group it could not.
 A session is accuracy evidence unless something about *how it was produced* disqualifies
 it. There is deliberately no threshold on how large its error came out: a rule that drops
 sessions for disagreeing with the references, and then reports the survivors' agreement
-with the references, selects on its own outcome. Two hold-outs precede that test. By design, before any number
-was computed: the five angle-experiment sessions of §4.4 (a single target at deliberately
-oblique poses) and three sessions whose calibration a separate analysis had already
-repaired or disputed. And by a scale-free check that uses no reference length: a rigid
-target must read the same length at every range, so a session whose targets show a length
-trend with range — the Theil–Sen slope over frames beyond 0.8 m, with its 95 % interval
-clear of ±2 % per metre — has a calibration error in the in-plane laser angle that no
-reprojection test can see (§3.3), and is excluded. That check removes five sessions. Three
-of the five carry a single target and the reference lengths independently grade every one
-of them as wrong; the remaining two are rejected on one target while a second target in
-the same session shows no trend, and one of those two is already held out as an August
-repair, so little in the reported figures turns on them. The rule admits 19 sessions and
-1,001 measurements; fourteen are checkerboard-calibrated and five slate-calibrated. Every
-session it rejects is rejected by the scale-free check alone.
+with the references, selects on its own outcome. Two things disqualify a session, and
+neither looks at the size of its error. The five angle-experiment sessions of §4.4 are set
+aside because they are a different experiment — one target driven through 0–45° on
+purpose, reported there rather than here. And a scale-free check that uses no reference
+length: a rigid target must read the same length at every range, so a session whose
+targets show a length trend with range — the Theil–Sen slope over frames beyond 0.8 m,
+with its 95 % interval clear of ±2 % per metre — has a calibration error in the in-plane
+laser angle that no reprojection test can see (§3.3), and is excluded. That check removes
+five sessions. Three of the five carry a single target and the reference lengths
+independently grade every one of them as wrong; the remaining two are rejected on one
+target while a second target in the same session shows no trend, and one of those two is
+already held out as an August repair, so little in the reported figures turns on them. One
+further session is held out on the same scale-free evidence, where the automatic threshold
+narrowly misses it: two of its targets show consistent trends of −2.2 and −2.3 % per
+metre, implying −0.13°, but each interval reaches −1.2 and so fails the requirement that
+the whole interval clear ±2 %. It is named rather than loosening the threshold until it is
+caught, which would be the same error in another costume. Of the thirty sessions with a
+polish cell, that leaves 19 admitted and 1,001 measurements; fourteen are
+checkerboard-calibrated and five slate-calibrated. Nothing is excluded for reading far
+from a reference.
 
 The check has also now caught something the known lengths could not, which is the
 strongest argument for keeping it. Two sessions used to be rejected for a trend of about
@@ -191,8 +197,8 @@ Three consequences follow, and they shape the rest of the paper. The pipeline re
 laser per dive rather than trusting a stored calibration. A per-session validation target
 remains good practice, because the failure is silent — this is what the range check of §4.1
 supplies, and it needs no reference length. And calibration state is the dominant reason a
-session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 8
-fail a calibration criterion in §4.1 — seven flagged by the scale-free range check, and
+session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 6
+fail a calibration criterion in §4.1 — five flagged by the scale-free range check, and
 one more held out on the same evidence. An instrument whose scale parameter drifts by more
 than its own measurement error between uses is one that must be calibrated, and validated,
 at the point of use.
@@ -504,13 +510,19 @@ alone would read as a small negative bias and would be the wrong summary of a
 one-sided error — the same reason $p_{90}$ rather than a mean appears in §4.3.
 
 **What the paired day excludes, and what it cannot.** The disagreement is not a
-calibration error: all seven fish resolve through one borrowed fit, so a scale
-error is common-mode and cannot separate individuals, and the scale-free range
-check of §4.1 applied to the best-sampled fish (11 frames over a 1.55× range
-spread) is flat at $+0.8\,\%$ per metre ($r=0.03$). It is not the projection,
-which is self-consistent to a fraction of a percent above. And it is not a
-landmark convention: the two individuals of one species on this day disagree in
-*opposite* directions, and their tail landmarks sit at the fork on the one
+calibration error, and the reason is the fitted baseline rather than the range
+trend. All seven fish resolve through a single slate calibration shot the same
+morning at 08:58, between 26 minutes and 1 h 42 before the fish themselves — the
+point-of-use practice §4.2 recommends, not a borrow. Its baseline is 10.55 cm,
+within the 9.87–10.55 cm every other sound fit in the fleet returns, and
+reproducing a $+8.6\,\%$ offset by scale alone would need 11.5 cm. The scale-free
+range check of §4.1 applied to the best-sampled fish (11 frames over a 1.55× range
+spread) is flat at $+0.8\,\%$ per metre ($r=0.03$), which excludes an in-plane
+angle error but not a scale error — a wrong baseline is flat with range, so it is
+the baseline's value, not the trend, that rules that out. It is not the
+projection, which is self-consistent to a fraction of a percent above. And it is
+not a landmark convention: the two individuals of one species on this day disagree
+in *opposite* directions, and their tail landmarks sit at the fork on the one
 reading long and at the fin tip on the one reading short — the reverse of what a
 systematic over-reach would produce. What remains is a residual we cannot
 attribute: either we read long on four of seven fish, or the stereo reads short,
@@ -714,7 +726,7 @@ slate-borrowed sessions and the paper needed to explain why two of them were rep
 3. **But the mount state is no longer a passing remark.** §4.2 now reports calibration
    stability as a result: the angle spans 0.27° across seven sessions, 0.82° between two
    calibrations seven minutes apart, and calibration state is the dominant reason a session
-   fails to be accuracy evidence (12 of 25). That is three quantities and a mechanism, and
+   fails to be accuracy evidence (6 of 30). That is three quantities and a mechanism, and
    it is what justifies the cohort rule, the range check, and re-fitting the laser per dive.
    A sentence cannot carry it. Figure 4 as it stands — seven sessions, angle on the
    ordinate, cohort by marker — is exactly the right figure and needs no change.
