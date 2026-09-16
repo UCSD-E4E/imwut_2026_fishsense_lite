@@ -129,11 +129,17 @@ def test_accuracy_cohort_ignores_cells_below_min_frames():
 
 
 def test_accuracy_cohort_on_the_real_corpus_is_the_published_set():
-    """The paper's cohort, pinned. If this changes, Section 4 changes."""
+    """The paper's cohort, pinned. If this changes, Section 4 changes.
+
+    Nineteen as of the 2026-09-16 export. 503 and 504 joined when the
+    checkerboard pitch was corrected to 0.04217 m: that took their borrowed
+    fit (dive 502) from 8.897 to 10.394 cm and their range trends from +5.31
+    and +5.54 %/m to +0.60 and +0.80."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
     assert cal.CORPUS_ACCURACY_DIVES == (
-        58, 59, 61, 66, 84, 495, 497, 498, 500, 501, 506, 507, 519, 520, 521, 522, 527
+        58, 59, 61, 66, 84, 495, 497, 498, 500, 501, 503, 504, 506, 507,
+        519, 520, 521, 522, 527,
     )
 
 
@@ -181,8 +187,8 @@ def test_holding_out_the_shark_removes_frames_not_sessions():
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     assert cal.HELD_OUT_MODELS == ("Shark",)
     cohort = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
-    assert len(cohort) == 958
-    assert len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 908
+    assert len(cohort) == 1051
+    assert len(cohort[~cohort.model_name.isin(cal.HELD_OUT_MODELS)]) == 1001
     for dive, g in cohort.groupby("dive_id"):          # no dive measures it alone
         assert set(g.model_name) - set(cal.HELD_OUT_MODELS), dive
 
@@ -208,12 +214,30 @@ def test_the_cohort_does_not_depend_on_the_reference_lengths():
     angle experiment, one named scale-free hold-out and the range-trend filter,
     none of which reads a reference length -- so the cohort is invariant to
     them, which is the strongest available answer to the charge that sessions
-    were selected for agreeing with the references."""
+    were selected for agreeing with the references.
+
+    The claim is invariance WITHIN a file, and that distinction became
+    load-bearing on 2026-09-16. This test used to assert the frozen file's
+    cohort also equalled `CORPUS_ACCURACY_DIVES`, which held only while the two
+    exports happened to select the same sessions. The checkerboard pitch
+    correction moved the live cohort 17 -> 19 and broke that incidental
+    equality -- a real change in the calibrations, not a reference sensitivity.
+    So each file is now checked against itself.
+
+    The frozen file is what keeps this testable at all: it still carries the
+    inherited 0.310 m trout, while every live export since has carried the
+    0.313 m tape value, making `corrected_references` a no-op on `corpus.csv`.
+    """
     frozen = DATA / "corpus_20260912.csv"
     raw = cal.to_frame(cal.load_rows(frozen), corrected_references=False)
     corrected = cal.to_frame(cal.load_rows(frozen))
     assert cal.accuracy_cohort(raw) == cal.accuracy_cohort(corrected)
-    assert cal.accuracy_cohort(raw) == cal.CORPUS_ACCURACY_DIVES
+
+    rows = cal.load_rows(DATA / "corpus.csv")
+    live_raw = cal.to_frame(rows, corrected_references=False)
+    live_corrected = cal.to_frame(rows)
+    assert cal.accuracy_cohort(live_raw) == cal.accuracy_cohort(live_corrected)
+    assert cal.accuracy_cohort(live_corrected) == cal.CORPUS_ACCURACY_DIVES
 
 
 def test_the_measured_reference_is_the_tape_value():
@@ -289,21 +313,36 @@ def test_to_frame_carries_the_dive_baseline():
 def test_range_trend_flagged_dives_on_the_corpus():
     """Both signs, whole interval beyond +-2 %/m, angle dives excluded. The
     flagged set is every dive already known bad from the known lengths plus
-    the short-baseline dives the median had hidden -- and no sound one."""
+    the short-baseline dives the median had hidden -- and no sound one.
+
+    Five since the 0.04217 m pitch correction. 503 and 504 left this set
+    because the fit they borrow was wrong, not because the filter moved: dive
+    502 went 8.897 -> 10.394 cm and their trends fell from +5.31 and +5.54 %/m
+    to +0.60 and +0.80, well inside the +-2 band. The filter is unchanged, and
+    that is the point -- a scale-free check responding to a pitch measured with
+    a tape is independent corroboration of it."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
-    assert cal.range_trend_flagged_dives(df) == (76, 491, 492, 494, 503, 504, 509)
+    assert cal.range_trend_flagged_dives(df) == (76, 491, 492, 494, 509)
 
 
-def test_the_pre_filter_is_what_removes_491_503_and_504():
+def test_the_pre_filter_is_what_removes_491_492_and_494():
     """All three clear the dive-effect bound and are removed by the range trend
-    alone. 503 and 504 borrow dive 502's calibration, which prod refitted from
-    8.90 cm to a sound 10.35 cm on 2026-09-14 — so a plausible baseline is not
-    sufficient, and the scale-free trend still says their lengths vary with
-    range. 491 borrows across the mid-session laser movement of §4.2."""
+    alone: they borrow across the mid-session laser movement of §4.2, reading
+    -3.78, -2.83 and -6.09 %/m.
+
+    This test was called `..._removes_491_503_and_504` and its reasoning was
+    the opposite of what it now records. It argued that 503 and 504 showed "a
+    plausible baseline is not sufficient", because prod had refitted dive 502
+    to 10.35 cm and their trends still flagged. The 0.04217 m pitch correction
+    refitted 502 again, to 10.394 cm, and their trends collapsed to +0.60 and
+    +0.80 %/m -- so the earlier 10.35 cm fit was itself still wrong, and the
+    plausible-baseline band had simply admitted it. The lesson stands in
+    general (the band cannot see an in-plane error) but 503 and 504 are no
+    longer the example of it."""
     df = cal.to_frame(cal.load_rows(DATA / "corpus.csv"))
     with_filter = cal.accuracy_cohort(df)
     without = cal.accuracy_cohort(df, range_trend_filter=False)
-    assert set(without) - set(with_filter) == {76, 491, 492, 494, 503, 504, 509}
+    assert set(without) - set(with_filter) == {76, 491, 492, 494, 509}
 
 
 def test_the_dive_84_relabels_are_in_the_corpus():
@@ -361,9 +400,14 @@ def test_binned_angle_error_uses_symmetric_bins_and_min_count():
 
 def test_the_rejected_sessions_are_what_the_limitations_paragraph_reports():
     """PAPER.md's "Sessions the rule rejects" states three counts about the same
-    nine dives. A draft said six of them borrow their calibration; eight do,
+    set of dives. A draft said six of them borrow their calibration; eight did,
     which makes borrowing the strongest predictor of rejection in the corpus
-    rather than a co-equal one. Pin all three so the next edit cannot drift."""
+    rather than a co-equal one. Pin all three so the next edit cannot drift.
+
+    Five since the 0.04217 m pitch correction, down from seven: 503 and 504
+    left by being *fixed*, not by a threshold moving. Four of the five borrow,
+    so the borrowing claim strengthened rather than weakened -- the only
+    self-fitted rejection is still 509."""
     rows = cal.load_rows(DATA / "corpus.csv")
     df = cal.to_frame(rows, corrected_references=True)
     polished = cal.median_polish(cal.cell_p90_grid(df, cal.POLISH_MIN_FRAMES))
@@ -371,19 +415,19 @@ def test_the_rejected_sessions_are_what_the_limitations_paragraph_reports():
     rejected = sorted(
         considered - set(cal.accuracy_cohort(df)) - set(cal.DESIGN_EXCLUDED_DIVES)
     )
-    assert rejected == [76, 491, 492, 494, 503, 504, 509]
+    assert rejected == [76, 491, 492, 494, 509]
 
     flagged = set(cal.range_trend_flagged_dives(df))
     assert set(rejected) <= flagged, "every rejection is now scale-free"
 
     source = df.groupby("dive_id").calibration_dive_id.first()
     borrowed = [d for d in rejected if int(source[d]) != d]
-    assert len(borrowed) == 6
+    assert len(borrowed) == 4
     assert [d for d in rejected if d not in borrowed] == [509]
 
     baselines = df.groupby("dive_id").baseline_m.first() * 100
-    assert baselines[rejected].min() == pytest.approx(10.24, abs=0.01)
-    assert baselines[rejected].max() == pytest.approx(10.51, abs=0.01)
+    assert baselines[rejected].min() == pytest.approx(10.29, abs=0.01)
+    assert baselines[rejected].max() == pytest.approx(10.55, abs=0.01)
 
 
 # --- the notebook is the only figure generator ------------------------------
