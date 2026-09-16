@@ -13,6 +13,11 @@ of building it. Nothing here has been written to prod.
 | `data/all.csv` | 464 per-frame measurements + per-frame geometry. `\|`-delimited: the geometry columns are JSON and contain commas. Carries a trailing psql `(n rows)` footer, dropped on load. |
 | `data/corpus.csv` | **every** rigid-target measurement in prod, re-exported 2026-09-14 (§9.6): 2,927 frames, 32 dives. Same schema. Extracted by `sql/extract_corpus.sql`. It is *not* a superset of `all.csv` — the six mislabel corrections of §10 differ from it deliberately, which is why the superset test was deleted (§11). |
 | `data/corpus_20260912.csv` | the frozen 2026-09-12 export. Kept because §9.6's reference-sensitivity result is only reproducible against it, and for nothing else. |
+| `data/stereo_pairs.csv` | our 41 measurements of the eight 2023-08-03 morning individuals, exported 2026-09-16. Extracted by `sql/extract_stereo_pairs.sql`. |
+| `data/stereo_reference.csv` | the stereo side: seven lengths lifted from the collaborators' `SMILE_Archive_LengthData.csv`, which is not in this repo. |
+| `sql/extract_stereo_pairs.sql` | the paired-comparison extraction |
+| `../fishsense_imwut/stereo_pairs.py` | the paired analysis: both estimators, the range-trend check, the geometry check |
+| `../tests/test_stereo_pairs.py` | pins §12's numbers against the two committed extractions |
 | `data/field.csv` | the seven Florida-reef deployments behind PAPER.md §4.5: 162 wild-fish measurements of 73 individuals, exported 2026-09-14. Extracted by `sql/extract_field.sql`. |
 | `sql/extract_field.sql` | the field extraction, so §4.5's numbers can be re-pulled rather than re-typed |
 | `../fishsense_imwut/repeatability.py` | the within-group CV estimator behind §4.5, with the bootstrap and the nearest-rank p90 |
@@ -1179,3 +1184,130 @@ species would appear as a per-species offset indistinguishable from a measuremen
 which is a second reason §8's stereo comparison cannot carry a conclusion. The
 repeatability is the one field result immune to it, being computed within an individual
 whatever that individual turns out to be.
+
+
+## 12. A paired field measurement — 2023-08-03, seven fish, two instruments (2026-09-16)
+
+§4.5 says field accuracy is unmeasurable, and for the seven established
+deployments that is exactly right: no known-length reference was ever in the
+water. This is the exception the archive turned out to contain — one day where
+the same individual animals were measured by FishSense Lite **and** by a
+calibrated stereo-video rig.
+
+**The pairing is by named individual, not by population.** Each dive folder is
+one fish (`Hogfish01_MolHITW_0926_080323`) and the archive numbers the same
+fish the same way; both sides' hogfish numbering at ConchReef runs 1–12 and
+**both skip 10**, which is a shared registry rather than two independent
+counts. That is a far cleaner design than §8's population-median comparison,
+and it lands in a different place.
+
+### What it took to get there
+
+Nothing about this was available on 2026-09-15. Four pipeline defects had to
+ship first, and each one is written up in `CLAUDE.md`:
+
+* `content_of_image` took whichever taxonomy path the labeler clicked first, so
+  34 rows across 6 dives lost their laser answer. Dive 22 lost all ten frames.
+* stage 1 dropped HDBSCAN noise points, so an evenly-spaced dive returned `[]`
+  and head-of-line blocked the cohort forever (dive 8, selected 8 times in a
+  row).
+* the calibration refusal message described an hourly churn that the refusal
+  record had already made impossible, and I read my own stale sentence back as
+  a live diagnosis.
+* sentinel species rows were read as labeler answers by stage 6.1, which split
+  one hogfish into two `Fish` rows carrying 4 and 7 measurements.
+
+The day's calibration is **dive 32** (`H Slate Dive 1`, 09:11), fitted at
+**10.551 cm** — inside the 9.87–10.54 cm band 30 of the fleet's 31 fits
+occupy. The other two H-Slate captures were refused on the lever arm: dive 22
+at 0.25 m over ten observations, dive 23 at **0.59 m** against a 0.60 m gate
+over five. Only the 09:11 burst varied range enough to be determinable, which
+is a fact about the capture protocol and not about the pipeline.
+
+All eight morning dives borrow dive 32 via `Dive.calibration_dive_id`. The
+afternoon individuals (ConchReef, SnappersLedge) are **excluded**: 5–7 hours
+from the only sound fit, with both afternoon slates refused, so nothing checks
+whether the laser moved during the day.
+
+### The result, and why the estimator is the finding
+
+| individual | n | our median | our max | stereo | median diff | **max diff** |
+|---|---|---|---|---|---|---|
+| Hogfish 1, MolHITW | 11 | 304.8 | 345.6 | 315.8 | −3.5 % | **+9.4 %** |
+| Hogfish 1, MolPeLe | 3 | 285.6 | 288.0 | 265.2 | +7.7 % | +8.6 % |
+| Hogfish 2, MolHITW | 3 | 275.7 | 277.9 | 322.3 | −14.5 % | −13.8 % |
+| Blue Parrotfish 1, MolHITW | 10 | 460.5 | 479.0 | 426.5 | +8.0 % | **+12.3 %** |
+| Stoplight Parrotfish 1, MolHITW | 6 | 190.5 | 220.0 | 197.9 | −3.7 % | **+11.2 %** |
+| Gray Snapper 1, MolPeLe | 3 | 233.7 | 273.9 | 298.2 | −21.6 % | −8.1 % |
+| Blue Parrotfish 1, MolPeLe | 3 | 338.6 | 353.5 | 377.5 | −10.3 % | −6.4 % |
+
+    per-fish median -> median -3.7 %, mean -5.4 % +- 11.0 %, 4/7 within 10 %
+    per-fish max    -> median +8.6 %, mean +1.9 % +- 10.9 %, 4/7 within 10 %
+
+**The median is the wrong summary, and using it inverts the reading.** Stage 14
+back-projects head and tail at a single laser-derived depth, so an out-of-plane
+fish can only read SHORT. That is not an assumption here: over the 16 frames
+carrying a laser depth, `length / (head_tail_px · range / f)` runs
+**0.9972–0.9997** — self-consistent to a fraction of a percent and never above
+1.0. The out-of-plane correction only ever removes length.
+
+So the maximum over frames of one animal is a **lower bound on its true
+length**, and the median is biased down by however much the pose varied.
+Switching estimator moves the centre from −3.7 % to +8.6 % while leaving the
+scatter at ~11 %: it is a question about the estimator, not about noise. This
+is the same reasoning §4.3 already uses when it reports p90 rather than a mean,
+and it was not applied here until the frames forced it.
+
+**Four of seven individuals exceed the stereo even at their maximum**, by
+8.6–12.3 %. Our own pose loss cannot explain those, because pose only subtracts.
+
+### What is ruled out, measured rather than argued
+
+* **Not the calibration.** All 41 measurements resolve through one fit, so a
+  scale error is common-mode: it can move the centre and cannot make two fish
+  disagree with each other. And it is not even moving the centre — the
+  scale-free range check on dive 5 (11 frames over a 1.55× range spread) gives
+  **+0.8 %/m, r = 0.03**, flat.
+* **Not the projection.** 16 of 16 frames self-consistent, above.
+* **Not landmark over-reach**, which was my first hypothesis and the frames
+  refuted it. The two Blue Parrotfish are the same species on the same day with
+  opposite signs; inspecting the tail clicks, dive 25 (+8.0 %) lands **in the
+  fork notch** and dive 39 (−10.3 %) lands **at the caudal fin tip**. Clicking
+  the tip lengthens a measurement, so over-reach predicts the opposite of what
+  is observed. Recorded because the hypothesis was plausible, cheap to check by
+  looking, and wrong.
+
+### What remains unattributable
+
+Either we read 9–12 % long on four of seven fish, or the stereo reads short, or
+the pairing is wrong on those individuals. **Seven pairs and no third
+instrument cannot separate those**, and the mean-difference interval spans zero
+under both estimators. This is the same wall §8 hit from the population side,
+reached from a much better design.
+
+Two specific follow-ups worth more than more statistics:
+
+* **Dive 20** is the cleanest anomaly: three frames agreeing to **0.6 % CV**,
+  the tightest in the set, sitting 14.5 % from the stereo. Internal consistency
+  that good with a large offset is the signature of a scale disagreement, which
+  is precisely what reprojection residual cannot see. One dive, not a
+  statistical question.
+* **The two Blue Parrotfish** disagree by 18 points in opposite directions on
+  one species, one day, six frames between them. Either the labelling differs
+  or one pairing is wrong.
+
+### What this does and does not license in the paper
+
+It does **not** license changing §4.5's conclusion. Seven pairs at ±8 points is
+exactly the arithmetic that paragraph already states, and the honest sentence
+is still that field accuracy is unmeasurable from this corpus.
+
+What it does license is a narrower, true claim: on one day, seven wild fish
+measured by two instruments agree to within about 10 % per individual with no
+detectable systematic offset — and the first paired field dataset this project
+has, with the provenance recorded well enough to extend.
+
+Species attribution across all of it remains the labeler's and unverified: the
+mislabel detector needs a known length and no wild fish has one. Frame 1378 of
+dive 25 was labelled Rainbow Parrotfish among nine Blue Parrotfish and was
+caught only because a human looked.
