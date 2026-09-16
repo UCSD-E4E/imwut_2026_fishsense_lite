@@ -425,26 +425,32 @@ at 13 % between cameras and 16 % between deployments, and the $F$-based interval
 degenerate at these sample sizes. A unit-to-unit bias of order the fish spread itself is
 therefore not excluded, which is a statement about the sample and not about the instrument.
 
-**A comparison against stereo video is available and comes out inconclusive.** Our
-collaborators measured the same species at the same reef in the same seasons with a
-calibrated stereo-video rig, 1,120 lengths over ten sites, to the same fork-length
-convention. Per species our medians differ from theirs by −21 % to +9 %, with bootstrap
-intervals spanning zero for three of the five species that have enough of our fish to
-compare, and the offsets vary by as much between our own units as they do against the
-stereo. We therefore report it as a consistency check — our field lengths sit within the
-sampling limits of the independent archive — and not as a bias measurement. Two further
-cautions belong with it: the two systems' spreads are the same (between-fish CV 18.7 %
-against 19.1 %), so no claim of a narrower distribution is supported; and the stereo's
-quoted precision is a propagated click-error (1.0 % of length) rather than a measured
-repeatability, with essentially one measurement per individual in the archive, so it is not
+**Two independent comparisons against a stereo-video archive are available, and
+they agree with each other: neither detects a systematic offset, and neither can
+rule one out.** Our collaborators measured the same species at the same reef in
+the same seasons with a calibrated stereo rig — 1,120 lengths over ten sites, to
+the same fork-length convention — and on one day they measured the *same
+individual animals* we did. The two comparisons differ in design by a lot, so we
+give both and let the weaker one be superseded rather than dropped.
+
+**The population comparison cannot carry a conclusion, and the reason is
+instructive.** Per species our medians differ from theirs by −21 % to +9 %, with
+bootstrap intervals spanning zero for three of the five species that have enough
+of our fish to compare. But split by camera unit, the same species at the same
+reef scatters by as much between our own units as it does against the stereo, and
+that scatter is not distinguishable from sampling 2–10 fish at a per-fish spread
+of 19 %. Two further cautions belong with it. The two systems' spreads are the
+same — between-fish CV 18.7 % against 19.1 % — so no claim of a narrower
+distribution is supported. And the stereo's quoted precision is a propagated
+click-error (1.0 % of length) rather than a measured repeatability, with
+essentially one measurement per individual in the archive, so it is not
 comparable to the 2.9 % above.
 
-**One day does better than that, and it is worth reporting for the design rather
-than the number.** On 2023-08-03 at two of the sites, the archive and our own
-capture record the *same named individuals* — each of our dive folders that day
-holds one fish, and the archive numbers the same fish the same way (both sides'
+**The paired comparison is the better design, and it is what the archive
+unexpectedly permits.** On 2023-08-03 at two sites, each of our dive folders
+holds one fish and the archive numbers the same fish the same way — both sides'
 hogfish numbering at one site runs 1–12 and both skip 10, so it is a shared
-registry rather than two independent counts). Seven individuals were measured by
+registry rather than two independent counts. Seven individuals were measured by
 both instruments. This is a separate day from the seven deployments above and is
 not part of the 162 measurements; its lengths rest on a calibration fitted from
 that morning's slate burst (10.55 cm, inside the 9.87–10.54 cm band 30 of the
@@ -452,7 +458,7 @@ fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time 
 borrowed calibration has produced field lengths checked against anything
 external.
 
-**The estimator, not the statistic, carries this result.** Because head and tail
+**The estimator, not the statistic, carries that result.** Because head and tail
 are back-projected at a single laser-derived depth, an out-of-plane fish can only
 read *short* — on these frames the measured length is 0.9972–0.9997 of the flat
 in-plane span its clicked pixels subtend at that range, never above 1.0. With a
@@ -465,29 +471,31 @@ foreshortening cannot account for. We report both, because reporting the median
 alone would read as a small negative bias and would be the wrong summary of a
 one-sided error — the same reason $p_{90}$ rather than a mean appears in §4.3.
 
-**What it excludes, and what it cannot.** The disagreement is not a calibration
-error: all seven fish resolve through one borrowed fit, so a scale error is
-common-mode and cannot separate individuals, and the scale-free range check of
-§4.1 applied to the best-sampled fish (11 frames over a 1.55× range spread) is
-flat at $+0.8\,\%$ per metre ($r=0.03$). It is not the projection, which is
-self-consistent to a fraction of a percent above. And it is not a landmark
-convention: the two individuals of one species on this day disagree in *opposite*
-directions, and their tail landmarks sit at the fork on the one reading long and
-at the fin tip on the one reading short — the reverse of what a systematic
-over-reach would produce. What remains is a residual we cannot attribute: either
-we read long on four of seven fish, or the stereo reads short, or the pairing is
-wrong on those individuals, and with seven pairs and no third instrument those
-are not separable. The mean difference spans zero under both estimators.
+**What the paired day excludes, and what it cannot.** The disagreement is not a
+calibration error: all seven fish resolve through one borrowed fit, so a scale
+error is common-mode and cannot separate individuals, and the scale-free range
+check of §4.1 applied to the best-sampled fish (11 frames over a 1.55× range
+spread) is flat at $+0.8\,\%$ per metre ($r=0.03$). It is not the projection,
+which is self-consistent to a fraction of a percent above. And it is not a
+landmark convention: the two individuals of one species on this day disagree in
+*opposite* directions, and their tail landmarks sit at the fork on the one
+reading long and at the fin tip on the one reading short — the reverse of what a
+systematic over-reach would produce. What remains is a residual we cannot
+attribute: either we read long on four of seven fish, or the stereo reads short,
+or the pairing is wrong on those individuals, and with seven pairs and no third
+instrument those are not separable. The mean difference spans zero under both
+estimators, as it does in the population comparison.
 
-**So this does not change the conclusion of the preceding paragraphs.** Seven
-paired individuals at $\pm 8$ points is the same arithmetic that makes a
-per-unit median uninformative, and field accuracy remains unmeasured. What the
-day supports is narrower and worth stating exactly: on one day, seven wild fish
-measured by two independent instruments agreed to within about 10 % per
-individual with no detectable systematic offset. It is also a template — the
-same-individual design, and a slate burst shot at two clearly different
-standoffs, is what would make a future deployment answer the question this
-corpus cannot.
+**So the two comparisons reach the same place from opposite ends, and neither
+changes the conclusion of the preceding paragraphs.** The population comparison
+is limited by between-unit scatter on 2–10 fish per unit; the paired comparison
+is limited by seven individuals at $\pm 8$ points. Field accuracy remains
+unmeasured. What the paired day supports is narrower and worth stating exactly:
+on one day, seven wild fish measured by two independent instruments agreed to
+within about 10 % per individual with no detectable systematic offset. It is also
+a template — the same-individual design, and a slate burst shot at two clearly
+different standoffs, is what would make a future deployment answer the question
+this corpus cannot.
 
 #### Sessions the rule rejects
 
@@ -598,9 +606,12 @@ check that would have caught any of this in the field.
   stereo-video archive, with the 1:1 line. Bars are bootstrap intervals on each median; the
   vertical ones are computed per *animal*, not per frame. **Read this differently from
   Figure 1.** There, one object is compared with its own known length, so a departure from
-  1:1 is error. Here the two axes are different animals — ours and theirs, same reef and
-  season but never the same individual — so a departure is error *or* a difference in which
-  fish each encountered, and nothing in the data separates them. The arms differ by 12×
+  1:1 is error. Here the two axes are **different animals** — ours and theirs, same reef and
+  season, and for the five species plotted never the same individual — so a departure is
+  error *or* a difference in which fish each encountered, and nothing in this figure
+  separates them. The seven paired individuals of §4.5 are the exception and are
+  deliberately not shown here: pooling a same-individual comparison into a
+  population-median plot would hide the very distinction this caption draws. The arms differ by 12×
   across these five species because the samples do, and that asymmetry is the result: Nassau
   Grouper's median sits ±23.5 cm on a 49 cm fish (7 of our animals against 8 of theirs),
   while Stoplight Parrotfish's stereo median is pinned to ±2.0 cm by 391. Five species with
