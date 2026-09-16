@@ -794,6 +794,23 @@ caught any of this in the field.
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
+- **Figure 16** *(§4.3)* — How many frames $p_{90}$ needs. Rarefaction: draw $n$ frames
+  without replacement from each of the fifteen cohort cells holding ≥ 30, take $p_{90}$,
+  and compare it with that cell's full-sample $p_{90}$; band is the central 80 % of 1,000
+  draws per cell, line their median. The reference is each cell's own value, so this shows
+  the **estimator's** sampling spread and not how accurate any target was. **The step at
+  $n = 10$ is arithmetic, not noise** — nearest rank is $\lceil 0.9n \rceil$, which equals
+  $n$ for every $n \le 10$, so below ten frames $p_{90}$ is the sample maximum, the noisiest
+  order statistic there is. Crossing that boundary narrows the 80 % interval from 2.08 pp
+  at $n = 9$ to 1.35 pp at $n = 10$ with no more information, purely because the estimator
+  stops taking the extreme. **Two thresholds follow**: ten frames to make $p_{90}$ a
+  quantile at all, and thirteen for it to land within 1 pp of its own limit 90 % of the
+  time (20 frames for 92 %, 30 for 97 %). The remaining sawtooth at $n = 20$ and $n = 30$
+  is the same arithmetic on a smaller scale.
+  **What this figure does not cover**, and the ruler is the cautionary case: it measures
+  sampling spread on cells whose diver *did* vary pose. More frames only help if the
+  animal is presented broadside at some point — six frames all taken at 15° return a stable,
+  confident, wrong answer, and no sample size fixes that.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
   black: pooled median and interquartile range; dashed: $\cos\theta - 1$; dotted: the 15 %

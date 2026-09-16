@@ -627,6 +627,46 @@ board's clicked span actually is.
 
 ---
 
+## 7c. How many frames p90 needs (2026-09-16)
+
+Asked straight after the ruler: if six frames were not enough, what is? Measured by
+rarefaction — draw n frames without replacement from each of the fifteen cohort cells
+holding ≥ 30, take p90, compare with that cell's own full-sample p90, 1,000 draws each.
+`repeatability.p90_rarefaction`, Figure 16.
+
+| n | rank | median err | 80 % interval | within 1 pp |
+|---|---|---|---|---|
+| 2 | 2/2 | −0.70 | 3.20 pp | 57 % |
+| 5 | 5/5 | −0.07 | 2.27 | 76 % |
+| 9 | 9/9 | +0.21 | 2.08 | 78 % |
+| **10** | **9/10** | −0.28 | **1.35** | 85 % |
+| **13** | 12/13 | −0.05 | 1.12 | **90 %** |
+| 20 | 18/20 | −0.07 | 0.89 | 92 % |
+| 30 | 27/30 | +0.00 | 0.68 | 97 % |
+
+**Two thresholds, and the first one is arithmetic.** ceil(0.9n) = n for every n <= 10, so
+below ten frames p90 is the sample MAXIMUM rather than a quantile. Crossing that boundary
+narrows the 80 % interval from 2.08 to 1.35 pp on no extra information — purely because the
+estimator stops taking the extreme. Then 13 frames for |error| < 1 pp at 90 % confidence.
+The sawtooth at n = 20 and 30 is the same arithmetic on a smaller scale.
+
+Note the median error CHANGES SIGN across the small-n range: −0.70 pp at n = 2 (the
+maximum of two draws sits well below the true 90th percentile) through +0.21 at n = 9 (the
+maximum of nine sits above it). Neither direction is safe, which is worth knowing before
+anyone treats a small-n p90 as conservative.
+
+**What this does NOT measure, and the ruler is why it matters.** It is sampling spread on
+cells whose diver did vary pose. More frames help only if the animal is presented broadside
+at some point; six frames all taken at 15° return a stable, confident, wrong answer
+(§7b) and no sample size repairs that. Sample size is necessary, not sufficient.
+
+Practical read for the field: the field corpus has a median of 2 frames per animal and a
+maximum of 8, so **every field p90 is a longest frame** and sits in the worst part of this
+curve. That is not a reason to distrust the field medians — it is a reason not to quote a
+field p90 as if it carried a pool p90's precision.
+
+---
+
 ## 8. The SMILE stereo-video archive — what a field comparison can and cannot say (2026-09-13)
 
 `~/Downloads/SMILE_Archive_LengthData.csv` is our collaborators' EventMeasure export: 1,471

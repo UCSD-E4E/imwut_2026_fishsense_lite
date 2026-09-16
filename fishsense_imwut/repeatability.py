@@ -141,3 +141,62 @@ def load_field(path):
     import pandas as pd
 
     return pd.read_csv(path, sep="|")
+
+
+# --- how many frames does p90 need? --------------------------------------
+#
+# The ruler forced this question (HELD_OUT_MODELS): six frames, and its p90 was
+# simply the largest of the six. Nearest rank is ceil(0.9n), which equals n for
+# every n <= 10, so below ten frames "p90" is not a quantile at all -- it is the
+# maximum, the noisiest order statistic there is. This measures what that costs.
+
+
+def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0,
+                    tolerance: float = 1.0):
+    """How far a p90 from `n` frames lands from the same group's full-sample p90.
+
+    `groups` maps a key to that group's per-frame percent errors -- use
+    `by_session_target` on the cohort. Only groups with enough frames to draw
+    `n` without replacement contribute at each `n`, so a group never competes
+    with itself and `n` is never inflated by resampling.
+
+    Returns a dict ``n -> (median, p10, p90, within)`` of the ERROR of the
+    subsample estimate, in percentage points, pooled over groups and draws;
+    `within` is the fraction of draws landing inside +-`tolerance` pp.
+
+    Read it as the spread a diver with `n` frames of one fish actually faces.
+    The reference is each group's own full-sample p90, so this isolates the
+    estimator's sampling behaviour from how accurate that group happened to be.
+    """
+    from .pubfig import nearest_rank_p90
+
+    rng = np.random.default_rng(seed)
+    full = {k: nearest_rank_p90(v) for k, v in groups.items()}
+    out = {}
+    for n in sizes:
+        errs = [
+            np.array([nearest_rank_p90(rng.choice(v, n, replace=False))
+                      for _ in range(draws)]) - full[k]
+            for k, v in groups.items() if len(v) >= n
+        ]
+        if not errs:
+            continue
+        e = np.concatenate(errs)
+        lo, hi = np.percentile(e, [10, 90])
+        out[int(n)] = (float(np.median(e)), float(lo), float(hi),
+                       float((np.abs(e) < tolerance).mean()))
+    return out
+
+
+def p90_min_frames(rarefaction, confidence: float = 0.90):
+    """Smallest n whose p90 lands inside the rarefaction's tolerance at least
+    `confidence` of the time, and stays there for every larger n tested.
+
+    The tolerance is whichever one `p90_rarefaction` was given -- it is baked
+    into the `within` column, not re-applied here.
+    """
+    ns = sorted(rarefaction)
+    for i, n in enumerate(ns):
+        if all(rarefaction[m][3] >= confidence for m in ns[i:]):
+            return n
+    return None

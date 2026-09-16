@@ -249,3 +249,69 @@ def test_the_pool_is_where_p90_is_a_real_quantile(field):
     )
     assert cells.n.median() >= 20
     assert (cells.p90 < cells.longest).mean() > 0.5
+
+
+# --- how many frames p90 needs --------------------------------------------
+
+
+@pytest.fixture(name="cohort_cells")
+def _cohort_cells():
+    rows = [r for r in cal.load_rows(DATA / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    a = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)
+           & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+    return {k: v for k, v in rep.by_session_target(a, value="pct_error").items()
+            if len(v) >= 30}
+
+
+def test_the_rarefaction_never_draws_a_group_beyond_its_frames(cohort_cells):
+    """n must never be inflated by resampling, or the whole figure is circular.
+
+    Each draw is without replacement from a group that HAS n frames, so a group
+    stops contributing once n passes its size rather than padding itself.
+    """
+    assert len(cohort_cells) == 15
+    sizes = sorted(len(v) for v in cohort_cells.values())
+    r = rep.p90_rarefaction(cohort_cells, sizes=(2, 30, 40, 200), draws=20)
+    assert 2 in r and 30 in r and 40 in r
+    assert 200 not in r, "no group has 200 frames, so n=200 must be absent"
+    assert max(sizes) >= 40
+
+
+def test_p90_is_the_maximum_below_ten_frames_and_that_is_the_step(cohort_cells):
+    """The figure's whole claim, and it is arithmetic before it is empirical.
+
+    ceil(0.9n) == n for every n <= 10, so below ten frames p90 takes the sample
+    maximum -- the noisiest order statistic. Crossing the boundary narrows the
+    80 % interval by a third with no extra information.
+    """
+    for n in range(2, 10):
+        assert int(np.ceil(0.9 * n)) == n
+    assert int(np.ceil(0.9 * 10)) == 9
+
+    r = rep.p90_rarefaction(cohort_cells, sizes=(8, 9, 10, 11))
+    width = {n: r[n][2] - r[n][1] for n in r}
+    assert width[9] == pytest.approx(2.08, abs=0.15)
+    assert width[10] == pytest.approx(1.35, abs=0.15)
+    assert width[10] < 0.75 * width[9]
+    assert width[11] == pytest.approx(width[10], abs=0.2)
+
+
+def test_thirteen_frames_is_the_reported_minimum(cohort_cells):
+    """Section 4.3's guidance: 13 frames puts p90 within 1 pp of its own limit
+    90 % of the time, and every larger n tested stays there."""
+    r = rep.p90_rarefaction(cohort_cells)
+    assert rep.p90_min_frames(r) == 13
+    assert r[13][3] >= 0.90
+    assert r[9][3] < 0.85
+    assert all(r[n][3] >= 0.90 for n in r if n >= 13)
+
+
+def test_the_tolerance_actually_reaches_the_minimum(cohort_cells):
+    """Regression: `p90_min_frames` reads the `within` column, so the tolerance
+    handed to `p90_rarefaction` has to be the one that shaped it. An earlier
+    draft took a tolerance argument on the wrong function and ignored it."""
+    loose = rep.p90_rarefaction(cohort_cells, tolerance=2.0)
+    tight = rep.p90_rarefaction(cohort_cells, tolerance=0.5)
+    assert rep.p90_min_frames(loose) < rep.p90_min_frames(tight)
