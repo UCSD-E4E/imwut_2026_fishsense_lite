@@ -439,6 +439,56 @@ quoted precision is a propagated click-error (1.0 % of length) rather than a mea
 repeatability, with essentially one measurement per individual in the archive, so it is not
 comparable to the 2.9 % above.
 
+**One day does better than that, and it is worth reporting for the design rather
+than the number.** On 2023-08-03 at two of the sites, the archive and our own
+capture record the *same named individuals* — each of our dive folders that day
+holds one fish, and the archive numbers the same fish the same way (both sides'
+hogfish numbering at one site runs 1–12 and both skip 10, so it is a shared
+registry rather than two independent counts). Seven individuals were measured by
+both instruments. This is a separate day from the seven deployments above and is
+not part of the 162 measurements; its lengths rest on a calibration fitted from
+that morning's slate burst (10.55 cm, inside the 9.87–10.54 cm band 30 of the
+fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time a
+borrowed calibration has produced field lengths checked against anything
+external.
+
+**The estimator, not the statistic, carries this result.** Because head and tail
+are back-projected at a single laser-derived depth, an out-of-plane fish can only
+read *short* — on these frames the measured length is 0.9972–0.9997 of the flat
+in-plane span its clicked pixels subtend at that range, never above 1.0. With a
+one-sided error the per-fish median is biased downward by however much the pose
+varied, and the per-fish *maximum* is a lower bound on the animal. Summarising
+the seven pairs by median gives a difference of **−3.7 %**; by maximum,
+**+8.6 %**, with the scatter unchanged at ~11 % in both cases. Four of the seven
+exceed the stereo even at their maximum, by 8.6–12.3 %, which our own
+foreshortening cannot account for. We report both, because reporting the median
+alone would read as a small negative bias and would be the wrong summary of a
+one-sided error — the same reason $p_{90}$ rather than a mean appears in §4.3.
+
+**What it excludes, and what it cannot.** The disagreement is not a calibration
+error: all seven fish resolve through one borrowed fit, so a scale error is
+common-mode and cannot separate individuals, and the scale-free range check of
+§4.1 applied to the best-sampled fish (11 frames over a 1.55× range spread) is
+flat at $+0.8\,\%$ per metre ($r=0.03$). It is not the projection, which is
+self-consistent to a fraction of a percent above. And it is not a landmark
+convention: the two individuals of one species on this day disagree in *opposite*
+directions, and their tail landmarks sit at the fork on the one reading long and
+at the fin tip on the one reading short — the reverse of what a systematic
+over-reach would produce. What remains is a residual we cannot attribute: either
+we read long on four of seven fish, or the stereo reads short, or the pairing is
+wrong on those individuals, and with seven pairs and no third instrument those
+are not separable. The mean difference spans zero under both estimators.
+
+**So this does not change the conclusion of the preceding paragraphs.** Seven
+paired individuals at $\pm 8$ points is the same arithmetic that makes a
+per-unit median uninformative, and field accuracy remains unmeasured. What the
+day supports is narrower and worth stating exactly: on one day, seven wild fish
+measured by two independent instruments agreed to within about 10 % per
+individual with no detectable systematic offset. It is also a template — the
+same-individual design, and a slate burst shot at two clearly different
+standoffs, is what would make a future deployment answer the question this
+corpus cannot.
+
 #### Sessions the rule rejects
 
 *(For the paper's limitations paragraph, or an appendix; Figure A gives every session.)*
