@@ -13,10 +13,9 @@ Every number below is produced by `fish_model_analysis/fish_model_measurements.i
 `data/corpus.csv` and `data/angles.csv`, and the cohort is pinned by
 `tests/test_calibration.py`. Figure files are in `fish_model_analysis/figures/`.
 
-Two blockquoted flags below mark numbers this pass could **not** re-derive: §4.2's
-checkerboard-minus-slate baseline comparison, which reads the database rather than a
-committed CSV, and the closing recount in "Sessions the rule rejects", which describes a
-cohort rule that has since been removed.
+One blockquoted flag below marks the single number this pass could **not** re-derive:
+§4.2's checkerboard-minus-slate baseline comparison, which reads the database rather than a
+committed CSV.
 
 Part A is the section draft. Part B is the recommendation on the August repair figures.
 
@@ -150,8 +149,10 @@ two calibrations of one unit under one standard (sd 0.12 cm).
 > is known (the checkerboard side moved *up*, so a −0.27 % checkerboard-minus-slate gap
 > should narrow or cross zero) but the figure and its interval are not, and they are not
 > reproducible from the committed CSVs — `calibration_analysis/baseline.ipynb` reads the
-> database directly. Re-run it against current prod. The session calibration
-offsets agree to about half a point: a median **+1.35 pp** over the fourteen checkerboard
+> database directly. Re-run it against current prod.
+
+The session calibration offsets, which *are* reproducible from the committed export, agree
+to about half a point: a median **+1.35 pp** over the fourteen checkerboard
 sessions of the cohort against **+0.77 pp** over the five slate sessions. The deployable
 object therefore reproduces the standard one to about a percent, which is what licenses
 the substitution, and it places the dominant uncertainty in §4.3's accuracy figures on the
@@ -165,8 +166,8 @@ intrinsics, which rescale the calibration object and the laser together. We do n
 the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
 difference would be the targets rather than the calibration.
 
-A sound calibration object is not a sound calibration, and §4.1 rejects every one of its
-seven excluded sessions on the state of a single parameter. It is worth saying plainly why
+A sound calibration object is not a sound calibration, and §4.1 excludes all six of its
+calibration-rejected sessions on the state of a single parameter. It is worth saying plainly why
 that parameter needs watching. The laser's in-plane pointing angle sets metric scale and
 is invisible to any reprojection check (§3.3): rotating the axis within the camera–laser
 plane moves the projected dot by less than $10^{-12}$ px, so a calibration can be wrong by
@@ -576,25 +577,21 @@ earlier still borrow the *later* burst — the calibration from the far side of 
 0.22° and 0.17°. The repair fixed the session that owned the frames; it could not fix the
 neighbours that borrowed across the same event.
 
-The extreme case shows what a cross-epoch borrow costs when nothing constrains it: one
-session borrows a calibration whose implied in-plane error is 8°, and its lengths vary by
-134 % per metre of range.
+What is no longer on this list is as informative as what is. Earlier drafts led with an
+extreme case — a session whose borrowed calibration implied an 8° in-plane error and whose
+lengths varied by 134 % per metre. No such session survives: refitting retired it, and the
+largest trend anywhere in the corpus is now −6.1 % per metre on dive 494, implying 0.37°.
+The list has become uniform, which is what a list of one failure mode should look like.
 
-> **Recount needed.** The two sentences that followed here — "the remaining three fail the
-> session-effect bound with flat trends" and "none of the nine is a ranging failure" —
-> describe the **session-effect bound that no longer exists**: the ±2.5 pp error-magnitude
-> criterion was dropped from the rule, so nothing is now rejected for a flat offset and
-> there is no set of nine. They were already stale before the 2026-09-16 re-export, which
-> took the rejected set from seven to five. The surviving population is the five named
-> above plus dive 60 and disputed 66; whoever revises this paragraph should say which of
-> those the closing argument is about. The argument itself still holds for all of them.
-
-None of the rejections is a ranging
-failure the diver could see, which is the point: an in-plane calibration error is invisible
-to reprojection residual, which is why the calibration procedure of §3.3 photographs the
-target at several ranges, why a calibration is discarded whenever the unit has been
-handled, and why a rigid reference photographed at two ranges after calibrating is the one
-check that would have caught any of this in the field.
+So all six sessions excluded for calibration — the five above and dive 60 — are excluded
+for the same reason, and none is excluded for the size of its error. Every one carries a
+range trend its own rigid targets reveal; not one is rejected for a flat offset, because
+nothing in the rule can reject a session for that. And none is a ranging failure the diver
+could see, which is the point: an in-plane calibration error is invisible to reprojection
+residual, which is why the calibration procedure of §3.3 photographs the target at several
+ranges, why a calibration is discarded whenever the unit has been handled, and why a rigid
+reference photographed at two ranges after calibrating is the one check that would have
+caught any of this in the field.
 
 #### Edits elsewhere in the draft
 
