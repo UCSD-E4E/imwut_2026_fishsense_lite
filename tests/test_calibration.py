@@ -256,6 +256,55 @@ def test_the_measured_reference_is_the_tape_value():
         assert cal.accuracy_cohort(df) == cal.CORPUS_ACCURACY_DIVES
 
 
+def test_the_ruler_reference_is_the_printed_scale_value():
+    """The Wildco board's clicked span, read off its OWN printed inch ticks.
+
+    Nine near-range frames of dive 60 give 340.4, 340.8, 341.1, 340.5, 340.2,
+    340.4, 341.2, 340.7 and 340.7 mm -- median 340.7, sd 0.5. Adopted 341 mm on
+    the same three-significant-figure rule the trout uses.
+
+    Admissible under HANDOFF section 0 in a way the shark's re-determination was
+    not: the span is a ratio of pixels to pixels inside one frame, so range,
+    focal length and the laser calibration all cancel and no part of this
+    instrument enters. The shark's ran through the rig as a comparator, which is
+    why it stays held out instead.
+    """
+    assert cal.MEASURED_REFERENCES_M["Ruler"] == 0.341
+
+    rows = cal.load_rows(DATA / "corpus.csv")
+    raw = cal.to_frame(rows, corrected_references=False)
+    fixed = cal.to_frame(rows)
+    assert (raw.loc[raw.model_name == "Ruler", "known_length_m"] == 0.3429).all()
+    assert (fixed.loc[fixed.model_name == "Ruler", "known_length_m"] == 0.341).all()
+
+    # Six frames of 1,001: the cohort and its headline numbers do not move.
+    assert cal.accuracy_cohort(fixed) == cal.CORPUS_ACCURACY_DIVES
+    for df in (raw, fixed):
+        a = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)
+               & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+        assert len(a) == 1001
+        assert np.median(a.pct_error) == pytest.approx(-2.06, abs=0.01)
+        assert np.percentile(a.pct_error, 90) == pytest.approx(0.36, abs=0.01)
+
+    # What does move, and by how much.
+    r = fixed[fixed.model_name == "Ruler"]
+    r = r[r.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
+    assert np.median(r.pct_error) == pytest.approx(-3.66, abs=0.05)
+
+
+def test_the_shark_is_held_out_rather_than_corrected():
+    """The distinction the ruler correction must not blur.
+
+    Both references are wrong. The ruler's replacement is measured without the
+    rig, so it is adopted; the shark's candidates all run through the rig, so
+    adopting one would let the instrument set its own validation target. It is
+    held out instead, and nothing in MEASURED_REFERENCES_M may quietly fix it.
+    """
+    assert "Shark" not in cal.MEASURED_REFERENCES_M
+    assert "Shark" in cal.HELD_OUT_MODELS
+    assert "Ruler" not in cal.HELD_OUT_MODELS
+
+
 def test_the_range_trend_filter_does_not_depend_on_any_reference():
     """It compares a rigid target against ITSELF across range, so no reference
     length enters. Pinned because it is what makes the pre-filter trustworthy

@@ -528,6 +528,60 @@ the fork notch; the landmarks are not the problem.
 
 ---
 
+## 7b. The ruler's reference was 2 mm long, read off the board itself (2026-09-16)
+
+Chased down from a figure-reading question: why does the Ruler row in Figure 2 sit at
+−4.2 % when every other target sits near −1 %?
+
+**Two separate things, and only one of them was the reference.**
+
+*The narrow box is not precision.* The ruler is six frames from one session over a 13 cm
+range window (1.78–1.91 m). Every other row pools 4–9 sessions and a 2×–18× range span, so
+their boxes carry between-session calibration scatter and range scatter and the ruler's
+carries neither. Cut any target down to one session and a 1.1× band and the median IQR is
+Angelfish 0.61, Box 0.75, Shark 0.77, **Ruler 0.97**, Grouper 1.08, Trout 1.94, Snook
+2.41 pp. The ruler sits in the middle of that. Nothing to fix.
+
+*The level was partly the reference.* Measured against the board's own printed inch scale,
+in nine near-range frames of dive 60 (`082929_FishModels_FSL04/P8290128–P8290136`, JPEG
+siblings on the NAS). Each frame is straightened along the click line, the inch ticks are
+located, and the clicked span is read in inches — a ratio of pixels to pixels inside one
+frame, so range, focal length and the laser calibration cancel and no part of the rig
+enters. That is what makes it admissible where the shark's re-determination was not.
+
+| frame | range | head | tail | span |
+|---|---|---|---|---|
+| P8290136 | 0.79 m | 0.619 in | 14.022 in | 340.4 mm |
+| P8290133 | 0.80 m | 0.632 | 14.050 | 340.8 |
+| P8290134 | 0.80 m | 0.631 | 14.059 | 341.1 |
+| P8290135 | 0.80 m | 0.620 | 14.028 | 340.5 |
+| P8290132 | 0.83 m | 0.626 | 14.021 | 340.2 |
+| P8290131 | 0.84 m | 0.614 | 14.016 | 340.4 |
+| P8290130 | 0.84 m | 0.612 | 14.046 | 341.2 |
+| P8290129 | 0.84 m | — | — | 340.7 |
+| P8290128 | 0.85 m | 0.603 | 14.016 | 340.7 |
+
+**median 340.7 mm, sd 0.5**, each from a quadratic through 10–13 inch ticks at 0.29–0.41 px
+residual. Adopted as **341 mm**, three significant figures like every other reference.
+Corroborates the 341.8 ± 0.3 mm the `HELD_OUT_MODELS` note derives from the tick pitch by
+a different route, to about a millimetre.
+
+**The labels say what happened.** Heads cluster at 0.60–0.63 in, tails at 14.02–14.06 in.
+The intent was the half-inch tick to the 14-inch tick — 13.5 in, exactly the 342.9 mm on
+file — executed about a tenth of an inch short at the near end. The reference recorded the
+intent, not the clicks.
+
+**What it costs:** six frames of 1,001. Ruler median −4.20 → −3.66 %, p90 −3.80 →
+−3.27 %. Cohort median (−2.06 %) and p90 (+0.36 %) unchanged; cohort membership untouched,
+since nothing in the selection rule reads a reference. Table 1's second row moves −3.39 →
+−3.34 % and 4.42 → 4.40 %.
+
+**What it does NOT explain.** The ruler still reads −3.7 %, and that is its session, not
+the target: at p90 it sits 0.23 pp from dive 60's other targets and 0.03 pp from dive 66's.
+A reference error was worth 0.65 %, not the 4 % the raw median suggested.
+
+---
+
 ## 8. The SMILE stereo-video archive — what a field comparison can and cannot say (2026-09-13)
 
 `~/Downloads/SMILE_Archive_LengthData.csv` is our collaborators' EventMeasure export: 1,471

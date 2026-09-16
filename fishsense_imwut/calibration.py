@@ -309,7 +309,40 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
 #: carries 0.310, and that is what keeps the claim testable now that the live
 #: export agrees with the tape. Pass the frozen file, not a flag, to exercise
 #: it.
-MEASURED_REFERENCES_M = {"Rainbow Trout": 0.313}
+#:
+#: **Ruler: 0.3429 -> 0.341 m.** The Wildco 118-E40's clicked span, measured
+#: 2026-09-16 against the board's OWN printed inch scale in nine near-range
+#: frames of dive 60 (0.79-0.85 m, `082929_FishModels_FSL04/P8290128-P8290136`).
+#:
+#: The method uses no part of this instrument, which is what makes it admissible
+#: under HANDOFF section 0: each frame is straightened along the click line, the
+#: printed inch ticks are located, and the clicked span is read off in INCHES.
+#: Being a ratio of pixels to pixels within one frame it cancels range, focal
+#: length and the laser calibration outright -- the same standing as a tape.
+#: (This is exactly why the shark could NOT be corrected the same way: its
+#: re-determination ran through the rig as a comparator, so adopting it would
+#: have reproduced the instrument's own error. It stays held out.)
+#:
+#: Nine frames give 340.4, 340.8, 341.1, 340.5, 340.2, 340.4, 341.2, 340.7 and
+#: 340.7 mm -- median 340.7, sd 0.5 mm, each from a quadratic through 10-13 inch
+#: ticks with a 0.29-0.41 px residual. **Adopted as 341 mm** on the same
+#: three-significant-figure rule the trout uses: sd 0.5 mm does not support a
+#: tenth-millimetre digit.
+#:
+#: The labels themselves show what happened. Head clicks land at 0.60-0.63 in
+#: and tails at 14.02-14.06 in, so the intent was the half-inch tick to the
+#: 14-inch tick -- 13.5 in, which is the 342.9 mm on file -- executed about a
+#: tenth of an inch short at the near end. The reference recorded the intent
+#: rather than the clicks.
+#:
+#: Also corroborates, to about a millimetre, the 341.8 +- 0.3 mm this file's own
+#: HELD_OUT_MODELS note derives from the tick pitch by a different route.
+#:
+#: Effect is confined to six frames: the ruler's median moves -4.20 -> -3.66 %
+#: and its p90 -3.80 -> -3.27 %. The cohort median (-2.06 %) and p90 (+0.36 %)
+#: are unchanged at the precision they are quoted, and the cohort membership is
+#: untouched -- nothing in the selection rule reads a reference length.
+MEASURED_REFERENCES_M = {"Rainbow Trout": 0.313, "Ruler": 0.341}
 
 
 def to_frame(rows: Sequence[dict], *, corrected_references: bool = True):

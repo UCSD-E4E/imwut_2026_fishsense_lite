@@ -290,12 +290,15 @@ statistic computed by the deployed pipeline — not as an absolute accuracy.
 Over the cohort the median frame error is −2.1 % and the $p_{90}$ is +0.36 %; 80 % of
 frames are within 5 % of the reference, 98 % within 10 % and 99 % within 15 %. The
 per-target $p_{90}$ — Box +0.7 %, Purple Angelfish +0.9 %, Rainbow Trout −1.0 %, Ruler
-−3.8 %, Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range
+−3.3 %, Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range
 of lengths. The median is the more informative number about the divers: −2.1 % is what a
 typical pose of 11.6° costs, so the corpus corroborates the 15° presentation guidance of
 §4.4 from the other direction — the divers were inside it. The ruler is one session and six
-frames, so its entry carries little weight; it is the only target whose reference is
-traceable to a printed scale rather than a tape.
+frames, so its entry carries little weight; it is also the only target whose reference is
+traceable to a printed scale rather than a tape, and the only one measured without
+recourse to a ruler at all: its 341 mm is read off the board's own printed inch ticks in
+nine near-range frames, a ratio of pixels to pixels that cancels range and focal length,
+and it corrects the 343 mm the capture recorded (`calibration.MEASURED_REFERENCES_M`).
 
 The nine frames beyond 15 % are the reason the reported estimator is a high quantile and
 not a mean. They are concentrated in two of the cohort's targets rather than spread across
@@ -348,8 +351,8 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
 | accuracy cohort (rule) | 19 | 1,001 | −2.06 % | +0.36 % | 3.09 % |
-| every session except the angle experiment | 26 | 1,400 | −3.39 % | +0.04 % | 4.42 % |
-| every session | 31 | 2,828 | −5.78 % | −0.57 % | 8.98 % |
+| every session except the angle experiment | 26 | 1,400 | −3.34 % | +0.05 % | 4.40 % |
+| every session | 31 | 2,828 | −5.78 % | −0.57 % | 8.97 % |
 
 ```latex
 \begin{table}[t]
@@ -363,8 +366,8 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
     accuracy cohort (rule)               & 19 & 1{,}001 & $-2.06$ & $+0.36$ & 3.09 \\
-    all but the angle experiment         & 26 & 1{,}400 & $-3.39$ & $+0.04$ & 4.42 \\
-    every session                        & 31 & 2{,}828 & $-5.78$ & $-0.57$ & 8.98 \\
+    all but the angle experiment         & 26 & 1{,}400 & $-3.34$ & $+0.05$ & 4.40 \\
+    every session                        & 31 & 2{,}828 & $-5.78$ & $-0.57$ & 8.97 \\
     \bottomrule
   \end{tabular}
 \end{table}
