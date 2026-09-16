@@ -13,10 +13,6 @@ Every number below is produced by `fish_model_analysis/fish_model_measurements.i
 `data/corpus.csv` and `data/angles.csv`, and the cohort is pinned by
 `tests/test_calibration.py`. Figure files are in `fish_model_analysis/figures/`.
 
-One blockquoted flag below marks the single number this pass could **not** re-derive:
-§4.2's checkerboard-minus-slate baseline comparison, which reads the database rather than a
-committed CSV.
-
 Part A is the section draft. Part B is the recommendation on the August repair figures.
 
 ---
@@ -138,20 +134,24 @@ the same scale, and that is checkable without reference to any fish. The pipelin
 scale does not come from the targets: it comes from the calibration object, and a wrong one
 would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
 The laser baseline, though, is a property of the rig rather than the dive, so any unit
-calibrated both ways must report the same baseline either way. Over the five units carrying
-both (19 calibrations, five distinct slate scans) the mean checkerboard-minus-slate
-difference is **−0.27 % of baseline (95 % CI −1.1 % to +0.6 %)**, below the scatter between
-two calibrations of one unit under one standard (sd 0.12 cm).
+calibrated both ways must report the same baseline either way. Over the six units carrying
+both in the pool corpus (19 calibration *fits* — 11 checkerboard, 8 slate — which is a
+different 19 from the session count, and coincidental) the mean
+checkerboard-minus-slate difference is **+0.66 % of baseline (95 % CI −0.23 % to +1.69 %)**,
+an interval that spans zero and is of the same order as the scatter between two
+calibrations of one unit under one standard (sd 0.135 cm). One unit dominates the spread:
+its slate side includes the fleet's shortest fit at 9.87 cm, which alone carries that unit
+to +2.9 %.
 
-> **STALE — re-derive before submission.** That comparison was computed from prod's
-> `laserextrinsics` before the 2026-09-16 grid-pitch correction, which refitted all twelve
-> checkerboard calibrations and moved them +0.39 % to +0.79 %. The direction of the change
-> is known (the checkerboard side moved *up*, so a −0.27 % checkerboard-minus-slate gap
-> should narrow or cross zero) but the figure and its interval are not, and they are not
-> reproducible from the committed CSVs — `calibration_analysis/baseline.ipynb` reads the
-> database directly. Re-run it against current prod.
+The sign of that figure changed with the grid-pitch correction and is worth recording,
+because it is the substitution's cost being measured rather than asserted. Before the
+correction the checkerboard read **−0.27 %** against the slate; refitting the twelve
+checkerboard calibrations at the tape-measured pitch moved them up by +0.39 % to +0.79 %
+each, and the comparison crossed zero. The two objects agreed within the scatter before and
+agree within it now, on either side of it — which is the claim, and it did not depend on
+which side the central value happened to fall.
 
-The session calibration offsets, which *are* reproducible from the committed export, agree
+The session calibration offsets, which are reproducible from the committed export, agree
 to about half a point: a median **+1.35 pp** over the fourteen checkerboard
 sessions of the cohort against **+0.77 pp** over the five slate sessions. The deployable
 object therefore reproduces the standard one to about a percent, which is what licenses
