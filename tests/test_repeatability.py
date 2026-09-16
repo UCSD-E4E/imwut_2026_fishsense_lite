@@ -167,15 +167,25 @@ def test_the_pool_repeatability_is_what_section_4_5_reports():
     """The identical statistic on the pool cohort: repeat frames of one target
     in one session. Computed from the CURRENT corpus -- the draft's 1.4 % and
     p90 4.5 % came from the frozen August export, before six mislabelled frames
-    were corrected, and both moved when they were."""
+    were corrected, and both moved when they were.
+
+    Re-derived 2026-09-16 after the 0.04217 m pitch correction added dives 503
+    and 504 to the cohort: 29 -> 31 groups and 908 -> 1001 frames. Note this
+    statistic barely moved (median 1.326 -> 1.364 %, p90 3.271 -> 3.196), which
+    is the expected behaviour and worth stating -- repeatability is a SPREAD
+    within one session at one scale, so a pitch change is very nearly common
+    mode inside each group and cancels. The accuracy medians moved; this did
+    not. If a scale correction ever moves this number much, suspect the
+    correction is not uniform across the session."""
     rows = cal.load_rows(DATA / "corpus.csv")
     df = cal.to_frame(rows, corrected_references=True)
     df = df[df["dive_id"].isin(cal.CORPUS_ACCURACY_DIVES)]
     df = df[~df.model_name.isin(cal.HELD_OUT_MODELS)]
     result = rep.repeatability(rep.by_session_target(df))
-    assert result.n_groups == 29
-    assert result.median_percent == pytest.approx(1.33, abs=0.01)
-    assert result.p90_percent == pytest.approx(3.27, abs=0.01)
+    assert result.n_groups == 31
+    assert result.n_values == 1001
+    assert result.median_percent == pytest.approx(1.36, abs=0.01)
+    assert result.p90_percent == pytest.approx(3.20, abs=0.01)
 
 
 def test_the_field_and_pool_intervals_overlap(field):

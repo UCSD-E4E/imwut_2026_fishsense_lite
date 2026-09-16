@@ -298,6 +298,17 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
 #: taken: 312.5, 312.7, 312.74 and 313 all select the same 13 dives, n = 793,
 #: and agree to 0.04 pp on the median and 0.04 pp on the p90. The rounding to
 #: three figures is therefore immaterial as well as tidier.
+#:
+#: **This correction is a no-op on `corpus.csv` and has been since before
+#: 2026-09-16**, because prod's own `fishmodelreference` row was moved to 0.313
+#: and every export since carries that value on all 525 trout frames. So
+#: `corrected_references=False` changes nothing on the live file.
+#:
+#: Keep the mechanism rather than deleting it: the two reference-independence
+#: tests deliberately run against the frozen `corpus_20260912.csv`, which still
+#: carries 0.310, and that is what keeps the claim testable now that the live
+#: export agrees with the tape. Pass the frozen file, not a flag, to exercise
+#: it.
 MEASURED_REFERENCES_M = {"Rainbow Trout": 0.313}
 
 
@@ -416,15 +427,40 @@ RANGE_TREND_MIN_RATIO = 2.0
 RANGE_TREND_MIN_DEPTH_M = 0.8
 
 # What the rule selects on the corpus, pinned as data so a change is a diff.
-# 2026-09-15, after removing the error-magnitude band: seventeen dives. The
-# range-trend pre-filter does the rejecting (503 at +5.3 %/m on an 8.90 cm
-# baseline, 76 via the Shark at +5.33), the angle experiment and dive 60 are
-# named above, and nothing is excluded for reading far from the references.
-# 498 stays despite 9.51 cm and +2.8 %/m: its interval [+2.0, +3.8] does not
-# clear the threshold, and the filter is not tuned to keep or drop it.
+# 2026-09-16, after the checkerboard pitch was corrected 0.042 -> 0.04217 m and
+# all twelve checkerboard calibrations refitted: nineteen dives. The
+# range-trend pre-filter still does all of the rejecting (76 via the Shark at
+# +5.33, then 491/492/494 at -3.78/-2.83/-6.09 and 509 at -4.13), the angle
+# experiment and dive 60 are named above, and nothing is excluded for reading
+# far from the references.
+#
+# 503 and 504 are new members, and how they joined is the substance: they
+# borrow dive 502, whose fit went 8.897 -> 10.394 cm, and their trends fell
+# from +5.31 and +5.54 %/m to +0.60 and +0.80. 498 stays, but for a different
+# reason than the note here used to give — its own 9.509 cm fit was retired by
+# the baseline gate, so it now borrows 496 at 10.444 cm and its trend went
+# +2.77 -> +0.31 %/m.
+#
+# That is the strongest evidence for the pitch correction anywhere in this
+# repo, and it is worth being explicit about why: the range trend spends no
+# known length. Three sessions becoming internally consistent under the new
+# pitch is a scale-free check agreeing with a tape measurement, not a
+# consequence of it. Do not reverse the reasoning and tune the pitch to grow
+# this cohort.
 CORPUS_ACCURACY_DIVES = (
-    58, 59, 61, 66, 84, 495, 497, 498, 500, 501, 506, 507, 519, 520, 521, 522, 527,
+    58, 59, 61, 66, 84, 495, 497, 498, 500, 501, 503, 504, 506, 507,
+    519, 520, 521, 522, 527,
 )
+#: HISTORICAL — this no longer reproduces from either export, and the reason is
+#: not the reference. It is the thirteen-dive set from before the
+#: error-magnitude band was removed, and the "2.5 pp bound" its note describes
+#: is that removed rule. Re-running the *current* selection against the
+#: as-exported references returns the full cohort from both files, because the
+#: band is gone and nothing else in the rule reads a reference length.
+#:
+#: Kept for the sensitivity argument it records, which still stands as a
+#: statement about threshold rules in general. Nothing imports it.
+#:
 #: What the rule selected on the 2026-09-12 export (`corpus_20260912.csv`)
 #: against the as-exported 0.310 m trout reference,
 #: kept because the difference is the headline sensitivity of the whole
