@@ -4,7 +4,7 @@ Draft text for the FishCamera / FishSense Lite paper, written against the figure
 numbers in `fish_model_analysis/` as of **2026-09-16**, re-pulled after the calibration
 board's grid pitch was corrected 0.042 → 0.04217 m and all twelve checkerboard
 calibrations refitted. That moved the accuracy cohort from seventeen sessions to
-**nineteen** (503 and 504 entered), so §4.1, §4.2, §4.3's Table 1 and §4.5's pool
+**nineteen** (503 and 504 entered), so §4.1, §4.2, §4.3's Table 1 and §4.6's pool
 repeatability all carry different numbers than the 2026-09-12 draft did. The earlier
 export is kept as `data/corpus_20260912.csv`; two tests use it to hold the
 reference-independence claim, which the live export can no longer exercise on its own.
@@ -24,8 +24,8 @@ Part A is the section draft. Part B is the recommendation on the August repair f
 We evaluate FishCamera in two settings: controlled pool sessions against rigid targets of
 known length, which give an absolute accuracy figure and isolate the dominant error source
 (fish pose); and open-water deployments on wild fish, which show the system in the hands
-of the divers it is designed for. §4.1–4.4 are the pool results; §4.5 carries the existing
-field-deployment text.
+of the divers it is designed for. §4.1–§4.4 are the pool results, §4.5 the one
+simulated result they rest on, and §4.6 carries the existing field-deployment text.
 
 #### 4.1 Known-length targets
 
@@ -395,7 +395,65 @@ Two of those 542 frames do exceed 15 %, at +28.9 % and +22.2 %. Foreshortening c
 long, so a large positive error is a labelling or calibration fault rather than a pose one,
 which is why the guidance is stated on the short side.
 
-#### 4.5 Field deployments
+#### 4.5 What the port correction buys
+
+§3 says of the M52 air lens at the housing port that we quantify the distortion it
+corrects here. This is the one subsection built on simulation rather than on photographs,
+and its scope is deliberately narrow: it establishes what a measurement would read if an
+in-air calibration were carried underwater with no refraction correction at all. That is a
+statement about the failure the optic prevents, not about the accuracy any correction
+achieves. The corrections themselves — the Pinax model [??] and the in-water
+single-viewpoint calibration it is compared against — are the subject of the companion
+flat-port paper [??], and neither they nor the code implementing them appears here. The
+forward model used below is shared verbatim with that work, and the tests carried
+alongside it pin it against the Pinax paper's own Table 1.
+
+Ignoring the water's index does two things at once, and they very nearly cancel.
+Transversely the scene is expanded by $n_w$: every off-axis point images further from the
+principal point than a pinhole would place it, so a target spans more pixels than it
+should. Along the axis the laser triangulates short by close to $1/n_w$ — $-25.6\,\%$ in
+the simulated geometry, against the $-25.5\,\%$ the ratio alone predicts — and the length
+is that pixel span scaled by the range. The two factors are reciprocal, so on the optical
+axis the measurement comes out right: $+0.1\,\%$ for a 300 mm target at 2 m. A centred
+target measures correctly by accident.
+
+Off axis the cancellation fails, because the angular compression is not a pure scale.
+Figure 9 plots the length error against where in the frame the target falls, for this
+camera's intrinsics and a 300 mm target at 2 m. A quarter of the way to the frame edge the
+error is $+1.8\,\%$; half way, $+7.3\,\%$; it crosses the 15 % budget at 18° off axis —
+seven tenths of the way out — and reaches $+17.7\,\%$ at 19.6°, beyond which a target of
+that length no longer fits in frame.
+
+The shape is what makes it dangerous, more than the size. It is exactly zero where a
+careful person would check it, so centring the target on a known length is the one test
+that cannot detect it. It is not a scale error, so no calibration of the kind §4.2 reports
+can absorb it — a single multiplier cannot be right at the centre and at the edge at once.
+And it is a function of where the fish happened to fall in the frame, which is not
+recorded, is not under the diver's control, and has no reason to be balanced within a
+session, so it would not average away: it would enter §4.1's per-session spread as an
+uncontrolled term larger at the frame edge than the $-13.4\,\%$ a 30° pose costs, and
+without any of the visual cues a posed fish gives the labeler.
+
+Two inputs to this are not measured. The housing was not opened or gauged, so the pane's
+thickness and index and the camera-to-glass spacing are assumed rather than known. **The
+result does not rest on them.** Across panes of 2–20 mm, glass indices of 1.46 to 1.62,
+and camera-to-glass spacings from the optimal 0.7 mm out to an implausible 80 mm, the
+error at the frame edge moves only from $+17.7\,\%$ to $+16.7\,\%$ and the budget crossing
+from 18.3° to 19.1°. That insensitivity is structural rather than lucky: a pane shifts a
+ray sideways but cannot change its final direction in water, so the figure is set by the
+air-to-water index ratio and the field of view, both of which are known. Fresh water in
+place of salt gives $+17.5\,\%$ and a crossing at 18.6°, so the choice of water does not
+carry it either. The headline figure is for a single pane, where a waterproof camera
+inside a second housing really forms a two-pane stack. Simulating that stack directly —
+two 6 mm panes separated by 5 to 30 mm of air — gives $+17.4$ to $+17.7\,\%$ at the edge
+and a crossing at 18.3° to 18.6°. The general case is treated in [??].
+
+Everything in §4.1–§4.4 is downstream of this optic, and none of those sections can
+demonstrate it: an error the port correction has already removed leaves no trace in the
+photographs. That is the reason the figure is simulated, and the reason it is one figure
+rather than a section.
+
+#### 4.6 Field deployments
 
 *(The existing narrative text — Florida Keys deployments, the red/green laser comparison,
 Figures 5–6, the mount failures and the in-field recalibration procedure — goes here
@@ -604,14 +662,17 @@ caught any of this in the field.
   15 %. Consider stating the broadside figure directly: "median −2.1 %, $p_{90}$ +0.36 %
   over 1,001 measurements of six targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
-- **§3's promise about refraction is still unmet.** The hardware paragraph says of the
-  M52 air lens "we quantify the distortion this corrects in Section 4", and no section here
-  does. Figure 9 and `reconstruction_analysis/flat_port_cost.py` supply the number — an
-  uncorrected flat port expands the scene by $n_w$ and shortens the range by $1/n_w$, which
-  cancel on axis and reach +17.7 % at 20° off axis, crossing the 15 % budget at 18°. It
-  wants a short subsection of its own, which would push §4.2–4.5 down one. Not written
-  here, because the placement is a structural call: it is the only simulation result in an
-  otherwise empirical section, and the WUWNet paper must not lose it as motivation.
+- **§3's promise about refraction is now met by §4.5**, written above as "What the port
+  correction buys". It is placed after §4.4 rather than earlier so the empirical run
+  §4.1–§4.4 is not interrupted by the one simulated result, which costs only the
+  §4.5→§4.6 renumber. It is scoped to what an *uncorrected* port costs and stops there,
+  so the WUWNet submission keeps the correction itself — Pinax, and the in-water
+  single-viewpoint calibration — as its own contribution and loses no motivation to this
+  paper. Every number comes from `fishsense_imwut/refraction.py` (`flat_port_cost`) and is
+  pinned by `tests/test_refraction.py`, including the robustness sweeps, since §4.5 is the
+  one subsection with no CSV behind it. **Two citations are unresolved in it**: the Pinax
+  paper (Łuczyński, Pfingsthorn & Birk, *Ocean Engineering* 133, 2017, 9–22) and the
+  WUWNet submission, both written as `[??]`.
 
 #### Figure captions
 
@@ -640,15 +701,16 @@ caught any of this in the field.
   median so units that photographed different targets are comparable. One hue throughout —
   the question is whether the units differ and the answer is no. Kept for the record rather
   than the paper, alongside Figures 5, 6 and 7.
-- **Figure 9** *(no section references it yet — see the note under "Edits elsewhere")* —
+- **Figure 9** *(§4.5)* —
   Length error against position in the frame with no refraction correction,
-  simulated for this camera and housing. Ignoring the water's index expands the scene
-  transversely by $n_w$ and shortens the laser range by $1/n_w$; on the optical axis these
+  simulated for this camera at 2 m against a 300 mm target. Ignoring the water's index
+  expands the scene transversely by $n_w$ and shortens the laser range by $1/n_w$; on the
+  optical axis these
   cancel to +0.1 %, so the error appears only off axis and cannot be averaged away. Dotted:
   the 15 % budget, crossed at 18°.
 - **Figure 11** — Within-individual repeatability, wild fish against posed models. Each
   point is one group: one wild individual (≥ 3 frames), or one (session, target) cell in
-  the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.5
+  the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.6
   figure that measures the system rather than the sample — a calibration error is common to
   every frame of one animal and cancels in a relative spread — and the intervals overlap at
   the margin, which the figure shows rather than hides.
@@ -670,7 +732,7 @@ caught any of this in the field.
   1:1 is error. Here the two axes are **different animals** — ours and theirs, same reef and
   season, and for the five species plotted never the same individual — so a departure is
   error *or* a difference in which fish each encountered, and nothing in this figure
-  separates them. The seven paired individuals of §4.5 are the exception and are
+  separates them. The seven paired individuals of §4.6 are the exception and are
   deliberately not shown here: pooling a same-individual comparison into a
   population-median plot would hide the very distinction this caption draws. The arms differ by 12×
   across these five species because the samples do, and that asymmetry is the result: Nassau

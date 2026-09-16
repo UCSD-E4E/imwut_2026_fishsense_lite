@@ -22,6 +22,7 @@ from fishsense_imwut.refraction import (
     back_project_uncorrected,
     exit_ray,
     field_angle,
+    flat_port_cost,
     focus_section,
     measure_length,
     optimal_d0,
@@ -254,3 +255,211 @@ def test_uncorrected_length_error_is_position_dependent_not_a_scale():
 def test_on_axis_cancellation_is_exact_in_the_paraxial_limit():
     """Why the on-axis error is ~0: transverse gain n_w times range 1/n_w = 1."""
     assert SALTY_WATER * (1 / SALTY_WATER) == pytest.approx(1.0)
+
+
+# --- the numbers §4.5 quotes -----------------------------------------------
+#
+# §4.5 ("What the port correction buys") is the paper's one simulated result,
+# so unlike every other section it has no CSV pinning it. These pin it to
+# `flat_port_cost` instead. The robustness tests matter more than the headline:
+# the housing was never opened, so the pane's thickness and index and the
+# camera-to-glass spacing are assumed, and the section claims in bold that the
+# result does not rest on them.
+
+
+def _cost_summary(port, fish=0.30, depth=2.0, n_points=200):
+    """`(on_axis, edge, edge_deg, budget_crossing_deg, range_pct)` for any port.
+
+    A re-implementation of `flat_port_cost` that takes the port rather than
+    constructing it at the optimal spacing, so the assumptions that function
+    makes can be varied. Kept here rather than in the module because varying
+    them is a test concern; `test_summary_agrees_with_flat_port_cost` holds the
+    two together.
+    """
+    K = np.array([[2850.0, 0, 2007.0], [0, 2850.0, 1508.0], [0, 0, 1.0]])
+    laser_origin, laser_axis = np.array([-0.04, -0.11, 0.0]), np.array([0.0, 0.0, 1.0])
+    back_project = lambda q: back_project_uncorrected(q, K)
+
+    def to_pixels(points):
+        a, az = project_water_points(points, port)
+        return alpha_azimuth_to_pixel(a, az, K)
+
+    _, laser_dirs = back_project(to_pixels(laser_origin + depth * laser_axis))
+    measured_depth = reconstruct_points(
+        laser_dirs, np.zeros(3), laser_origin, laser_axis
+    )[0][2]
+
+    half_frame = water_radius(np.arctan(2007.0 / 2850.0), depth, port)
+    offsets = np.linspace(0.0, 0.75 * half_frame, n_points)
+    zeros, depths = np.zeros_like(offsets), np.full_like(offsets, depth)
+    head = to_pixels(np.stack([offsets + fish / 2, zeros, depths], -1))
+    tail = to_pixels(np.stack([offsets - fish / 2, zeros, depths], -1))
+    measured = measure_length(head, tail, measured_depth, back_project)
+
+    angles = np.degrees(np.arctan(offsets / depth))
+    errors = 100 * (measured - fish) / fish
+    return (
+        errors[0],
+        errors[-1],
+        angles[-1],
+        float(np.interp(15.0, errors, angles)),
+        100 * (measured_depth - depth) / depth,
+    )
+
+
+def _paper_port(d1=0.006, n_glass=1.49, n_water=SALTY_WATER, d0=None):
+    if d0 is None:
+        half_fov = np.arctan(np.hypot(4014 / 2, 3016 / 2) / 2850.0)
+        d0 = optimal_d0(d1, n_glass, n_water, half_fov)[0]
+    return FlatPort(d0, d1, n_glass, n_water)
+
+
+def _error_at_frame_fraction(fraction, fish=0.30, depth=2.0):
+    """Percent length error for a target centred `fraction` of the way to the edge."""
+    K = np.array([[2850.0, 0, 2007.0], [0, 2850.0, 1508.0], [0, 0, 1.0]])
+    laser_origin, laser_axis = np.array([-0.04, -0.11, 0.0]), np.array([0.0, 0.0, 1.0])
+    port = _paper_port()
+    back_project = lambda q: back_project_uncorrected(q, K)
+
+    def to_pixels(point):
+        a, az = project_water_points(point, port)
+        return alpha_azimuth_to_pixel(a, az, K)
+
+    _, laser_dirs = back_project(to_pixels(laser_origin + depth * laser_axis))
+    measured_depth = reconstruct_points(
+        laser_dirs, np.zeros(3), laser_origin, laser_axis
+    )[0][2]
+
+    centre = fraction * water_radius(np.arctan(2007.0 / 2850.0), depth, port)
+    head = to_pixels(np.array([centre + fish / 2, 0.0, depth]))
+    tail = to_pixels(np.array([centre - fish / 2, 0.0, depth]))
+    measured = float(measure_length(head, tail, measured_depth, back_project))
+    return 100 * (measured - fish) / fish
+
+
+def test_summary_agrees_with_flat_port_cost():
+    """The helper above and the module's own entry point are the same scenario."""
+    r = flat_port_cost()
+    on_axis, edge, edge_deg, crossing, range_pct = _cost_summary(_paper_port())
+    a, e = r["field_angle_deg"], r["length_pct_error"]
+    assert on_axis == pytest.approx(e[0], abs=0.01)
+    assert edge == pytest.approx(e[-1], abs=0.01)
+    assert edge_deg == pytest.approx(a[-1], abs=0.01)
+    assert range_pct == pytest.approx(r["range_pct_error"], abs=0.01)
+    assert crossing == pytest.approx(np.interp(15.0, e, a), abs=0.05)
+
+
+def test_section_4_5_headline_numbers():
+    """Every figure §4.5 states in prose, and Figure 9's caption."""
+    r = flat_port_cost()
+    a, e = r["field_angle_deg"], r["length_pct_error"]
+
+    # "+0.1 % for a 300 mm target at 2 m" -- the accidental on-axis agreement.
+    assert e[0] == pytest.approx(0.1, abs=0.05)
+
+    # "-25.6 % ... against the -25.5 % the ratio alone predicts"
+    assert r["range_pct_error"] == pytest.approx(-25.6, abs=0.1)
+    assert r["range_pct_error"] == pytest.approx(
+        100 * (1 / SALTY_WATER - 1), abs=0.2
+    )
+
+    # "a quarter of the way to the frame edge ... +1.8 %; half way, +7.3 %"
+    # Evaluated exactly rather than interpolated off the plotted samples: the
+    # curve is convex, so linear interpolation reads low by about 0.05 points.
+    assert _error_at_frame_fraction(0.25) == pytest.approx(1.8, abs=0.05)
+    assert _error_at_frame_fraction(0.50) == pytest.approx(7.3, abs=0.05)
+
+    # The plotted span is three quarters of the half-frame; recover the fraction
+    # from the angles rather than assuming a sample count.
+    offsets = np.tan(np.radians(a))
+    fraction = 0.75 * offsets / offsets[-1]
+
+    # "crosses the 15 % budget at 18 deg -- seven tenths of the way out"
+    crossing = np.interp(15.0, e, a)
+    assert crossing == pytest.approx(18.3, abs=0.1)
+    assert np.interp(crossing, a, fraction) == pytest.approx(0.70, abs=0.02)
+
+    # "reaches +17.7 % at 19.6 deg, beyond which a 300 mm target no longer fits"
+    assert e[-1] == pytest.approx(17.7, abs=0.1)
+    assert a[-1] == pytest.approx(19.6, abs=0.1)
+
+    # "larger at the frame edge than the -13.4 % a 30 deg pose costs"
+    assert 100 * (np.cos(np.radians(30)) - 1) == pytest.approx(-13.4, abs=0.1)
+    assert e[-1] > abs(100 * (np.cos(np.radians(30)) - 1))
+
+
+def test_headline_survives_the_unmeasured_housing():
+    """§4.5's bold claim: the result does not rest on the parameters we guessed.
+
+    Pane thickness, glass index and camera-to-glass spacing were never measured.
+    The section claims the edge error stays within +16.7 to +17.7 % and the
+    budget crossing within 18.3 to 19.1 deg across every plausible value, because
+    a pane displaces a ray sideways but cannot change its direction in water --
+    so the answer is set by the index ratio and the field of view, both known.
+    """
+    edges, crossings = [], []
+    for d1 in (0.002, 0.006, 0.010, 0.015, 0.020):
+        _, edge, _, crossing, _ = _cost_summary(_paper_port(d1=d1))
+        edges.append(edge)
+        crossings.append(crossing)
+    for n_glass in (1.46, 1.49, 1.52, 1.62):
+        _, edge, _, crossing, _ = _cost_summary(_paper_port(n_glass=n_glass))
+        edges.append(edge)
+        crossings.append(crossing)
+    for d0 in (0.002, 0.010, 0.030, 0.050, 0.080):  # 0.080 is absurd, deliberately
+        _, edge, _, crossing, _ = _cost_summary(_paper_port(d0=d0))
+        edges.append(edge)
+        crossings.append(crossing)
+
+    assert min(edges) == pytest.approx(16.7, abs=0.1)
+    assert max(edges) == pytest.approx(17.7, abs=0.1)
+    assert min(crossings) == pytest.approx(18.3, abs=0.1)
+    assert max(crossings) == pytest.approx(19.1, abs=0.1)
+
+
+def test_headline_survives_fresh_water():
+    """"Fresh water in place of salt gives +17.5 % and a crossing at 18.6 deg"."""
+    _, edge, _, crossing, _ = _cost_summary(_paper_port(n_water=SWEET_WATER))
+    assert edge == pytest.approx(17.5, abs=0.1)
+    assert crossing == pytest.approx(18.6, abs=0.1)
+
+
+class _Stack:
+    """A waterproof camera inside a second housing: air, pane, air, pane.
+
+    §4.5 reports this case but the module deliberately carries no `LayeredPort`
+    -- the multi-pane treatment belongs to the companion paper. Everything in
+    `refraction` reaches the port only through `layers`, `d2`, `n_air` and
+    `n_water`, so the stack is expressible here without widening that boundary.
+    """
+
+    def __init__(self, d0, t1, n1, gap, t2, n2, n_water, n_air=1.0):
+        self.d0, self.n_water, self.n_air = d0, n_water, n_air
+        self._panes = ((d0, n_air), (t1, n1), (gap, n_air), (t2, n2))
+
+    @property
+    def layers(self):
+        return self._panes
+
+    @property
+    def d2(self):
+        return sum(thickness for thickness, _ in self._panes)
+
+
+def test_two_pane_stack_does_not_move_the_headline():
+    """"two 6 mm panes separated by 5 to 30 mm of air -- +17.4 to +17.7 %"."""
+    half_fov = np.arctan(np.hypot(4014 / 2, 3016 / 2) / 2850.0)
+    d0 = optimal_d0(0.006, 1.49, SALTY_WATER, half_fov)[0]
+
+    edges, crossings = [], []
+    for gap in (0.005, 0.015, 0.030):
+        _, edge, _, crossing, _ = _cost_summary(
+            _Stack(d0, 0.006, 1.49, gap, 0.006, 1.49, SALTY_WATER)
+        )
+        edges.append(edge)
+        crossings.append(crossing)
+
+    assert min(edges) == pytest.approx(17.4, abs=0.1)
+    assert max(edges) == pytest.approx(17.7, abs=0.1)
+    assert min(crossings) == pytest.approx(18.3, abs=0.1)
+    assert max(crossings) == pytest.approx(18.6, abs=0.1)
