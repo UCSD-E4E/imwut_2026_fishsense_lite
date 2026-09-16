@@ -6,14 +6,18 @@ The numbers are pinned against the two committed extractions
 comparison is reproducible from this repository rather than from a prod query
 that may not return the same rows next week.
 
-The test that carries the analysis is `test_the_estimator_choice_flips_the_sign`.
-An out-of-plane fish can only read SHORT, so a per-fish median is biased
-downward and a per-fish maximum is a lower bound on the animal. Reporting the
-median alone gives -3.7 % and reads as "we measure slightly short"; the
-maximum gives +8.6 % and reads as "four of seven fish are longer than the
-stereo says". Both are true statements about the same data, and the first one
-is the wrong summary for a one-sided error -- the same reason section 4.3
-reports p90 rather than a mean.
+The paper reports ONE estimator, p90, everywhere a set of frames becomes a
+length, so `test_p90_is_the_reported_estimator_between_the_other_two` is the
+test that carries the analysis and the rest are context. An out-of-plane fish
+can only read SHORT, so a per-fish median inherits the pose loss (-3.7 %, reads
+as "we measure slightly short") while p90 rejects it (+3.5 %, reads as "four of
+seven fish are longer than the stereo says"). Both are true of the same data;
+the median is the wrong summary for a one-sided error, which is the same reason
+section 4.3 reports p90 rather than a mean.
+
+`test_the_estimator_choice_flips_the_sign` and the maximum-based tests are kept
+because the spread between estimators is what justifies the choice -- not
+because any of them is reported.
 """
 
 from pathlib import Path

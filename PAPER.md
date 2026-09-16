@@ -264,6 +264,18 @@ than the instrument, and a high quantile is robust to that tail in a way a mean 
 $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed pipeline
 reports.
 
+**This is the paper's only estimator**, used wherever a set of frames becomes one length:
+the pool targets here, and in §4.6 each wild animal, in Figures 13, 14 and 15 alike. One
+consequence of nearest rank is worth stating once, because the two settings differ. A pool
+cell holds 26 frames at the median, where $\lceil 0.9n \rceil$ is a genuine high quantile;
+a wild animal here holds at most eight, and $\lceil 0.9n \rceil$ is $n$ for every
+$n \le 10$, so **every field $p_{90}$ is that animal's longest frame**. With a one-sided
+error that is the intended reading — the longest frame is the one least corrupted by
+pose — but the field estimates should not be credited with the precision the pool
+estimates carry. Where a *population* is summarised rather than a measurement, §4.6 takes
+the median across animals: a $p_{90}$ there would name the ninetieth-percentile fish,
+which is a different quantity.
+
 It is an upper quantile, and we are careful not to read it as a recovery of the true
 length. A quantile sits above the centre of whatever distribution it is given, pose or no
 pose: on Gaussian noise at the within-cell spread we measure (1.3 %), the expected
@@ -531,15 +543,18 @@ individual animals* we did. The two comparisons differ in design by a lot, so we
 give both and let the weaker one be superseded rather than dropped.
 
 **The population comparison cannot carry a conclusion, and the reason is
-instructive.** Per species our medians differ from theirs by −21 % to +9 %, with
-bootstrap intervals spanning zero for three of the five species that have enough
-of our fish to compare. But split by camera unit, the same species at the same
+instructive.** Each animal reduces to one length at $p_{90}$ as above, and the
+species is then summarised by the median across animals — a population statistic,
+where $p_{90}$ would name the ninetieth-percentile *fish* rather than a
+measurement. On that footing our species medians differ from theirs by −21 % to
++12 %, with bootstrap intervals spanning zero for three of the five species that
+have enough of our fish to compare. But split by camera unit, the same species at the same
 reef scatters by as much between our own units as it does against the stereo, and
 that scatter is not distinguishable from sampling 2–10 fish at a per-fish spread
 of 19 %. Two further cautions belong with it. The two systems' spreads are the
-same — between-fish CV 18.7 % against 19.1 % — so no claim of a narrower
-distribution is supported. And the stereo's quoted precision is a propagated
-click-error (1.0 % of length) rather than a measured repeatability, with
+same — between-fish CV 19.1 % against 19.1 % on the best-sampled species — so no
+claim of a narrower distribution is supported. And the stereo's quoted precision is a
+propagated click-error (1.0 % of length) rather than a measured repeatability, with
 essentially one measurement per individual in the archive, so it is not
 comparable to the 2.9 % above.
 
@@ -555,18 +570,32 @@ fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time 
 borrowed calibration has produced field lengths checked against anything
 external.
 
-**The estimator, not the statistic, carries that result.** Because head and tail
-are back-projected at a single laser-derived depth, an out-of-plane fish can only
-read *short* — on these frames the measured length is 0.9972–0.9997 of the flat
-in-plane span its clicked pixels subtend at that range, never above 1.0. With a
-one-sided error the per-fish median is biased downward by however much the pose
-varied, and the per-fish *maximum* is a lower bound on the animal. Summarising
-the seven pairs by median gives a difference of **−3.7 %**; by maximum,
-**+8.6 %**, with the scatter unchanged at ~11 % in both cases. Four of the seven
-exceed the stereo even at their maximum, by 8.6–12.3 %, which our own
-foreshortening cannot account for. We report both, because reporting the median
-alone would read as a small negative bias and would be the wrong summary of a
-one-sided error — the same reason $p_{90}$ rather than a mean appears in §4.3.
+**The comparison is reported at $p_{90}$, the estimator used everywhere else in
+this paper**, and the reason it is not a median is visible in this data. Because
+head and tail are back-projected at a single laser-derived depth, an out-of-plane
+fish can only read *short* — on these frames the measured length is 0.9972–0.9997
+of the flat in-plane span its clicked pixels subtend at that range, never above
+1.0. A median over frames therefore inherits however much the pose varied, and a
+high-order statistic rejects it; that is the same argument §4.3 makes against a
+mean. Over the seven pairs $p_{90}$ gives a difference of **+3.5 %** (mean
++0.8 %, sd 10.1 %, Figure 15), and **four of the seven read longer than the
+stereo, by 3.5 to 11.2 %**, which our own foreshortening cannot account for in
+either direction. The estimator does not manufacture that result: the same four
+individuals exceed the stereo under any summary that is not the median, and the
+median itself would report −3.7 % — a small negative bias that is an artefact of
+summarising a one-sided error at its centre.
+
+One property of nearest rank has to be stated here rather than left for a reader
+to find. $p_{90}$ is the $\lceil 0.9n \rceil$-th of $n$ frames, which is $n$
+itself for every $n \le 10$, and these fish carry 3 to 11 frames each. For five
+of the seven, $p_{90}$ is therefore that animal's longest frame, and only the two
+best-sampled separate the two at all. It is a high-order statistic on this day,
+not a tail estimate. The same is true throughout §4.6: no wild animal here has
+more than eight frames, so every field $p_{90}$ is a longest frame. This is
+intended rather than tolerated — with a one-sided error the longest frame is the
+one least corrupted by pose — but it is why the field figures should not be read
+as carrying the same estimator precision the pool figures do, where a cell holds
+26 frames at the median.
 
 **What the paired day excludes, and what it cannot.** The disagreement is not a
 calibration error, and the reason is the fitted baseline rather than the range
@@ -586,8 +615,8 @@ reading long and at the fin tip on the one reading short — the reverse of what
 systematic over-reach would produce. What remains is a residual we cannot
 attribute: either we read long on four of seven fish, or the stereo reads short,
 or the pairing is wrong on those individuals, and with seven pairs and no third
-instrument those are not separable. The mean difference spans zero under both
-estimators, as it does in the population comparison.
+instrument those are not separable. The mean difference spans zero — −6.7 % to
++8.3 % at 95 % — as it does in the population comparison.
 
 **So the two comparisons reach the same place from opposite ends, and neither
 changes the conclusion of the preceding paragraphs.** The population comparison
@@ -719,15 +748,18 @@ caught any of this in the field.
   judgement that nothing in the field data can check, so a genuine per-species offset and a
   systematic misidentification would look identical here. Species with a single individual
   are pooled.
-- **Figure 13** — Hogfish fork length by camera unit, **one point per animal**, with the
-  between-fish interquartile range shaded behind. Drawn to show that a unit effect is not
-  resolvable on this sample, not that there is none: 2 to 10 fish per unit against an 18 %
-  between-fish spread. Plotting all 74 measurements instead of the 33 animals returns
-  $F(5,68) = 4.05$, $p = 0.004$ — an apparently significant unit effect that is entirely
-  pseudo-replication.
+- **Figure 13** — Hogfish fork length by camera unit, **one point per animal** at
+  $p_{90}$, with the between-fish interquartile range shaded behind. Drawn to show that a
+  unit effect is not resolvable on this sample, not that there is none: 2 to 10 fish per
+  unit against an 18 % between-fish spread, $F(5,27) = 1.10$, $p = 0.38$. Plotting all 74
+  measurements instead of the 33 animals returns $F(5,68) = 4.05$, $p = 0.004$ — an
+  apparently significant unit effect that is entirely pseudo-replication.
 - **Figure 14** — Per-species median length, FishSense Lite against the independent
   stereo-video archive, with the 1:1 line. Bars are bootstrap intervals on each median; the
-  vertical ones are computed per *animal*, not per frame. **Read this differently from
+  vertical ones are computed per *animal*, not per frame, each animal reduced at $p_{90}$
+  as everywhere else; the median across animals is a population statistic, where a
+  $p_{90}$ would name the ninetieth-percentile fish rather than a measurement. **Read this
+  differently from
   Figure 1.** There, one object is compared with its own known length, so a departure from
   1:1 is error. Here the two axes are **different animals** — ours and theirs, same reef and
   season, and for the five species plotted never the same individual — so a departure is
@@ -738,9 +770,9 @@ caught any of this in the field.
   across these five species because the samples do, and that asymmetry is the result: Nassau
   Grouper's median sits ±23.5 cm on a 49 cm fish (7 of our animals against 8 of theirs),
   while Stoplight Parrotfish's stereo median is pinned to ±2.0 cm by 391. Five species with
-  at least five of our fish: Hogfish (33 vs 119), Stoplight Parrotfish (16 vs 391), Nassau Grouper
-  (7 vs 8), Black Grouper (6 vs 51), Rainbow Parrotfish (5 vs 59). Medians differ by
-  −21 % to +9 %.
+  at least five of our fish: Hogfish (33 vs 119), Stoplight Parrotfish (16 vs 391),
+  Nassau Grouper (7 vs 8), Black Grouper (6 vs 51), Rainbow Parrotfish (5 vs 59). Medians
+  differ by −21 % to +12 %.
 - **Figure 15** *(§4.6)* — The paired day: our per-frame lengths against the stereo
   length of the **same individual**, seven fish over 39 frames, with the $p_{90}$ estimator
   and a 1:1 datum. **Figure 1's form and Figure 1's estimator**, so the two read the same

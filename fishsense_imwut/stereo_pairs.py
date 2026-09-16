@@ -6,25 +6,34 @@ population samples. Each dive folder is one animal
 (`Hogfish01_MolHITW_0926_080323`) and the SMILE archive numbers the same fish
 the same way, which is what makes the pairing possible at all.
 
-**The estimator matters more than the statistics here, and getting it wrong
-inverts the result.** Stage 14 back-projects head and tail at a single
-laser-derived depth, so an out-of-plane fish can only read SHORT — verified on
-this data: every stored length is <= the flat in-plane span its clicked pixels
-and range imply (`geometry_consistency`). With a one-sided error, the median
-over frames of one fish is biased downward by however much the pose varied, and
-the MAXIMUM is a lower bound on the animal's true length.
+**Reported at p90, the paper's one estimator, and the choice is not cosmetic.**
+Stage 14 back-projects head and tail at a single laser-derived depth, so an
+out-of-plane fish can only read SHORT — verified on this data: every stored
+length is <= the flat in-plane span its clicked pixels and range imply
+(`geometry_consistency`). With a one-sided error a median over frames inherits
+however much the pose varied, which is the same argument section 4.3 makes
+against a mean.
 
-    per-fish median -> median difference  -3.5 %
-    per-fish max    -> median difference  +8.7 %
+    per-fish p90    -> median difference  +3.5 %   <- reported (Figure 15)
+    per-fish median -> median difference  -3.7 %
+    per-fish max    -> median difference  +8.6 %
 
-Both are computed here because the flip is the finding. The same reasoning is
-why section 4.3 reports p90 rather than a mean.
+All three are computed because the spread between them is worth seeing, but only
+p90 is reported; the other two are context, not results.
+
+Note what nearest rank does at these sample sizes. p90 is the ceil(0.9n)-th of
+n, which is n itself for every n <= 10, and these fish carry 3 to 11 frames. For
+five of the seven p90 IS that animal's longest frame, and only the two
+best-sampled separate them. It is a high-order statistic here, not a tail
+estimate -- intended, since with a one-sided error the longest frame is the one
+least corrupted by pose, but it should not be read as carrying the estimator
+precision a 26-frame pool cell does.
 
 What the comparison can and cannot say is in FINDINGS section 12; the short
-version is that four of the seven fish have a *maximum* exceeding the stereo by
-8.7-12.4 %, which our own pose loss cannot explain, and that we cannot separate
-"we read long" from "the stereo reads short" from "the pairing is wrong on
-those individuals" with seven pairs and no third instrument.
+version is that four of the seven fish exceed the stereo at p90 by 3.5-11.2 %,
+which our own pose loss cannot explain, and that we cannot separate "we read
+long" from "the stereo reads short" from "the pairing is wrong on those
+individuals" with seven pairs and no third instrument.
 """
 
 from __future__ import annotations

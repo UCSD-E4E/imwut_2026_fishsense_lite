@@ -1244,7 +1244,17 @@ def fig_field_by_camera(
     what the figure says. Repeat frames of one fish are not independent, and
     plotting all 74 hogfish measurements returns F(5,68) = 4.05, p = 0.004 --
     an apparently significant unit effect that is pseudo-replication. Collapsed
-    to the 33 individuals §4.5 actually tests, it is F(5,27) = 1.17, p = 0.35.
+    to the 33 individuals §4.6 actually tests, it is F(5,27) = 1.10, p = 0.38.
+
+    An animal's frames reduce through `nearest_rank_p90`, the one estimator the
+    paper reports anywhere a set of frames becomes a length -- Figures 1, 14 and
+    15 included. Read what nearest rank does at this sample size: no field
+    animal has more than 8 frames and `ceil(0.9n)` is n for every n <= 10, so a
+    field p90 IS that animal's longest frame. That is the intended behaviour and
+    not an accident of the sample. The single-depth back-projection can only
+    read short, so the longest frame is the one least corrupted by pose; it is
+    also why the choice barely moves this figure (a per-animal mean gives
+    F = 1.17, p = 0.35) while keeping one convention across the paper.
 
     The figure is drawn to show that a unit effect is *not resolvable* here, not
     that there is none: with 4 to 18 fish per unit and an 18 % between-fish size
@@ -1255,7 +1265,11 @@ def fig_field_by_camera(
     from scipy import stats
 
     f = field[field.species == species]
-    per_fish = f.groupby(["camera_id", "fish_id"]).length_m.mean().reset_index()
+    per_fish = (
+        f.groupby(["camera_id", "fish_id"])
+        .length_m.agg(nearest_rank_p90)
+        .reset_index()
+    )
     cams = sorted(per_fish.camera_id.unique())
     rng = np.random.default_rng(2)
 

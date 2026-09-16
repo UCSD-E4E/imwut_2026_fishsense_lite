@@ -199,3 +199,49 @@ def test_the_field_and_pool_intervals_overlap(field):
     field_result = rep.repeatability(rep.by_individual(field))
     assert field_result.ci_percent[0] < pool.ci_percent[1]
     assert field_result.median_percent > 2 * pool.median_percent
+
+
+# --- the one-estimator convention, and where it degenerates -----------------
+
+
+def test_every_field_p90_is_that_animals_longest_frame(field):
+    """§4.3's caveat, pinned on the data it is about.
+
+    The paper reports p90 by nearest rank wherever frames become a length, the
+    field included. `ceil(0.9n)` is n itself for every n <= 10, and no wild
+    animal here carries more than eight frames, so a field p90 is always that
+    animal's maximum. That is intended -- with a one-sided error the longest
+    frame is the least pose-corrupted -- but the claim is stated in §4.3, §4.6
+    and three captions, so it is pinned rather than trusted.
+    """
+    from fishsense_imwut.pubfig import nearest_rank_p90
+
+    per_fish = field.groupby("fish_id").length_m.agg(
+        n="size", p90=nearest_rank_p90, longest="max"
+    )
+    assert per_fish.n.max() <= 8
+    assert (per_fish.p90 == per_fish.longest).all()
+
+
+def test_the_pool_is_where_p90_is_a_real_quantile(field):
+    """The contrast that makes the caveat worth stating, rather than alarming.
+
+    A pool (session, target) cell holds 26 frames at the median, so there
+    `ceil(0.9n)` is a genuine high quantile and lands strictly below the
+    maximum for most cells. The estimator is one convention; only its
+    resolution differs between the two settings.
+    """
+    from fishsense_imwut.pubfig import nearest_rank_p90
+
+    rows = [
+        r
+        for r in cal.load_rows(DATA / "corpus.csv")
+        if int(r["dive_id"]) not in cal.NON_POOL_DIVES
+    ]
+    pool = cal.to_frame(rows)
+    pool = pool[pool.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)]
+    cells = pool.groupby(["dive_id", "model_name"]).length_m.agg(
+        n="size", p90=nearest_rank_p90, longest="max"
+    )
+    assert cells.n.median() >= 20
+    assert (cells.p90 < cells.longest).mean() > 0.5

@@ -572,6 +572,20 @@ across rigs with ≥3 fish, H = 6.34, p = 0.18). Stoplight is marginal (p = 0.01
 per rig. So the per-species offsets above are ~2 SE effects resting on the assumption that
 our fish and theirs are drawn from one population, which different dates do not guarantee.
 
+> **Addendum (2026-09-16): one estimator, and this section predates it.** Everything
+> above reduces an animal's frames with a median, and Figure 13 used a mean. The paper
+> now reports **p90 by nearest rank everywhere a set of frames becomes a length**, so
+> Figures 13, 14 and 15 all use it and the numbers in this section are superseded by the
+> notebook's. What moves: the per-species offsets go from −21 %…+9 % to −21 %…+12 %
+> (only Black Grouper meaningfully, +9.4 → +11.7 %), the Hogfish per-camera ANOVA from
+> F(5,27) = 1.17, p = 0.35 to F(5,27) = 1.10, p = 0.38, and the between-fish CV on
+> Hogfish from 18.7 % to 19.1 % — which happens to be exactly the stereo's, so "the two
+> systems' spreads are the same" becomes literal rather than approximate. **No
+> conclusion in this section changes.** Note also that no wild animal here carries more
+> than 8 frames and ceil(0.9n) is n for n <= 10, so every field p90 is that animal's
+> longest frame; that is intended with a one-sided error, but it is why a field p90 does
+> not carry the estimator precision a 26-frame pool cell does.
+
 **Two things it does settle.**
 
 The draft's SOTA sentence — "we see a narrower spread of results for FishCamera in the same
@@ -1229,20 +1243,33 @@ afternoon individuals (ConchReef, SnappersLedge) are **excluded**: 5–7 hours
 from the only sound fit, with both afternoon slates refused, so nothing checks
 whether the laser moved during the day.
 
-### The result, and why the estimator is the finding
+### The result, reported at p90
 
-| individual | n | our median | our max | stereo | median diff | **max diff** |
-|---|---|---|---|---|---|---|
-| Hogfish 1, MolHITW | 11 | 304.8 | 345.6 | 315.8 | −3.5 % | **+9.4 %** |
-| Hogfish 1, MolPeLe | 3 | 285.6 | 288.0 | 265.2 | +7.7 % | +8.6 % |
-| Hogfish 2, MolHITW | 3 | 275.7 | 277.9 | 322.3 | −14.5 % | −13.8 % |
-| Blue Parrotfish 1, MolHITW | 10 | 460.5 | 479.0 | 426.5 | +8.0 % | **+12.3 %** |
-| Stoplight Parrotfish 1, MolHITW | 6 | 190.5 | 220.0 | 197.9 | −3.7 % | **+11.2 %** |
-| Gray Snapper 1, MolPeLe | 3 | 233.7 | 273.9 | 298.2 | −21.6 % | −8.1 % |
-| Blue Parrotfish 1, MolPeLe | 3 | 338.6 | 353.5 | 377.5 | −10.3 % | −6.4 % |
+**p90 is the reported estimator** — the paper's only one, wherever frames become
+a length. The median and maximum are kept here as context, because the spread
+between them is what justifies the choice.
 
+| individual | n | our median | **our p90** | our max | stereo | median diff | **p90 diff** | max diff |
+|---|---|---|---|---|---|---|---|---|
+| Hogfish 1, MolHITW | 11 | 304.8 | **326.7** | 345.6 | 315.8 | −3.5 % | **+3.5 %** | +9.4 % |
+| Hogfish 1, MolPeLe | 3 | 285.6 | **288.0** | 288.0 | 265.2 | +7.7 % | **+8.6 %** | +8.6 % |
+| Hogfish 2, MolHITW | 3 | 275.7 | **277.9** | 277.9 | 322.3 | −14.5 % | −13.8 % | −13.8 % |
+| Blue Parrotfish 1, MolHITW | 10 | 460.5 | **472.1** | 479.0 | 426.5 | +8.0 % | **+10.7 %** | +12.3 % |
+| Stoplight Parrotfish 1, MolHITW | 6 | 190.5 | **220.0** | 220.0 | 197.9 | −3.7 % | **+11.2 %** | +11.2 % |
+| Grey Snapper 1, MolPeLe | 3 | 233.7 | **273.9** | 273.9 | 298.2 | −21.6 % | −8.1 % | −8.1 % |
+| Blue Parrotfish 1, MolPeLe | 3 | 338.6 | **353.5** | 353.5 | 377.5 | −10.3 % | −6.4 % | −6.4 % |
+
+    per-fish p90    -> median +3.5 %, mean +0.8 % +- 10.1 %, 4/7 within 10 %   <- REPORTED
     per-fish median -> median -3.7 %, mean -5.4 % +- 11.0 %, 4/7 within 10 %
     per-fish max    -> median +8.6 %, mean +1.9 % +- 10.9 %, 4/7 within 10 %
+
+Note the p90 column against the max column: **identical for five of the seven**.
+Nearest rank is ceil(0.9n)-th of n, which is n for every n <= 10, and only the
+two best-sampled fish (11 and 10 frames) separate them. p90 here is a high-order
+statistic, not a tail estimate. The same holds for every wild animal in §8 — none
+has more than 8 frames — so a field p90 is always a longest frame. Intended,
+since with a one-sided error the longest frame is the least pose-corrupted, but
+it does not carry the estimator precision a 26-frame pool cell does.
 
 **The median is the wrong summary, and using it inverts the reading.** Stage 14
 back-projects head and tail at a single laser-derived depth, so an out-of-plane
@@ -1253,13 +1280,15 @@ carrying a laser depth, `length / (head_tail_px · range / f)` runs
 
 So the maximum over frames of one animal is a **lower bound on its true
 length**, and the median is biased down by however much the pose varied.
-Switching estimator moves the centre from −3.7 % to +8.6 % while leaving the
-scatter at ~11 %: it is a question about the estimator, not about noise. This
-is the same reasoning §4.3 already uses when it reports p90 rather than a mean,
-and it was not applied here until the frames forced it.
+Switching estimator moves the centre from −3.7 % to +3.5 % (p90) or +8.6 %
+(max) while leaving the scatter at ~10–11 %: it is a question about the
+estimator, not about noise. This is the same reasoning §4.3 already uses when it
+reports p90 rather than a mean, and it was not applied here until the frames
+forced it.
 
-**Four of seven individuals exceed the stereo even at their maximum**, by
-8.6–12.3 %. Our own pose loss cannot explain those, because pose only subtracts.
+**Four of seven individuals exceed the stereo at p90**, by 3.5–11.2 % — the same
+four that exceed it at the maximum. Our own pose loss cannot explain those,
+because pose only subtracts.
 
 ### What is ruled out, measured rather than argued
 
@@ -1279,10 +1308,10 @@ and it was not applied here until the frames forced it.
 
 ### What remains unattributable
 
-Either we read 9–12 % long on four of seven fish, or the stereo reads short, or
+Either we read 4–11 % long on four of seven fish, or the stereo reads short, or
 the pairing is wrong on those individuals. **Seven pairs and no third
 instrument cannot separate those**, and the mean-difference interval spans zero
-under both estimators. This is the same wall §8 hit from the population side,
+under every estimator (at p90, −6.7 % to +8.3 %). This is the same wall §8 hit from the population side,
 reached from a much better design.
 
 Two specific follow-ups worth more than more statistics:
