@@ -1380,3 +1380,89 @@ def fig_field_vs_stereo(
         ax.spines[s].set_visible(False)
     fig.tight_layout()
     return fig
+
+
+# --- figure 15: the paired-instrument day --------------------------------
+#
+# Figure 14's population comparison and this one are deliberately different
+# forms for a reason the captions have to carry: there, the two axes are
+# different animals, so a departure from 1:1 is error OR a difference in which
+# fish each instrument met. Here the two axes are the SAME animal, so a
+# departure is the instruments disagreeing and nothing else.
+
+
+def fig_paired_vs_stereo(
+    ours: pd.DataFrame,
+    pairs: Sequence[object],
+    figsize: tuple[float, float] = (COL_WIDTH, 2.7),
+) -> plt.Figure:
+    """Our per-frame lengths against the stereo length, per paired individual.
+
+    Figure 1's form applied to the field, and deliberately its estimator too:
+    the reference length on x, every frame on y, the per-individual $p_{90}$
+    drawn over the cloud, and a 1:1 datum. Reading the two figures side by side
+    should require learning nothing new.
+
+    `nearest_rank_p90` for the same reason it is used against the models -- the
+    single-depth back-projection means an out-of-plane fish can only read short,
+    so a mean or median is biased down by however much the pose varied. Note
+    what nearest rank does at these sample sizes: with 3 to 11 frames per fish
+    it selects the top sample for five of the seven, so $p_{90}$ here is close
+    to a per-fish maximum and should be read as a high-order statistic rather
+    than as a tail estimate.
+
+    Two things differ from Figure 1, each because the data differs. There is no
+    jitter: Figure 1 jitters because thousands of frames collapse onto eight
+    known lengths, where 39 frames on seven are already legible and jitter
+    would move points off the very reference they are compared against. And the
+    1:1 line is agreement, not truth -- both axes are instruments, so a point
+    above it means we read longer than the stereo did, which is a disagreement
+    and not yet an error.
+
+    `ours` is `data/stereo_pairs.csv`; `pairs` is
+    `stereo_pairs.build_pairs(...)`, one entry per paired individual.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="both")
+
+    paired = sorted(pairs, key=lambda p: p.stereo_mm)
+    by_dive = {int(d): g for d, g in ours.groupby("dive_id")}
+
+    stereo_cm, p90_cm = [], []
+    frame_x, frame_y = [], []
+    for p in paired:
+        lengths_cm = by_dive[int(p.dive_id)]["length_m"].to_numpy(float) * 100.0
+        stereo_cm.append(p.stereo_mm / 10.0)
+        # From the Pair, not recomputed here, so the diamond is the same number
+        # `stereo_pairs.summary("p90")` reports and the text quotes.
+        p90_cm.append(p.ours_p90_mm / 10.0)
+        frame_x.extend([p.stereo_mm / 10.0] * lengths_cm.size)
+        frame_y.extend(lengths_cm)
+
+    stereo_cm, p90_cm = np.array(stereo_cm), np.array(p90_cm)
+    frame_x, frame_y = np.array(frame_x), np.array(frame_y)
+
+    lo = float(min(frame_y.min(), stereo_cm.min()))
+    hi = float(max(frame_y.max(), stereo_cm.max()))
+    pad = 0.08 * (hi - lo)
+    span = np.array([lo - pad, hi + pad])
+
+    ax.plot(span, span, color=INK_MUTED, linewidth=0.8, linestyle=(0, (4, 3)),
+            zorder=2, label="1:1 (agreement)")
+
+    # Frames are drawn at full size and low transparency; Figure 1's heavier
+    # alpha exists to survive a cloud two orders of magnitude denser than this.
+    ax.scatter(frame_x, frame_y, s=11, color=SERIES_1, alpha=0.5, linewidths=0,
+               zorder=3, label="Per-frame measurement")
+    ax.scatter(stereo_cm, p90_cm, s=26, marker="D", color=SERIES_2,
+               edgecolors=SURFACE, linewidths=1.0, zorder=4,
+               label="Per-fish $p_{90}$ estimate")
+
+    ax.set_xlim(*span)
+    ax.set_ylim(*span)
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlabel("Stereo-video length, same individual (cm)")
+    ax.set_ylabel("FishSense Lite length (cm)")
+    ax.legend(loc="upper left", handletextpad=0.4, borderaxespad=0.2)
+    fig.tight_layout()
+    return fig

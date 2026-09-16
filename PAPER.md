@@ -741,6 +741,19 @@ caught any of this in the field.
   at least five of our fish: Hogfish (33 vs 119), Stoplight Parrotfish (16 vs 391), Nassau Grouper
   (7 vs 8), Black Grouper (6 vs 51), Rainbow Parrotfish (5 vs 59). Medians differ by
   −21 % to +9 %.
+- **Figure 15** *(§4.6)* — The paired day: our per-frame lengths against the stereo
+  length of the **same individual**, seven fish over 39 frames, with the $p_{90}$ estimator
+  and a 1:1 datum. **Figure 1's form and Figure 1's estimator**, so the two read the same
+  way — but the 1:1 line here is *agreement*, not truth, because both axes are instruments
+  and neither is a known length. Contrast Figure 14, where the two axes are different
+  animals. Four of the seven read longer than the stereo at $p_{90}$, by 3.5 to 11.2 %, and
+  pose loss cannot produce a positive; the median difference is +3.5 %. One caution about
+  the estimator at these sample sizes: nearest rank is `ceil(0.9n)`, which is $n$ itself for
+  $n \le 10$, so with 3 to 11 frames per fish $p_{90}$ selects the top sample for five of
+  the seven. It is a high-order statistic here rather than a tail estimate, and only the
+  two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
+  32 cm are worth following: nearly the same stereo length, disagreeing in opposite
+  directions, which is the landmark-convention point the text makes.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
   black: pooled median and interquartile range; dashed: $\cos\theta - 1$; dotted: the 15 %

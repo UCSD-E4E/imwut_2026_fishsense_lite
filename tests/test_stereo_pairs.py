@@ -132,3 +132,78 @@ def test_landmark_over_reach_does_not_explain_the_signs(pairs):
     assert by_dive[25].median_diff_pct > 0
     assert by_dive[39].median_diff_pct < 0
     assert by_dive[25].species == by_dive[39].species == "Blue Parrotfish"
+
+
+# --- the p90 estimator, which is what Figure 15 draws -----------------------
+
+
+def test_p90_is_the_reported_estimator_between_the_other_two(pairs):
+    """Section 4.3's estimator applied to the paired day: +3.5 %.
+
+    It sits between the median's -3.7 % and the maximum's +8.6 % because it is
+    a high-order statistic of the same one-sided distribution, and it is the
+    one Figure 15 draws -- the same estimator Figure 1 draws against the models,
+    so the two figures can be read without learning a second convention.
+    """
+    s = sp.summary(pairs, "p90")
+    assert s["median_pct"] == pytest.approx(+3.5, abs=0.2)
+    assert s["mean_pct"] == pytest.approx(+0.8, abs=0.2)
+    assert s["sd_pct"] == pytest.approx(10.1, abs=0.3)
+    assert s["within_10_pct"] == 4
+
+    med = sp.summary(pairs, "median")["median_pct"]
+    mx = sp.summary(pairs, "max")["median_pct"]
+    assert med < s["median_pct"] < mx
+
+
+def test_nearest_rank_selects_the_top_sample_for_five_of_seven(pairs):
+    """Why p90 lands close to the maximum here, stated so it cannot surprise.
+
+    `ceil(0.9n)` is n itself for every n <= 10, and five of the seven fish have
+    3 to 6 frames. p90 on this day is therefore a high-order statistic and not
+    a tail estimate, and it is only the two best-sampled fish -- 11 and 10
+    frames -- that separate it from the maximum at all.
+    """
+    at_max = [p for p in pairs if p.ours_p90_mm == p.ours_max_mm]
+    assert len(at_max) == 5
+    assert all(p.n_frames <= 10 for p in at_max)
+
+    separated = [p for p in pairs if p.ours_p90_mm < p.ours_max_mm]
+    assert sorted(p.dive_id for p in separated) == [5, 25]
+    assert all(p.n_frames >= 10 for p in separated)
+
+
+def test_four_individuals_still_exceed_the_stereo_at_p90(pairs):
+    """The finding survives the softer estimator, which is the point of using it.
+
+    Switching from the maximum to p90 costs the two best-sampled fish some
+    length (+9.4 -> +3.5 % and +12.3 -> +10.7 %) and changes nothing about the
+    membership: the same four individuals read longer than the stereo does, by
+    3.5 to 11.2 %, and pose loss cannot produce a positive.
+    """
+    over = [p for p in pairs if p.p90_diff_pct > 0]
+    assert sorted(p.dive_id for p in over) == [5, 16, 25, 28]
+    assert min(p.p90_diff_pct for p in over) == pytest.approx(3.5, abs=0.2)
+    assert max(p.p90_diff_pct for p in over) == pytest.approx(11.2, abs=0.2)
+
+
+def test_the_p90_mean_interval_also_spans_zero(pairs):
+    """Seven pairs establish no bias under this estimator either."""
+    low, high = sp.summary(pairs, "p90")["ci95"]
+    assert low < 0 < high
+
+
+def test_figure_15_draws_the_numbers_the_analysis_reports(pairs):
+    """The diamond in Figure 15 is `Pair.ours_p90_mm`, not a recomputation.
+
+    Pins the figure to the analysis module rather than to a second p90 written
+    beside it, so the number quoted from the figure equals the one the text
+    quotes. `nearest_rank_p90` is the single implementation both go through.
+    """
+    from fishsense_imwut.pubfig import nearest_rank_p90
+
+    ours = sp.load_ours(DATA / "stereo_pairs.csv")
+    by_dive = {int(d): g for d, g in ours.groupby("dive_id")}
+    for p in pairs:
+        frames_mm = by_dive[p.dive_id]["length_m"].to_numpy(float) * 1000.0
+        assert p.ours_p90_mm == pytest.approx(nearest_rank_p90(frames_mm))

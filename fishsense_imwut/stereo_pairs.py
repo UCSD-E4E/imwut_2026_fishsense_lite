@@ -58,12 +58,24 @@ class Pair:
     species: str
     n_frames: int
     ours_median_mm: float
+    ours_p90_mm: float
     ours_max_mm: float
     stereo_mm: float
 
     @property
     def median_diff_pct(self) -> float:
         return 100.0 * (self.ours_median_mm - self.stereo_mm) / self.stereo_mm
+
+    @property
+    def p90_diff_pct(self) -> float:
+        """Difference using our per-fish p90 -- the estimator section 4.3 reports.
+
+        Nearest rank, so this is `ceil(0.9n)`-th of n. Read it as a high-order
+        statistic rather than a tail estimate at these sample sizes: with 3 to
+        11 frames per fish it selects the top sample for five of the seven, so
+        it sits much closer to `max_diff_pct` than to `median_diff_pct`.
+        """
+        return 100.0 * (self.ours_p90_mm - self.stereo_mm) / self.stereo_mm
 
     @property
     def max_diff_pct(self) -> float:
@@ -93,6 +105,10 @@ def load_stereo(path):
 
 def build_pairs(ours, stereo) -> list[Pair]:
     """One `Pair` per individual that both instruments measured."""
+    # Deferred like `calibration.cell_p90_grid` does it, so importing the
+    # analysis does not drag matplotlib in behind it.
+    from .pubfig import nearest_rank_p90
+
     by_dive = {int(r.dive_id): r for r in stereo.itertuples()}
     pairs: list[Pair] = []
     for dive_id, group in ours.groupby("dive_id"):
@@ -106,6 +122,7 @@ def build_pairs(ours, stereo) -> list[Pair]:
                 species=str(group["species"].iloc[0]),
                 n_frames=len(mm),
                 ours_median_mm=float(np.median(mm)),
+                ours_p90_mm=float(nearest_rank_p90(mm)),
                 ours_max_mm=float(mm.max()),
                 stereo_mm=float(ref.stereo_length_mm),
             )
@@ -113,11 +130,16 @@ def build_pairs(ours, stereo) -> list[Pair]:
     return sorted(pairs, key=lambda p: p.dive_id)
 
 
-def summary(pairs: list[Pair], estimator: Literal["median", "max"] = "median") -> dict:
+def summary(
+    pairs: list[Pair], estimator: Literal["median", "p90", "max"] = "median"
+) -> dict:
     """Median / mean / sd of the paired differences under one estimator."""
-    a = np.array(
-        [p.median_diff_pct if estimator == "median" else p.max_diff_pct for p in pairs]
-    )
+    attr = {
+        "median": "median_diff_pct",
+        "p90": "p90_diff_pct",
+        "max": "max_diff_pct",
+    }[estimator]
+    a = np.array([getattr(p, attr) for p in pairs])
     se = a.std(ddof=1) / np.sqrt(a.size)
     return {
         "n": int(a.size),
