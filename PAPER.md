@@ -400,7 +400,8 @@ both, over 19 calibration *fits*, 11 checkerboard and 8 slate. (That 19 is not t
 count; the coincidence is unfortunate.) The mean checkerboard-minus-slate difference is
 **+0.66 % of baseline, 95 % CI −0.23 % to +1.69 %**. The interval spans zero, and its width
 is comparable to the scatter between two calibrations of one unit under a single standard
-(sd 0.135 cm). Most of the spread comes from one unit, whose slate side includes the
+(0.132 cm, the mean within-unit sd over the ten units calibrated more than once under one
+object). Most of the spread comes from one unit, whose slate side includes the
 fleet's shortest fit at 9.87 cm and which alone reads +2.9 %.
 
 That figure changed sign when we corrected the grid pitch. Before the correction the
@@ -409,15 +410,16 @@ calibrations at the tape-measured pitch raised each by +0.39 % to +0.79 %, and t
 comparison crossed zero. The two objects agreed within the scatter before the correction
 and agree within it after, on opposite sides of it.
 
-The session calibration offsets, which are reproducible from the committed export, agree to
-about half a point: a median **+1.35 pp** over the cohort's fourteen checkerboard sessions
-against **+0.77 pp** over its five slate sessions. The deployable object reproduces the
-standard one to roughly a percent. That is what licenses the substitution, and it puts the
+The session calibration offsets agree to about half a point: a median **+1.28 pp** over the
+cohort's fourteen checkerboard sessions against **+0.83 pp** over its five slate sessions.
+The offset is the median-polish dive effect, so it is the part of a session's error common
+to every target it shot, which is what a calibration contributes. The deployable object
+reproduces the standard one to roughly a percent. That is what licenses the substitution, and it puts the
 dominant uncertainty in §4.2 on the target lengths rather than on the calibration chain.
 
 Two limits go with that. Only five of the nineteen cohort sessions are slate-calibrated, so
 the deployable path carries the smaller share of the accuracy evidence, and its offset
-spread (sd 2.10 pp, against the checkerboard's 1.81) rests on five points. And neither
+spread (sd 2.11 pp, against the checkerboard's 1.81) rests on five points. And neither
 check can see an error common to both objects, or one in the camera intrinsics, which
 rescale the calibration object and the laser together. We do not compare the two groups'
 raw errors, because they photographed disjoint target sets (§4.2) and any difference would

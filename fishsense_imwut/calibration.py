@@ -942,3 +942,57 @@ def checkerboard_slate_difference(per_unit, resamples: int = 20_000, seed: int =
         "ci_lo": float(np.percentile(draws, 2.5)),
         "ci_hi": float(np.percentile(draws, 97.5)),
     }
+
+
+def within_standard_scatter(fits, min_fits: int = 2, excluded=(107,)):
+    """Mean baseline sd over units calibrated more than once under one object.
+
+    The noise floor §4.3 compares the checkerboard-slate difference against: if
+    two calibrations of one rig from one object already disagree by this much,
+    a difference between objects of the same size is not evidence of anything.
+
+    Dive 107 is excluded by default for the reason it is excluded everywhere --
+    it is the 12.95 cm lever-arm failure, and a failed fit measures the gate
+    rather than the scatter.
+    """
+    keep = fits[~fits.dive_id.isin(excluded)]
+    groups = [g.baseline_cm.to_numpy(float)
+              for _, g in keep.groupby(["camera_id", "standard"])
+              if len(g) >= min_fits]
+    return {
+        "n_groups": len(groups),
+        "mean_sd_cm": float(np.mean([g.std(ddof=1) for g in groups])),
+        "median_sd_cm": float(np.median([g.std(ddof=1) for g in groups])),
+    }
+
+
+def session_offsets_by_standard(df, cohort, fits):
+    """Median and spread of the per-session calibration offset, split by the
+    object that session's calibration was fitted from.
+
+    The offset is the median-polish dive effect, so it is the part of a
+    session's error common to every target it shot -- which is what a
+    calibration contributes and what a comparison between calibration objects
+    has to look at. A session inherits its object through
+    `calibration_dive_id`, since most sessions borrow rather than self-calibrate.
+
+    Computed on the SAME reference lengths as the rest of §4, i.e. with
+    `to_frame`'s corrected references. A draft quoted +1.35 / +0.77 pp here,
+    which is this statistic on the uncorrected prod references while §4.2 used
+    the measured ones -- reproducible, but not on the section's own basis.
+    """
+    standard = dict(zip(fits.dive_id, fits.standard))
+    sub = df[df.dive_id.isin(cohort)]
+    label = {int(d): standard.get(int(c))
+             for d, c in sub.groupby("dive_id").calibration_dive_id.first().items()}
+    effect = median_polish(cell_p90_grid(df)).dive_effect
+    out = {}
+    for name in ("checkerboard", "slate"):
+        dives = [d for d, s in label.items() if s == name and d in effect.index]
+        v = effect.loc[dives].to_numpy(float)
+        out[name] = {
+            "n_sessions": int(v.size),
+            "median_pp": float(np.median(v)),
+            "sd_pp": float(np.std(v, ddof=1)),
+        }
+    return out

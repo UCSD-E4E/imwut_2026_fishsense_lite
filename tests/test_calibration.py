@@ -770,3 +770,51 @@ def test_the_fleet_baseline_range_excludes_only_the_lever_arm_failure():
     others = fits[fits.dive_id != 107].baseline_cm
     assert others.min() == pytest.approx(9.87, abs=0.01)
     assert others.max() == pytest.approx(10.554, abs=0.002)
+
+
+def test_the_two_objects_agree_within_the_within_standard_scatter():
+    """§4.3's noise floor: 0.132 cm over the ten multiply-calibrated units.
+
+    The draft said 0.135 cm, which no grouping of the fits reproduces. This is
+    the quantity the sentence describes -- the mean sd between calibrations of
+    one unit under one object -- and the comparison it supports is unchanged,
+    since the checkerboard-slate difference is +0.66 % of a ~10.4 cm baseline.
+    """
+    import pytest
+
+    from fishsense_imwut import calibration as cal
+
+    fits, _ = _baseline_cohort()
+    s = cal.within_standard_scatter(fits)
+    assert s["n_groups"] == 10
+    assert s["mean_sd_cm"] == pytest.approx(0.132, abs=0.001)
+
+
+def test_session_offsets_by_standard_use_the_sections_own_references():
+    """§4.3: +1.28 pp over fourteen checkerboard sessions, +0.83 over five slate.
+
+    A draft quoted +1.35 / +0.77 with sd 2.10. Those are this same statistic on
+    the UNCORRECTED prod reference lengths, while §4.2's accuracy numbers use
+    the measured ones -- reproducible, but not on the section's own basis, so a
+    reader recomputing it from the committed export would not have got them.
+    """
+    import pytest
+
+    from fishsense_imwut import calibration as cal
+
+    data = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    df = cal.to_frame(cal.load_rows(data / "corpus.csv"))
+    fits = cal.load_calibration_fits(data / "calibration_fits.csv")
+    o = cal.session_offsets_by_standard(df, cal.accuracy_cohort(df), fits)
+
+    assert (o["checkerboard"]["n_sessions"], o["slate"]["n_sessions"]) == (14, 5)
+    assert o["checkerboard"]["median_pp"] == pytest.approx(1.28, abs=0.01)
+    assert o["slate"]["median_pp"] == pytest.approx(0.83, abs=0.01)
+    assert o["checkerboard"]["sd_pp"] == pytest.approx(1.81, abs=0.01)
+    assert o["slate"]["sd_pp"] == pytest.approx(2.11, abs=0.01)
+
+    # the uncorrected references are what produced the draft's numbers
+    raw = cal.to_frame(cal.load_rows(data / "corpus.csv"), corrected_references=False)
+    o_raw = cal.session_offsets_by_standard(raw, cal.accuracy_cohort(df), fits)
+    assert o_raw["checkerboard"]["median_pp"] == pytest.approx(1.35, abs=0.01)
+    assert o_raw["slate"]["median_pp"] == pytest.approx(0.77, abs=0.01)
