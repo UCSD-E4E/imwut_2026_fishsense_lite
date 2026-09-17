@@ -23,6 +23,7 @@ from fishsense_imwut.refraction import (
     exit_ray,
     field_angle,
     flat_port_cost,
+    flat_port_error_field,
     focus_section,
     measure_length,
     optimal_d0,
@@ -490,3 +491,44 @@ def test_flat_port_cost_reports_the_frame_it_is_measured_against():
     # of the half-width, in metres, not an angle of incidence
     offset = r["depth_m"] * np.tan(np.radians(r["field_angle_deg"][-1]))
     assert offset / r["half_frame_m"] == pytest.approx(0.75, abs=0.01)
+
+
+def test_the_error_field_is_not_radially_symmetric():
+    """Section 4.5's argument, and the reason Figure 9b exists.
+
+    The port is rotationally symmetric, so a radius is; the target is not a
+    point. Held horizontal it lies along a radius at the side of the frame and
+    across one at the top, and radial and tangential magnification differ. If
+    this test ever passes trivially -- side == top -- the field has collapsed to
+    a scale error and the paper's claim that no calibration can absorb it is
+    wrong.
+    """
+    f = flat_port_error_field(cell_px=16.0)
+    e = f["error_pct"]
+    h, w = e.shape
+
+    centre = float(np.nanmin(np.abs(e)))
+    top = float(np.nanmax(e[:, w // 2]))
+    side = float(np.nanmax(e[h // 2, :]))
+
+    assert centre == pytest.approx(0.09, abs=0.05)
+    assert top == pytest.approx(6.1, abs=0.4)
+    assert side == pytest.approx(23.0, abs=0.6)
+    assert side > 3 * top, "a horizontal target must read far worse at the side"
+
+    # the corner is worse than anything the 1-D slice of Figure 9 reaches
+    assert float(np.nanmax(e)) > flat_port_cost()["length_pct_error"][-1]
+
+
+def test_the_error_field_samples_square_cells():
+    """Why the mask edge is smooth: the fit/no-fit boundary is a curve that can
+    only land on a cell edge, so the cells have to be square and small. Equal
+    counts on both axes would make them 4:3 and staircase it unevenly."""
+    f = flat_port_error_field(cell_px=10.0)
+    h, w = f["error_pct"].shape
+    W, H = f["image_size_px"]
+    assert W / (w - 1) == pytest.approx(10.0, abs=0.2)
+    assert H / (h - 1) == pytest.approx(10.0, abs=0.2)
+
+    # NaN only ever means "would not fit", never "off the end of the grid"
+    assert np.isfinite(f["error_pct"][h // 2, w // 2])

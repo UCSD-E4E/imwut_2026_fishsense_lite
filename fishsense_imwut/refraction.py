@@ -371,3 +371,94 @@ def flat_port_cost(
         half_frame_m=float(half_frame),
         depth_m=float(depth_m),
     )
+
+
+def flat_port_error_field(
+    n_water: float = SALTY_WATER,
+    glass_thickness_m: float = GLASS_THICKNESS_M,
+    n_glass: float = N_GLASS,
+    fish_length_m: float = FISH_LENGTH_M,
+    depth_m: float = MEASUREMENT_DEPTH_M,
+    cell_px: float = 8.0,
+) -> dict:
+    """Length error as a field over the whole image, not just along one axis.
+
+    `flat_port_cost` walks the target out along +x; this evaluates the same
+    measurement wherever in the frame the target's centre falls, which is what a
+    picture of the frame needs.
+
+    **The field is not radially symmetric, and that is the physics.** The port
+    is rotationally symmetric, so a *radius* is, but the target is not a point:
+    it is held horizontal in the image, so near the left and right edges it lies
+    along the radius and near the top and bottom it lies across one. Radial and
+    tangential magnification differ under this distortion -- that difference is
+    precisely why the error is not a scale error -- so a horizontal target reads
+    differently at the side of the frame than at the top.
+
+    `cell_px` is the sampling pitch in IMAGE PIXELS, and it is square on
+    purpose. The fit/no-fit boundary is a smooth curve that can only land on a
+    cell edge, so a coarse grid staircases it, and a grid with the same count on
+    both axes staircases it unevenly -- the frame is 4:3, so equal counts give
+    cells half again as wide as they are tall. Square cells at 8 px put the
+    steps below the resolution of a column-width figure.
+
+    Returns `error_pct` (NaN where a target of this length would not fit),
+    `extent` in pixels for `imshow`, and the scalars `range_pct_error` and
+    `budget_crossing_px`.
+    """
+    K = camera_intrinsics()
+    W, H = IMAGE_WIDTH_PX, IMAGE_HEIGHT_PX
+    half_fov = np.arctan(np.hypot(W / 2, H / 2) / FOCAL_LENGTH_PX)
+    d0_star, _, _ = optimal_d0(glass_thickness_m, n_glass, n_water, half_fov)
+    port = FlatPort(d0_star, glass_thickness_m, n_glass, n_water)
+
+    back_project = lambda q: back_project_uncorrected(q, K)
+
+    def to_pixels(points):
+        alpha, azimuth = project_water_points(points, port)
+        return alpha_azimuth_to_pixel(alpha, azimuth, K)
+
+    # the range the pipeline actually has, from the laser dot, uncorrected
+    laser_point = LASER_POSITION_M + depth_m * LASER_DIRECTION
+    _, laser_dirs = back_project(to_pixels(laser_point))
+    measured_depth = reconstruct_points(
+        laser_dirs, np.zeros(3), LASER_POSITION_M, LASER_DIRECTION
+    )[0][2]
+
+    # every pixel is a camera ray; follow it to `depth_m` to place the target
+    u = np.linspace(0.0, float(W), int(round(W / cell_px)) + 1)
+    v = np.linspace(0.0, float(H), int(round(H / cell_px)) + 1)
+    uu, vv = np.meshgrid(u, v)
+    alpha, azimuth = pixel_to_alpha_azimuth(np.stack([uu, vv], -1), K)
+    radius = water_radius(alpha, depth_m, port)
+    cx = radius * np.cos(azimuth)
+    cy = radius * np.sin(azimuth)
+    z = np.full_like(cx, depth_m)
+
+    half = fish_length_m / 2
+    head_px = to_pixels(np.stack([cx + half, cy, z], -1))
+    tail_px = to_pixels(np.stack([cx - half, cy, z], -1))
+    measured = measure_length(head_px, tail_px, measured_depth, back_project)
+    error = 100 * (measured - fish_length_m) / fish_length_m
+
+    inside = np.ones_like(error, dtype=bool)
+    for px in (head_px, tail_px):
+        inside &= (px[..., 0] >= 0) & (px[..., 0] <= W)
+        inside &= (px[..., 1] >= 0) & (px[..., 1] <= H)
+    error = np.where(inside, error, np.nan)
+
+    # where the budget is first crossed along the horizontal centre line
+    mid = error[np.argmin(np.abs(v - H / 2)), :]
+    right = mid[u >= W / 2]
+    ur = u[u >= W / 2]
+    ok = np.isfinite(right)
+    crossing = (float(np.interp(15.0, right[ok], ur[ok]))
+                if ok.any() and np.nanmax(right) >= 15.0 else float("nan"))
+
+    return dict(
+        error_pct=error,
+        extent=(0.0, float(W), float(H), 0.0),
+        range_pct_error=float(100 * (measured_depth - depth_m) / depth_m),
+        budget_crossing_px=crossing,
+        image_size_px=(W, H),
+    )

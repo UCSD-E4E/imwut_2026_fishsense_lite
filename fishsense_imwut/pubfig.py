@@ -1606,3 +1606,102 @@ def fig_p90_vs_sample_size(
               handletextpad=0.4, columnspacing=1.0, borderaxespad=0.0)
     fig.tight_layout()
     return fig
+
+
+# --- figure 9b: the same cost drawn on the frame itself ------------------
+#
+# Sequential, so ONE hue light -> dark, stepped from this paper's own orange.
+# Never a rainbow: the quantity is magnitude and one-signed, and a rainbow would
+# invent category boundaries where the field is smooth. The categorical slots
+# are untouched -- this is a different form, not a third series.
+
+_PORT_ERROR_RAMP = mpl.colors.LinearSegmentedColormap.from_list(
+    "port_error",
+    ["#fdf3ee", "#fbd9c6", "#f6ad86", "#ef7f4b", "#d9541f", "#a43a12", "#6b2409"],
+).with_extremes(bad=GRIDLINE)
+
+
+def fig_flat_port_error_field(
+    field,
+    budget_pct: float = 15.0,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.9),
+) -> plt.Figure:
+    """The flat-port length error drawn over the image frame it happens in.
+
+    `field` is `refraction.flat_port_error_field(...)`. The panel IS the frame:
+    axes are image pixels, so "where in the picture" needs no translation into
+    degrees and cannot be mistaken for the fish's pose.
+
+    **Read the asymmetry, it is the whole argument.** The port is rotationally
+    symmetric but the target is not a point -- it is held horizontal, so at the
+    left and right edges it lies along a radius and at the top and bottom across
+    one. Radial and tangential magnification differ, which is exactly why this
+    is not a scale error a calibration could absorb: a horizontal fish reads
+    +23 % at the side of the frame and +6 % at the top, at the same distance
+    from the centre.
+
+    Grey is where a target of this length would not fit in frame.
+    """
+    err = np.asarray(field["error_pct"], dtype=float)
+    W, H = field["image_size_px"]
+
+    fig, ax = plt.subplots(figsize=figsize)
+    im = ax.imshow(err, extent=field["extent"], origin="upper", aspect="equal",
+                   cmap=_PORT_ERROR_RAMP, vmin=0.0, vmax=float(np.nanmax(err)),
+                   # NEAREST, not bilinear: matplotlib will not interpolate
+                   # across a NaN, so a smoothing filter bleeds the no-fit mask
+                   # outward and notches its corners. At an 8 px cell the raw
+                   # samples are already finer than the printed figure.
+                   interpolation="nearest", zorder=1)
+
+    if budget_pct is not None and np.nanmax(err) >= budget_pct:
+        ys = np.linspace(field["extent"][3], field["extent"][2], err.shape[0])
+        xs = np.linspace(field["extent"][0], field["extent"][1], err.shape[1])
+        cs = ax.contour(xs, ys, err, levels=[budget_pct], colors=[SURFACE],
+                        linewidths=1.4, zorder=3)
+        ax.clabel(cs, fmt=lambda v: f"{v:g} %", fontsize=6, inline=True,
+                  inline_spacing=6)
+
+    # the frame's own border, and its centre
+    ax.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor=INK_MUTED,
+                               linewidth=0.8, zorder=4))
+    ax.plot([W / 2], [H / 2], marker="+", markersize=6, markeredgewidth=1.0,
+            color=INK_PRIMARY, zorder=5)
+
+    # the asymmetry, stated where it happens: same distance from the centre,
+    # very different error, because the target lies along a radius at the side
+    # and across one at the top
+    mid_row = err[err.shape[0] // 2, :]
+    mid_col = err[:, err.shape[1] // 2]
+    side = float(np.nanmax(mid_row))
+    top = float(np.nanmax(mid_col))
+    for xy, text, va, ha in (
+        ((0.985 * W, H / 2), f"side\n{side:+.0f} %", "center", "right"),
+        ((W / 2, 0.02 * H), f"top {top:+.0f} %", "top", "center"),
+        ((W / 2, H / 2), "centre +0.1 %", "bottom", "center"),
+    ):
+        ax.annotate(text, xy=xy, xytext=(0, 5 if va == "bottom" else 0),
+                    textcoords="offset points", fontsize=6,
+                    color=INK_PRIMARY if va == "bottom" else SURFACE,
+                    ha=ha, va=va, zorder=6)
+
+    ax.set_xlim(0, W)
+    ax.set_ylim(H, 0)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    ax.set_xlabel(
+        f"The {W} \u00d7 {H} frame, target held horizontal.\n"
+        "Grey: a target this long no longer fits.", fontsize=6.5, labelpad=3)
+
+    # horizontal bar beneath a 4:3 panel; a vertical one is taller than the
+    # picture and takes the eye off it
+    cb = fig.colorbar(im, ax=ax, orientation="horizontal", fraction=0.055,
+                      pad=0.12, aspect=34)
+    cb.set_label("Length error (%)", fontsize=7, labelpad=2)
+    cb.ax.tick_params(labelsize=6, length=2, width=0.6)
+    cb.outline.set_linewidth(0.6)
+    cb.outline.set_edgecolor(BASELINE)
+    fig.tight_layout()
+    return fig
