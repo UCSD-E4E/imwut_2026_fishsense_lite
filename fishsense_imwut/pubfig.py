@@ -1494,7 +1494,7 @@ def fig_p90_vs_sample_size(
     rarefaction,
     tolerance: float = 1.0,
     min_frames: int | None = None,
-    figsize: tuple[float, float] = (COL_WIDTH, 2.6),
+    figsize: tuple[float, float] = (COL_WIDTH, 3.1),
 ) -> plt.Figure:
     """Error of a p90 length estimate against the number of frames behind it.
 
@@ -1528,9 +1528,11 @@ def fig_p90_vs_sample_size(
     _zero_line(ax, orientation="h")
 
     # ignore n = 2's long lower tail, which would otherwise spend a third of
-    # the panel on one sample size
-    top = max(hi.max(), tolerance) + 0.30
-    bottom = min(lo[ns >= 4].min(), -tolerance) - 0.30
+    # the panel on one sample size. The generous padding is deliberate: the
+    # legend sits above the axes so the interior is the data's, and both
+    # annotations need a margin they are not fighting the marks for.
+    top = max(hi.max(), tolerance) + 0.55
+    bottom = min(lo[ns >= 4].min(), -tolerance) - 0.55
 
     ax.axvspan(ns.min() - 0.5, 9.5, color=INK_MUTED, alpha=0.07, zorder=0)
     ax.fill_between(ns, lo, hi, color=SERIES_1, alpha=0.20, linewidth=0, zorder=2,
@@ -1548,18 +1550,21 @@ def fig_p90_vs_sample_size(
         ax.axvline(min_frames, color=INK_MUTED, linewidth=1.0,
                    linestyle=(0, (4, 2)), zorder=3)
         ax.annotate(f"{min_frames} frames:\n90 % of draws\ninside $\\pm${tolerance:g} pp",
-                    xy=(min_frames, top), xytext=(4, -3),
-                    textcoords="offset points", fontsize=6,
+                    xy=(min_frames, top), xytext=(5, -5),
+                    textcoords="offset points", fontsize=6.2,
                     color=INK_SECONDARY, ha="left", va="top", zorder=5)
 
-    ax.annotate(r"$p_{90}$ here is just" "\n" r"the maximum ($\lceil 0.9n \rceil = n$)",
-                xy=(5.75, bottom), xytext=(0, 3), textcoords="offset points",
-                fontsize=6, color=INK_SECONDARY, ha="center", va="bottom", zorder=5)
+    ax.annotate(r"$p_{90}$ here is just the" "\n" r"maximum ($\lceil 0.9n \rceil = n$)",
+                xy=(5.75, bottom), xytext=(0, 5), textcoords="offset points",
+                fontsize=6.2, color=INK_SECONDARY, ha="center", va="bottom", zorder=5)
 
-    ax.set_xlim(ns.min() - 0.5, ns.max() + 0.5)
+    ax.set_xlim(ns.min() - 1.0, ns.max() + 1.0)
     ax.set_ylim(bottom, top)
     ax.set_xlabel("Frames of one fish")
-    ax.set_ylabel("Error in the $p_{90}$ length estimate (pp)")
-    ax.legend(loc="lower right", handletextpad=0.4, borderaxespad=0.3)
+    ax.set_ylabel("Error in the $p_{90}$ estimate (pp)")
+    ax.margins(y=0.05)
+    # above the axes, as Figure 4 does it, so the panel interior is all data
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.01), ncols=2,
+              handletextpad=0.4, columnspacing=1.0, borderaxespad=0.0)
     fig.tight_layout()
     return fig
