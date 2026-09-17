@@ -211,3 +211,62 @@ def test_figure_15_draws_the_numbers_the_analysis_reports(pairs):
     for p in pairs:
         frames_mm = by_dive[p.dive_id]["length_m"].to_numpy(float) * 1000.0
         assert p.ours_p90_mm == pytest.approx(nearest_rank_p90(frames_mm))
+
+
+# --- the candidate range correction, carried to both stereo comparisons ----
+
+
+def test_the_range_correction_helps_one_comparison_and_hurts_the_other(pairs):
+    """Section 4.6's number, and the reason no correction is applied.
+
+    The two comparisons disagree about the SIGN of our bias -- the population
+    says we read short, the paired individuals say we read long -- so a
+    correction that only ever adds length cannot improve both. This pins the
+    disagreement, not the correction: if these ever agree, the argument in
+    section 4.6 needs rewriting rather than re-running.
+    """
+    import pandas as pd
+
+    from fishsense_imwut import calibration as cal
+    from fishsense_imwut import repeatability as rep
+    from fishsense_imwut.pubfig import nearest_rank_p90
+
+    rows = [r for r in cal.load_rows(DATA / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    acc = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)
+             & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+    coef = cal.fit_depth_offset(acc.depth_m, acc.pct_error)
+
+    # the paired day: 4 of 7 read LONG
+    long_side = sum(1 for p in pairs if p.p90_diff_pct > 0)
+    assert long_side == 4
+    assert np.median([p.p90_diff_pct for p in pairs]) == pytest.approx(3.5, abs=0.3)
+
+    # the population: our species medians read SHORT
+    field = rep.load_field(DATA / "field.csv")
+    field["sp"] = field.species.str.strip().str.title()
+    archive = pd.read_csv(DATA / "stereo_archive.csv", low_memory=False)
+    archive = archive[archive.camtype == "SV"].copy()
+    archive["Length"] = pd.to_numeric(archive.Length, errors="coerce")
+    archive = archive[archive.Length.notna()]
+    archive["sp"] = archive.Common.str.strip().str.title()
+
+    offsets = []
+    for name in sorted(set(field.sp) & set(archive.sp)):
+        ours, theirs = field[field.sp == name], archive[archive.sp == name]
+        if ours.fish_id.nunique() < 5 or len(theirs) < 20:
+            continue
+        mine = np.median(ours.groupby("fish_id").length_m.agg(nearest_rank_p90)) * 100
+        ref = np.median(theirs.Length) / 10
+        offsets.append(100 * (mine - ref) / ref)
+    assert len(offsets) == 4
+    assert np.median(offsets) == pytest.approx(-15.4, abs=0.5)
+
+    # the correction is small against either, and a tenth of the disagreement
+    added = 100 * (cal.correct_lengths(field.length_m, field.range_m, coef)
+                   / field.length_m - 1)
+    assert np.median(added) == pytest.approx(2.2, abs=0.2)
+    disagreement = abs(np.median([p.p90_diff_pct for p in pairs]) - np.median(offsets))
+    assert disagreement > 18.0
+    assert np.median(added) < 0.15 * disagreement

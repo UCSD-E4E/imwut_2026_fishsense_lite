@@ -815,6 +815,19 @@ def apply_depth_offset(depths_m, pct_errors, coefficients) -> np.ndarray:
     return np.asarray(pct_errors, dtype=float) - (a + b / z)
 
 
+def correct_lengths(lengths_m, ranges_m, coefficients) -> np.ndarray:
+    """Apply the fitted range offset to LENGTHS rather than to percent errors.
+
+    `apply_depth_offset` works on percent error, which needs a known length.
+    Field fish have none, so to carry the correction across to the stereo
+    comparisons it has to scale the measurement itself: a bias of `b` per cent
+    at that range means the length reads `(1 + b/100)` times true.
+    """
+    a, b = coefficients
+    z = np.asarray(ranges_m, dtype=float)
+    return np.asarray(lengths_m, dtype=float) / (1.0 + (a + b / z) / 100.0)
+
+
 def depth_offset_gain(df, bins: int = 16) -> dict:
     """Leave-one-session-out: what the range correction is worth out of sample.
 

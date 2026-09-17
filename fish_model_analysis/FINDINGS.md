@@ -719,6 +719,63 @@ effect. It is an artefact: dot radius differs from endpoint radius by half the a
 span, which is itself ∝ 1/range, so partialling range out of the two leaves different
 residuals. `sql/extract_head_tail.sql` exports the endpoints; use those.
 
+### Carried across to the stereo comparisons, where it settles the question
+
+Applied to OUR side only — the archive has no known length either, so there is nothing to
+fit on their side and nothing to correct. At field ranges the curve adds 1.2–6.2 %,
+median 2.2 %.
+
+| comparison | before | after | |
+|---|---|---|---|
+| population, 4 species (Fig 14) | 15.37 % | 14.41 % | 3 of 4 closer |
+| paired, 7 individuals (Fig 15) | 8.60 % | 10.87 % | 3 of 7 closer |
+
+**It helps one and hurts the other, because the two do not agree on the SIGN of our bias:**
+the population comparison has our species medians **−15.4 %** against the archive, the
+paired individuals **+3.5 %** long — a **18.8 point** disagreement. A correction that only
+ever adds length helps the first and hurts the second by construction, and at 2.2 % it is a
+tenth of the thing it would have to explain. Neither result licenses it.
+
+Believe the paired one: same named individuals, one shared calibration, no assumption that
+our fish and theirs are drawn from one population. §8 already says the population
+comparison cannot carry a conclusion; this is that caution with a number on it.
+
+### Could the correction be fitted on the SV side instead? No
+
+The archive has no ground truth, so the only handle is the scale-free range trend — and on
+wild fish that is dominated by detectability, since a big fish is visible from further
+away. Per species the stereo gives +9.99 (Black Grouper), +9.45 (Stoplight), +6.51 (Blue
+Parrotfish), +3.07 (Gray Snapper), +1.71, −0.10, −4.14 %/m. Mostly positive, and not
+instrument bias. Matched against our field data the comparison is hopeless on 5–33 animals
+a species: ours run −9.5 to +20 %/m.
+
+**What DOES compare cleanly is precision against range**, which needs no ground truth and
+no size-distance assumption:
+
+| range | stereo (quoted) | ours (measured) |
+|---|---|---|
+| 0.7–1.4 m | 0.42 % | 0.74 % |
+| 1.4–1.8 m | 0.72 % | 0.87 % |
+| 1.8–2.2 m | 1.17 % | 1.19 % |
+| 2.2–2.8 m | 1.54 % | 1.52 % |
+| 2.8–6.5 m | 2.62 % | 1.66 % |
+
+Near-identical through the middle, ours better past 2.8 m; the stereo degrades 6.2× across
+its range against our 2.2×. Read it as "the same order, and the single-laser rig holds up
+at range" and no further: theirs is EventMeasure's PROPAGATED click error, ours is MEASURED
+scatter of repeat frames, and ours is a rigid pool target against their wild fish.
+
+### And one correction to how Figure 3 reads
+
+Within a single rigid target in a single session — no composition confound possible — the
+range trend is small and scatters BOTH ways: cohort cells median +0.73 %/m (but that number
+is selected, since the rule rejects cells clearing ±2 %/m), rejected cells −2.12 %/m, span
+−6.70 to +4.39 across both. Figure 3's smooth −6 % → −1.5 % droop is therefore
+substantially POOLING COMPOSITION — only Box and Rainbow Trout are ever shot inside 0.8 m.
+Within a target it shrinks to −0.97 pp (Box) and −2.95 pp (Trout) against −3.68 pooled.
+That is the deepest reason the correction does not transfer: there is no consistent
+per-object range bias for one curve to remove.
+
 ### What survives
 
 Distortion sensitivity is ~40× higher for a large target near the edge, close in, than for

@@ -646,6 +646,23 @@ or the pairing is wrong on those individuals, and with seven pairs and no third
 instrument those are not separable. The mean difference spans zero — −6.7 % to
 +8.3 % at 95 % — as it does in the population comparison.
 
+**The two comparisons disagree about the sign of our bias, and that is worth
+stating numerically because it bounds what any correction could do.** Over the
+four species with enough of our animals, our medians sit **−15.4 %** against the
+archive; over the seven paired individuals we read **+3.5 %** long. A candidate
+range correction fitted on the pool cohort — the pool's own near-field trend,
+$-0.56 - 2.40/z$ per cent, which flattens that trend from a 1.40 pp spread of
+binned medians to 0.50 — adds between 1.2 % and 6.2 % at field ranges, median
+2.2 %. Applied to our side it moves the population comparison from a median
+absolute offset of 15.4 % to 14.4 %, and the paired comparison from 8.6 % to
+10.9 %: it helps the one that says we read short and hurts the one that says we
+read long, because it only ever adds length. Two things follow. The correction is
+**a tenth of the disagreement it would have to explain**, so neither result
+licenses it and it is not applied. And a population comparison that a
+same-individual comparison contradicts by nineteen points is not a weak
+measurement of a bias, it is a measurement of something else — which is the
+caution the preceding paragraphs give, here with a number on it.
+
 **So the two comparisons reach the same place from opposite ends, and neither
 changes the conclusion of the preceding paragraphs.** The population comparison
 is limited by between-unit scatter on 2–10 fish per unit; the paired comparison
