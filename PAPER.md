@@ -895,10 +895,18 @@ caught any of this in the field.
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
-- **Figure 16** *(§4.2)* — How many frames $p_{90}$ needs. Rarefaction: draw $n$ frames
-  without replacement from each of the fifteen cohort cells holding ≥ 30, take the
-  $p_{90}$ of percent length error, and compare it with that cell's full-sample $p_{90}$;
-  1,000 draws per cell. **Two statistics, at two levels.** Per fish the estimate is
+- **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
+  Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
+  holding ≥ 30, take the $p_{90}$ of percent length error, and compare it with that cell's
+  full-sample $p_{90}$; 1,000 draws per cell. **Read the origin, not just the unit.** The
+  axis is percentage points of length, the same unit §4.2 uses throughout, but zero here is
+  *that cell's own answer with all its frames*, not the known length. Subtracting each
+  cell's own $p_{90}$ is what removes the between-cell accuracy spread — those fifteen
+  values run −5.8 % to +2.7 % — and it is why this band can converge at all; a measurement
+  does not converge on truth, it converges on its own session's accuracy. So this figure
+  sizes the *sampling* term alone, and the note in the panel gives its scale: the ±15 %
+  budget is seven times the full height shown. Frame count is not what puts a measurement
+  outside the budget (§4.3 is). **Two statistics, at two levels.** Per fish the estimate is
   $p_{90}$, the paper's estimator throughout, because one fish's frames are a one-sided
   pose-corrupted distribution and a high quantile rejects that tail. Across draws and cells
   the summary is a **median** — the same choice §4.1 makes across animals — because sampling
@@ -910,11 +918,12 @@ caught any of this in the field.
   $n = 10$ on no extra information, purely because the estimator stops taking the extreme.
   **Two thresholds follow**: ten frames to make $p_{90}$ a quantile at all, and thirteen for
   it to land within 1 pp of its own limit 90 % of the time (20 frames for 92 %, 30 for
-  97 %). The sawtooth at $n = 20$ and $30$ is the same arithmetic on a smaller scale. Note
-  also that the median error *changes sign* over the small-$n$ range, −0.70 pp at $n = 2$
-  through +0.21 at $n = 9$: the maximum of two draws sits below the true 90th percentile and
-  the maximum of nine sits above it, so a small sample is not conservative in either
-  direction.
+  97 %). The second is a consequence of the ±1 pp tolerance and moves with it — 1.5 pp gives
+  ten frames, 2 pp gives four — so it is a resolution target, not an accuracy requirement.
+  The sawtooth at $n = 20$ and $30$ is the same arithmetic on a smaller scale. Note also
+  that the median error *changes sign* over the small-$n$ range, −0.70 pp at $n = 2$ through
+  +0.21 at $n = 9$: the maximum of two draws sits below the true 90th percentile and the
+  maximum of nine sits above it, so a small sample is not conservative in either direction.
   **What this figure does not cover**, and the ruler is the cautionary case: it measures
   sampling spread on cells whose diver *did* vary pose. More frames help only if the animal
   is presented broadside at some point — six frames all taken at 15° return a stable,

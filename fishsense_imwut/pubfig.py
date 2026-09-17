@@ -679,9 +679,11 @@ FIGURE_TITLES = {
     "fig15_paired_vs_stereo":
         "FishSense Lite against underwater stereo video, the same individuals",
     "fig16_p90_vs_sample_size":
-        "Error in the $p_{90}$ length estimate against frames per fish",
+        "How many frames the $p_{90}$ estimate needs to settle",
     "figA_all_dives_percent": "Percent length error for every session",
     "figD1_depth_correction": "The range correction, and why it is not applied",
+    "figD2_p90_budget":
+        "Reported length error against frames per fish, with the error budget marked",
 }
 
 
@@ -1709,6 +1711,98 @@ def fig_paired_vs_stereo(
 # not noise, and it is the figure's whole point.
 
 
+def fig_p90_budget(
+    traces,
+    worst,
+    marks: tuple[float, ...] = (5.0, 10.0, 15.0),
+    budget: float = 15.0,
+    figsize: tuple[float, float] = (COL_WIDTH, 3.1),
+) -> plt.Figure:
+    """The reported measurement's error against the number of frames behind it,
+    in percent length error -- the unit §4.2 and Figures 1-3 use.
+
+    `traces`, `worst` are `repeatability.p90_level_traces(...)`.
+
+    This is a **budget** figure, and the distinction from the convergence view
+    (Figure D2) is the whole reason it exists. A draw's $p_{90}$ is the
+    measurement a diver with `n` frames would report, so plotting its level
+    against the 5, 10 and 15 % marks answers "does the measurement meet the
+    budget?" directly. Figure D2 plots the deviation from each cell's own
+    full-sample $p_{90}$ instead, which answers "has the estimator converged?"
+    -- a standard fifteen times tighter, and a different question.
+
+    **One trace per cell, never pooled.** The fifteen cells' own $p_{90}$ values
+    span nearly 9 pp; pooling the draws folds that constant spread into the band
+    and the band then goes flat in `n`, which is a figure about between-cell
+    variation wearing the label of one about sample size. Drawn apart, each
+    trace settles -- that is the sample-size effect -- and the fan's width at
+    large `n` is the between-cell term, which is §4.3's subject and not this
+    figure's.
+
+    The worst single draw over every cell carries the budget claim, because a
+    budget is a bound rather than an average: what matters is whether *any* draw
+    crosses it.
+
+    The positive side is marked only at the innermost band. Nothing reaches
+    +5 % at any `n`, so drawing +10 and +15 would spend a third of the panel
+    certifying that an empty region is empty. Nothing is clipped.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="both")
+    _zero_line(ax, orientation="h")
+
+    all_ns = sorted({n for t in traces.values() for n in t})
+    wx = np.array(sorted(worst), dtype=float)
+    wy = np.array([worst[int(n)] for n in wx])
+    floor = min(wy.min(), -max(marks))
+    ceiling = max([v for t in traces.values() for v in t.values()] + [min(marks)])
+
+    # Single-hue ramp: the budget is the darkest mark because it is the one the
+    # paper commits to; the tighter marks are context.
+    shades = np.linspace(0.30, 1.0, len(marks))
+    for mark, shade in zip(marks, shades):
+        for sign in (-1.0, 1.0):
+            if sign > 0 and mark != min(marks):
+                continue
+            ax.axhline(sign * mark, color=INK_MUTED, linestyle=":",
+                       linewidth=0.7 + 0.5 * shade, alpha=0.35 + 0.65 * shade,
+                       zorder=1)
+        label = f"{mark:g} %" + (" budget" if mark == budget else "")
+        # OUTSIDE the axes, in the right margin: a cell trace runs at -5.84 %,
+        # so any label placed inside near the 5 % mark lands on it. `clip_on`
+        # off and `bbox = "tight"` together give the labels their own gutter.
+        ax.annotate(label, xy=(1.01, -mark),
+                    xycoords=ax.get_yaxis_transform(), xytext=(0, 0),
+                    textcoords="offset points", fontsize=6,
+                    color=INK_SECONDARY, ha="left", va="center",
+                    annotation_clip=False, zorder=5)
+
+    ax.axvspan(min(all_ns) - 1.0, 9.5, color=INK_MUTED, alpha=0.07, zorder=0)
+    for i, trace in enumerate(traces.values()):
+        ns = sorted(trace)
+        ax.plot(ns, [trace[n] for n in ns], color=SERIES_1, linewidth=0.8,
+                alpha=0.55, zorder=2,
+                label="One session-target cell" if i == 0 else None)
+    ax.plot(wx, wy, color=SERIES_2, linewidth=1.8, zorder=4,
+            label="Worst single draw")
+
+    # Under the worst-draw trace inside the shaded small-n region, the only
+    # clear space: the budget mark and its label own the bottom row.
+    ax.annotate(r"$p_{90}$ here is just the" "\n" r"maximum ($\lceil 0.9n \rceil = n$)",
+                xy=(5.6, wy.min()), xytext=(0, -5),
+                textcoords="offset points", fontsize=6.2, color=INK_SECONDARY,
+                ha="center", va="top", zorder=5)
+
+    ax.set_xlim(min(all_ns) - 1.0, max(all_ns) + 1.0)
+    ax.set_ylim(floor - 2.4, ceiling + 1.0)
+    ax.set_xlabel("Frames of one fish")
+    ax.set_ylabel("Reported $p_{90}$ length error (%)")
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.01), ncols=2,
+              handletextpad=0.4, columnspacing=1.0, borderaxespad=0.0)
+    fig.tight_layout()
+    return fig
+
+
 def fig_p90_vs_sample_size(
     rarefaction,
     tolerance: float = 1.0,
@@ -1765,6 +1859,14 @@ def fig_p90_vs_sample_size(
                 xytext=(-2, 2), textcoords="offset points", fontsize=6,
                 color=INK_SECONDARY, ha="right", va="bottom")
 
+    # The comparison a reader needs and the panel cannot hold: the sampling term
+    # is a few pp, the accuracy budget is 15 %, and drawing the latter would
+    # crush the former into a flat line. So it is stated at the scale it is.
+    ax.annotate("for scale: the \u00b115 % error budget\n"
+                f"spans {30.0 / (top - bottom):.0f}\u00d7 this panel",
+                xy=(ns.max(), bottom), xytext=(-2, 3), textcoords="offset points",
+                fontsize=6, color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
+
     if min_frames is not None:
         ax.axvline(min_frames, color=INK_MUTED, linewidth=1.0,
                    linestyle=(0, (4, 2)), zorder=3)
@@ -1780,7 +1882,12 @@ def fig_p90_vs_sample_size(
     ax.set_xlim(ns.min() - 1.0, ns.max() + 1.0)
     ax.set_ylim(bottom, top)
     ax.set_xlabel("Frames of one fish")
-    ax.set_ylabel("Error in the $p_{90}$ estimate (pp)")
+    # Name the quantity, not just the unit. The unit was never in question --
+    # this axis and §4.2's percent error are both percentage points of length --
+    # but the ORIGIN differs: zero here is the cell's own full-sample p90, not
+    # the known length. That is what lets the band converge, and a reader who
+    # takes it for reported error will think the measurement converges on truth.
+    ax.set_ylabel("Sampling error in the $p_{90}$\nestimate (pp of length)")
     ax.margins(y=0.05)
     # above the axes, as Figure 4 does it, so the panel interior is all data
     ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.01), ncols=2,

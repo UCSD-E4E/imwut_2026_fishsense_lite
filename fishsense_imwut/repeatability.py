@@ -172,9 +172,22 @@ class RarefactionPoint:
     lo: float           # 10th percentile of the signed error
     hi: float           # 90th percentile of the signed error
 
+    # The same draws expressed as the REPORTED measurement rather than as a
+    # deviation from the full-sample p90: percent length error against the
+    # known length, which is the unit every other figure in section 4 uses.
+    # The fields above answer "has p90 converged?"; these answer "does the
+    # measurement meet the budget?", and only the second question is in the
+    # paper's own currency. Defaults so a fixture can build a point without
+    # them.
+    level_median: float = float("nan")   # median reported error, %
+    level_lo: float = float("nan")       # 10th percentile, %
+    level_hi: float = float("nan")       # 90th percentile, %
+    level_worst: float = float("nan")    # signed error of the worst draw, %
+    within_budget: float = float("nan")  # fraction of draws inside +-budget
+
 
 def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0,
-                    tolerance: float = 1.0) -> dict:
+                    tolerance: float = 1.0, budget: float = 15.0) -> dict:
     """How far a p90 from `n` frames lands from the same group's full-sample p90.
 
     `groups` maps a key to that group's per-frame percent errors -- use
@@ -182,10 +195,21 @@ def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0
     `n` without replacement contribute at each `n`, so a group never competes
     with itself and `n` is never inflated by resampling.
 
-    Returns ``{n: RarefactionPoint}``. The reference is each group's own
-    full-sample p90, so this isolates the estimator's sampling behaviour from
-    how accurate that group happened to be. Read it as the error a diver with
-    `n` frames of one fish actually faces.
+    Returns ``{n: RarefactionPoint}``, carrying each `n` twice over.
+
+    The `median`/`lo`/`hi`/`abs_p90` fields are measured against each group's
+    own full-sample p90, which isolates the estimator's sampling behaviour from
+    how accurate that group happened to be -- "has p90 converged?".
+
+    The `level_*` fields are the same draws reported as percent length error
+    against the known length, which is what section 4 measures everywhere else
+    and the unit the 15 % budget is stated in. A draw's p90 *is* the
+    measurement a diver would report from those `n` frames, so `level_worst`
+    and `within_budget` answer the question the paper actually asks. Keeping
+    both is deliberate: a convergence tolerance of +-1 pp is fifteen times
+    tighter than the budget, so the two questions have very different answers
+    and conflating them once produced a minimum-sample-size claim that the
+    accuracy metric does not support.
     """
     from .pubfig import nearest_rank_p90
 
@@ -193,23 +217,34 @@ def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0
     full = {k: nearest_rank_p90(v) for k, v in groups.items()}
     out = {}
     for n in sizes:
-        errs = [
-            np.array([nearest_rank_p90(rng.choice(v, n, replace=False))
-                      for _ in range(draws)]) - full[k]
+        drawn = [
+            (k, np.array([nearest_rank_p90(rng.choice(v, n, replace=False))
+                          for _ in range(draws)]))
             for k, v in groups.items() if len(v) >= n
         ]
-        if not errs:
+        if not drawn:
             continue
-        e = np.concatenate(errs)
-        lo, hi = np.percentile(e, [10, 90])
+        # Same draws, two references: the group's own p90 for convergence, the
+        # known length for the reported error. The drawn value already IS the
+        # latter -- `groups` holds percent error, so a draw's p90 is the error
+        # of the measurement that draw would have reported.
+        errs = np.concatenate([lv - full[k] for k, lv in drawn])
+        level = np.concatenate([lv for _, lv in drawn])
+        lo, hi = np.percentile(errs, [10, 90])
+        level_lo, level_hi = np.percentile(level, [10, 90])
         out[int(n)] = RarefactionPoint(
             n=int(n),
             rank=int(np.ceil(0.9 * n)),
-            abs_p90=float(np.percentile(np.abs(e), 90)),
-            within=float((np.abs(e) < tolerance).mean()),
-            median=float(np.median(e)),
+            abs_p90=float(np.percentile(np.abs(errs), 90)),
+            within=float((np.abs(errs) < tolerance).mean()),
+            median=float(np.median(errs)),
             lo=float(lo),
             hi=float(hi),
+            level_median=float(np.median(level)),
+            level_lo=float(level_lo),
+            level_hi=float(level_hi),
+            level_worst=float(level[np.argmax(np.abs(level))]),
+            within_budget=float((np.abs(level) <= budget).mean()),
         )
     return out
 
@@ -227,3 +262,40 @@ def p90_min_frames(rarefaction, tolerance: float = 1.0) -> int | None:
         if all(rarefaction[m].abs_p90 <= tolerance for m in ns[i:]):
             return n
     return None
+
+
+def p90_level_traces(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0):
+    """One convergence trace per group, in reported percent length error.
+
+    Returns ``(traces, worst)``: `traces` maps each group key to
+    ``{n: median reported error}``, and `worst` maps each `n` to the single
+    most extreme draw over every group.
+
+    **Why per group and not pooled.** `p90_rarefaction`'s `level_*` fields pool
+    the draws, and pooling is what destroys the figure: the fifteen cohort
+    cells' own p90s span nearly 9 pp, that spread does not depend on `n`, and it
+    is five times the sampling effect being measured. A pooled band is therefore
+    flat in `n` and says nothing about sample size, even though each individual
+    cell still settles. Subtracting each cell's own p90 to fix that is what
+    `p90_rarefaction` does, and it costs the paper's metric. Keeping the cells
+    apart keeps both: every trace converges, and the vertical spread between
+    traces is the between-cell term, stated rather than hidden.
+    """
+    from .pubfig import nearest_rank_p90
+
+    rng = np.random.default_rng(seed)
+    traces: dict[object, dict[int, float]] = {k: {} for k in groups}
+    worst: dict[int, float] = {}
+    for n in sizes:
+        extremes = []
+        for k, v in groups.items():
+            if len(v) < n:
+                continue
+            drawn = np.array([nearest_rank_p90(rng.choice(v, n, replace=False))
+                              for _ in range(draws)])
+            traces[k][int(n)] = float(np.median(drawn))
+            extremes.append(drawn[np.argmax(np.abs(drawn))])
+        if extremes:
+            e = np.array(extremes)
+            worst[int(n)] = float(e[np.argmax(np.abs(e))])
+    return {k: v for k, v in traces.items() if v}, worst

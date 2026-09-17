@@ -672,6 +672,49 @@ maximum of 8, so **every field p90 is a longest frame** and sits in the worst pa
 curve. That is not a reason to distrust the field medians — it is a reason not to quote a
 field p90 as if it carried a pool p90's precision.
 
+### Addendum (2026-09-17): this was the wrong metric for the paper
+
+The table above measures the distance from each cell's **own full-sample p90**, which
+answers "has the estimator converged?". Section 4 measures percent length error against
+the known length everywhere else, and states a 15 % budget. Those are different
+quantities, and ±1 pp is a standard **fifteen times tighter** than the budget — so the
+"thirteen frames" threshold is an artefact of the tolerance, not a requirement the
+accuracy claim rests on. It is also sensitive to it: 1.5 pp gives ten frames, 2 pp gives
+four, 0.5 pp gives thirty-two, and 0.5 pp would demand more frames than any fish in the
+corpus, wild or modelled.
+
+Re-asked in the paper's own currency — a draw's p90 **is** the measurement a diver with
+those n frames would report, so plot its level, not its deviation:
+
+| n | median reported | 80 % interval | worst single draw | inside 15 % |
+|---|---|---|---|---|
+| 2 | −1.31 % | [−5.17, +0.99] | −10.37 % | 100 % |
+| 3 | −0.82 % | [−4.63, +1.13] | −9.10 % | 100 % |
+| 5 | −0.35 % | [−4.50, +1.69] | −7.20 % | 100 % |
+| 10 | −0.52 % | [−4.51, +1.06] | −6.76 % | 100 % |
+| 13 | −0.28 % | [−4.26, +1.09] | −6.70 % | 100 % |
+| 30 | −0.28 % | [−4.26, +1.06] | −6.22 % | 100 % |
+
+**There is no minimum sample size for the 15 % budget.** Two frames meet it; the worst
+single draw over every n and every cell is −10.4 %. Frame count is not what puts a
+measurement outside the budget — which calibration it resolves through is (§9).
+
+One trap in the re-cut, and it is why `p90_level_traces` exists alongside
+`p90_rarefaction`. Pooling the draws across cells makes the band **flat in n**: the
+fifteen cells' own p90s span −5.84 % to +2.74 %, that spread has no n dependence, and it
+is roughly five times the sampling effect. A pooled band is therefore a figure about
+between-cell variation wearing the label of one about sample size. Subtracting each cell's
+own p90 removes it — that is what the original figure did, and it costs the paper's metric.
+Keeping the cells as separate traces keeps both: each settles, and the fan's width is the
+between-cell term, stated rather than hidden.
+
+Figure 16 is now the budget version. The convergence curve is kept as
+`figD2_p90_convergence`, repository only, because the n ≤ 10 arithmetic is real and worth a
+figure: crossing that boundary narrows the 80 % interval from 2.08 pp at n = 9 to 1.35 at
+n = 10 on no extra information, and the median deviation changes sign across the small-n
+range (−0.70 pp at n = 2 through +0.21 at n = 9), so a small sample is not conservative in
+either direction.
+
 ---
 
 ## 7d. The near-field droop is not optics, and the range correction is not applied (2026-09-16)

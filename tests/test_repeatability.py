@@ -338,3 +338,55 @@ def test_the_tolerance_actually_reaches_the_minimum(cohort_cells):
     r = rep.p90_rarefaction(cohort_cells)
     assert rep.p90_min_frames(r, tolerance=2.0) < rep.p90_min_frames(r)
     assert rep.p90_min_frames(r, tolerance=0.5) > rep.p90_min_frames(r)
+
+
+# --- the budget view, and why it is a different figure -----------------------
+
+
+def test_level_traces_are_kept_per_cell_because_pooling_flattens_them(cohort_cells):
+    """The reason `p90_level_traces` exists next to `p90_rarefaction`.
+
+    Pooled, the reported error's spread is dominated by the cells' own p90s --
+    which differ by nearly 9 pp and do not depend on n -- so a pooled band is
+    flat across the axis and describes between-cell variation while appearing
+    to describe sample size. Per cell, each trace still settles.
+    """
+    sizes = (2, 5, 10, 30)
+    rare = rep.p90_rarefaction(cohort_cells, sizes=sizes, draws=100)
+    traces, worst = rep.p90_level_traces(cohort_cells, sizes=sizes, draws=100)
+
+    pooled_width = {n: rare[n].level_hi - rare[n].level_lo for n in sizes}
+    between = max(traces[k][30] for k in traces) - min(traces[k][30] for k in traces)
+    # the pooled band never narrows to anything like the sampling term
+    assert min(pooled_width.values()) > 0.5 * between
+    # and it is the between-cell spread that sets its size
+    assert pooled_width[30] == pytest.approx(between, rel=0.5)
+
+
+def test_level_traces_settle_where_the_pooled_band_does_not(cohort_cells):
+    sizes = (2, 3, 5, 10, 20, 30)
+    traces, _ = rep.p90_level_traces(cohort_cells, sizes=sizes, draws=200)
+    # every trace moves less between n=20 and n=30 than between n=2 and n=5
+    early = [abs(t[5] - t[2]) for t in traces.values()]
+    late = [abs(t[30] - t[20]) for t in traces.values()]
+    assert np.median(late) < np.median(early)
+
+
+def test_no_draw_at_any_n_leaves_the_error_budget(cohort_cells):
+    """The budget figure's headline, and it is a negative result about sample
+    size: frame count is not what puts a measurement outside 15 %.
+
+    Pinned because it is the claim the paper makes from Figure D2, and because
+    the worst case is the whole point -- a budget is a bound, not an average.
+    """
+    _, worst = rep.p90_level_traces(cohort_cells, sizes=(2, 3, 5, 10, 30), draws=500)
+    assert max(abs(v) for v in worst.values()) < 15.0
+    # the worst case is at the smallest n, where p90 is the max of two frames
+    assert abs(worst[2]) == max(abs(v) for v in worst.values())
+
+
+def test_level_traces_never_draw_a_cell_beyond_its_frames(cohort_cells):
+    traces, worst = rep.p90_level_traces(cohort_cells, sizes=(2, 40, 200), draws=10)
+    assert 200 not in worst
+    assert all(200 not in t for t in traces.values())
+    assert all(len(cohort_cells[k]) >= 40 for k, t in traces.items() if 40 in t)
