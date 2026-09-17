@@ -756,11 +756,10 @@ caught any of this in the field.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level
   interquartile range and whiskers; dots: every frame past a whisker; diamond: $p_{90}$,
   the reported estimator. The gap between median and $p_{90}$ is the pose tail, not
-  instrument spread. The axis stops at ±12 % so the boxes are not crushed into a third of
-  the width by a one-sided tail; the twelve frames outside it are drawn as carets on the
-  boundary and the note gives the worst, −30.6 %. Both matter: a clipped axis that reports
-  only a count says the same thing whether the tail reaches −12 % or −31 %, and the size
-  of that tail is the whole reason the reported estimator is a high quantile.
+  instrument spread. **Nothing is clipped and nothing is omitted** — all 995 frames are on
+  the axis, out to the worst at −30.6 %. That tail, one-sided and worst on the two largest
+  models, is the whole reason the reported estimator is a high quantile rather than a mean,
+  so a narrower axis would have hidden the figure's own argument.
 - **Figure 3** — Percent length error against laser range, accuracy cohort. Binned median
   and interquartile band over the per-frame cloud. The band does not widen with range.
 - **Figure 4** — Fitted in-plane laser angle for seven sessions of one unit, the parameter
@@ -891,7 +890,11 @@ caught any of this in the field.
   budget. No frame within 20° of broadside breaches it; the pooled median crosses at 30°.
   The guidance in the text is 15°.
 - **Figure A (appendix)** — Percent length error for every session with ≥ 8 frames,
-  ordered by median. The held-out and rejected sessions are the wide, negative rows.
+  ordered by median, held-out targets included. The held-out and rejected sessions are the
+  wide, negative rows. This one **is** clipped, to −35–15 %, and unlike Figure 2 it has to
+  be: a single mis-clicked box frame in one rejected session reads +77.8 %, and letting one
+  frame in 2,926 set the scale would flatten every row. The forty frames outside are drawn
+  as carets on the boundary and the note carries the extreme.
 
 Drop-in: figures are sized for the `acmart` column already (`\includegraphics` with no
 `width=`); see the last cell of the notebook.

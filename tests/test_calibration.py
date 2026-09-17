@@ -583,15 +583,14 @@ def test_the_notebook_draws_every_figure_the_paper_captions():
     assert captioned <= drawn, f"captioned but not drawn: {sorted(captioned - drawn)}"
 
 
-def test_a_clipped_axis_reports_how_far_not_just_how_many():
-    """A clip note that counts but does not size the tail is not disclosure.
+def test_figure_2_is_not_clipped_at_all():
+    """It used to stop at +-12 % with a footnote counting what fell outside, and
+    that reads as choosing which frames to show -- fairly, since the footnote
+    sized nothing and `showfliers` was off besides, hiding 41 of 995 frames.
 
-    Figure 2's axis stops at -12 % while the worst frame in the cohort is
-    -30.6 %, and the earlier note said only "12 frame(s) beyond axis" -- true of
-    a -12.1 % tail and a -30.6 % one alike. Worse, `showfliers` was off, so 41
-    of 995 frames sat past a whisker unseen, four times what the note admitted.
-    The tail is the paper's own reason for reporting p90, so understating it
-    undercuts the argument the figure is there to support.
+    The tail IS the argument: one-sided, worst on the two largest models, and the
+    stated reason the reported estimator is a high quantile. So the axis carries
+    all of it, out to -30.6 %, and there is no note to read.
     """
     from fishsense_imwut import pubfig
 
@@ -602,24 +601,36 @@ def test_a_clipped_axis_reports_how_far_not_just_how_many():
              & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
 
     pubfig.use_publication_style()
-    fig = pubfig.fig_error_by_model_p90(acc)
-    ax = fig.axes[0]
-    notes = [t.get_text() for t in ax.texts if "beyond axis" in t.get_text()]
-    assert len(notes) == 1, "a clipped axis must say so exactly once"
+    ax = pubfig.fig_error_by_model_p90(acc).axes[0]
+    assert not [t for t in ax.texts if "beyond axis" in t.get_text()]
 
-    worst = float(acc.pct_error.min())
-    assert f"{worst:+.1f}" in notes[0], (
-        f"the note must carry the extreme; got {notes[0]!r} against {worst:+.1f}")
-    assert "12 frame" in notes[0]
+    lo, hi = ax.get_xlim()
+    assert lo <= acc.pct_error.min(), "the worst frame must be on the axis"
+    assert hi >= acc.pct_error.max()
 
-    # and the clipped frames are drawn at the boundary rather than dropped
-    lo = ax.get_xlim()[0]
-    carets = [ln for ln in ax.lines
-              if ln.get_marker() in ("<", ">") and len(ln.get_xdata())]
-    assert carets, "clipped frames must be visible at the axis edge"
-    assert all(abs(ln.get_xdata()[0] - lo) < 1e-6 for ln in carets)
-
-    # fliers are on: the Box's worst frame is -11.2 % but its whisker stops
-    # near -3.8 %, so with them off that gap was invisible
-    fliers = [ln for ln in ax.lines if ln.get_marker() == "o" and ln.get_linestyle() == "None"]
+    # and every frame past a whisker is drawn, not suppressed
+    fliers = [ln for ln in ax.lines
+              if ln.get_marker() == "o" and ln.get_linestyle() == "None"]
     assert sum(len(ln.get_xdata()) for ln in fliers) > 25
+
+
+def test_where_clipping_survives_it_says_how_far():
+    """Figure A still clips, and has to: one mis-clicked frame reads +77.8 % and
+    would set the scale for 2,926. A clip that is necessary is fine; a clip that
+    reports only a count is not, because "40 beyond axis" says the same thing
+    whether the tail reaches -36 % or -378 %.
+    """
+    from fishsense_imwut import pubfig
+
+    df = cal.to_frame([r for r in cal.load_rows(DATA / "corpus.csv")
+                       if int(r["dive_id"]) not in cal.NON_POOL_DIVES])
+    pubfig.use_publication_style()
+    ax = pubfig.fig_error_by_dive(df, min_frames=8, xlim=(-35, 15),
+                                  figsize=(pubfig.COL_WIDTH, 5.0)).axes[0]
+
+    notes = [t.get_text() for t in ax.texts if "beyond axis" in t.get_text()]
+    assert len(notes) == 1
+    assert "+77.8" in notes[0], f"the extreme must be named; got {notes[0]!r}"
+
+    carets = [ln for ln in ax.lines if ln.get_marker() in ("<", ">")]
+    assert carets, "clipped frames must be visible at the boundary"

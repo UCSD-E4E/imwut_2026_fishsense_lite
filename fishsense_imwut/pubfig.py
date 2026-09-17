@@ -642,8 +642,8 @@ def _p90_marker(ax, x, y, label=None, **kw):
 
 def fig_error_by_model_p90(
     df: pd.DataFrame,
-    figsize: tuple[float, float] = (COL_WIDTH, 2.2),
-    xlim: tuple[float, float] | None = (-12, 12),
+    figsize: tuple[float, float] = (COL_WIDTH, 2.4),
+    xlim: tuple[float, float] | None = None,
     emphasise: str | None = None,
 ) -> plt.Figure:
     """Per-model error distribution with the p90 estimator marked.
@@ -652,6 +652,14 @@ def fig_error_by_model_p90(
     pipeline actually reports. The gap between the median and the p90 is the
     foreshortening tail, which is the reason the estimator is a high quantile
     and not a mean.
+
+    **NOT CLIPPED, deliberately.** This defaulted to +-12 % with a footnote
+    counting what fell outside, and that reads as choosing which frames to show
+    -- fairly, since the footnote sized nothing and `showfliers` was off besides.
+    Rendering it unclipped settled it: the boxes stay legible across the full
+    -31 to +4 range, and the long negative tail on the two largest models is the
+    figure's actual argument, so hiding it cost more than the width it bought.
+    `xlim` remains for a caller that needs it; nothing in the paper uses it.
 
     `emphasise` recolours one model as the accent and greys the rest -- the
     emphasis form, for when a single model is the point (Shark).
