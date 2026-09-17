@@ -270,3 +270,69 @@ def test_the_range_correction_helps_one_comparison_and_hurts_the_other(pairs):
     disagreement = abs(np.median([p.p90_diff_pct for p in pairs]) - np.median(offsets))
     assert disagreement > 18.0
     assert np.median(added) < 0.15 * disagreement
+
+
+# --- R^2 about the 1:1 line -------------------------------------------------
+
+
+def test_r2_about_identity_is_perfect_only_on_the_line():
+    from fishsense_imwut.pubfig import r2_about_identity
+
+    x = [10.0, 20.0, 30.0, 40.0]
+    assert r2_about_identity(x, x) == pytest.approx(1.0)
+
+
+def test_r2_about_identity_punishes_a_pure_scale_error_that_pearson_ignores():
+    """The reason the paper quotes this statistic and not Pearson r^2.
+
+    A uniform 20 % underestimate is a perfect straight line, so Pearson r^2 is
+    exactly 1.0 and certifies nothing. R^2 about identity has no slope to
+    absorb the bias, so the same data drops it to ~0.24 -- and drops it below
+    zero once the bias exceeds the reference's own spread, which is the honest
+    reading: worse than a flat guess at the mean reference length.
+    """
+    import numpy as np
+
+    from fishsense_imwut.pubfig import r2_about_identity
+
+    x = np.array([200.0, 265.0, 300.0, 320.0, 380.0, 430.0])
+    assert np.corrcoef(x, 0.8 * x)[0, 1] ** 2 == pytest.approx(1.0)
+    assert r2_about_identity(x, 0.8 * x) == pytest.approx(0.244, abs=0.001)
+    assert r2_about_identity(x, 0.6 * x) < 0.0
+
+
+def test_r2_about_identity_uses_the_reference_as_its_baseline():
+    """The denominator is the reference's variance, not the measurement's.
+
+    These are different numbers whenever the measurement's spread differs from
+    the reference's, and only the reference baseline has a meaning: "beat a
+    flat guess at the mean reference length". A draft quoted the other one.
+    """
+    import numpy as np
+
+    from fishsense_imwut.pubfig import r2_about_identity
+
+    x = np.array([10.0, 20.0, 30.0, 40.0])
+    y = np.array([11.0, 19.0, 33.0, 37.0])
+    residual = float(np.sum((y - x) ** 2))
+    assert r2_about_identity(x, y) == pytest.approx(
+        1.0 - residual / np.sum((x - x.mean()) ** 2))
+    assert r2_about_identity(x, y) != pytest.approx(
+        1.0 - residual / np.sum((y - y.mean()) ** 2))
+
+
+def test_r2_about_identity_is_undefined_without_reference_spread():
+    import math
+
+    from fishsense_imwut.pubfig import r2_about_identity
+
+    assert math.isnan(r2_about_identity([30.0, 30.0, 30.0], [29.0, 31.0, 30.0]))
+    assert math.isnan(r2_about_identity([30.0], [30.0]))
+
+
+def test_r2_about_identity_reports_the_paired_stereo_comparison(pairs):
+    """Pins the number section 4.3 and Figure 15 quote."""
+    from fishsense_imwut.pubfig import r2_about_identity
+
+    r2 = r2_about_identity([p.stereo_mm for p in pairs], [p.ours_p90_mm for p in pairs])
+    assert r2 == pytest.approx(0.807, abs=0.001)

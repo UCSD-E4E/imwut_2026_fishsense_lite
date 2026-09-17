@@ -148,7 +148,14 @@ high-order statistic rejects it; that is the same argument §4.2 makes against a
 mean. Over the seven pairs $p_{90}$ gives a difference of **+3.5 %** (mean
 +0.8 %, sd 10.1 %, Figure 15), and **four of the seven read longer than the
 stereo, by 3.5 to 11.2 %**, which our own foreshortening cannot account for in
-either direction. The estimator does not manufacture that result: the same four
+either direction. Read as agreement rather than as a spread, the seven $p_{90}$
+estimates sit on the 1:1 line with $R^2 = 0.807$ (residual RMS 3.0 cm). That is
+$R^2$ *about identity* — no fitted slope or offset to absorb a bias — and it is
+the number to quote rather than a correlation: over fish spanning 20 to 43 cm,
+Pearson $r^2$ is 0.838 and would stay near 1.0 under a uniform scale error of any
+size, so it would certify only that the seven animals are different lengths.
+
+The estimator does not manufacture that result: the same four
 individuals exceed the stereo under any summary that is not the median, and the
 median itself would report −3.7 % — a small negative bias that is an artefact of
 summarising a one-sided error at its centre.
@@ -773,8 +780,11 @@ caught any of this in the field.
 #### Figure captions
 
 - **Figure 1** — Measured against known length, accuracy cohort (19 sessions, 995 frames).
-  Five targets separate along the abscissa by their own lengths. Error bars are the
-  interquartile range of frames; the diamond is the $p_{90}$.
+  Five targets separate along the abscissa by their own lengths; the diamond is the
+  $p_{90}$. $R^2 = 0.999$ about the 1:1 line on the five $p_{90}$ estimates, 0.976 on the
+  995 individual frames. That statistic and not Pearson $r^2$: it has no free slope or
+  offset, so a scale error lowers it, where $r^2$ over targets spanning a factor of four
+  in length would mostly certify that the targets are different sizes.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level
   interquartile range and whiskers; dots: every frame past a whisker; diamond: $p_{90}$,
   the reported estimator. The gap between median and $p_{90}$ is the pose tail, not
@@ -873,9 +883,12 @@ caught any of this in the field.
   length of the **same individual**, seven fish over 39 frames, with the $p_{90}$ estimator
   and a 1:1 datum. **Figure 1's form and Figure 1's estimator**, so the two read the same
   way — but the 1:1 line here is *agreement*, not truth, because both axes are instruments
-  and neither is a known length. Contrast Figure 14, where the two axes are different
-  animals. Four of the seven read longer than the stereo at $p_{90}$, by 3.5 to 11.2 %, and
-  pose loss cannot produce a positive; the median difference is +3.5 %. One caution about
+  and neither is a known length. $R^2 = 0.807$ about that line on the seven $p_{90}$
+  estimates (0.786 per frame), which is an agreement statistic and not a correlation:
+  Pearson $r^2$ is 0.838 and would sit near 1.0 under a uniform scale error. Contrast
+  Figure 14, where the two axes are different animals. Four of the seven read longer than
+  the stereo at $p_{90}$, by 3.5 to 11.2 %, and pose loss cannot produce a positive; the
+  median difference is +3.5 % and the mean +0.8 %. One caution about
   the estimator at these sample sizes: nearest rank is `ceil(0.9n)`, which is $n$ itself for
   $n \le 10$, so with 3 to 11 frames per fish $p_{90}$ selects the top sample for five of
   the seven. It is a high-order statistic here rather than a tail estimate, and only the

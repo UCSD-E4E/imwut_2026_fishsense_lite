@@ -111,6 +111,34 @@ def _zero_line(ax: plt.Axes, orientation: str = "h") -> None:
         ax.axvline(0.0, color=BASELINE, linewidth=0.8, zorder=1)
 
 
+def _r2_annotation(ax: plt.Axes, r2: float | None, basis: str = "per frame") -> None:
+    """Stamp R^2-about-1:1 in the corner the 1:1 line leaves empty.
+
+    Lower right on both agreement figures: the legend holds the upper left and
+    the diagonal runs between them, so this is the one corner no mark reaches.
+    Text ink, not a series colour -- it is a label, not a third series.
+
+    `basis` names which marks the number was computed over, because both
+    figures draw two: a per-frame cloud and a per-target estimator. Without it
+    the reader cannot tell a statement about single frames from a statement
+    about the reported estimate, and the two differ by a lot.
+    """
+    if r2 is None:
+        return
+    ax.text(
+        0.97,
+        0.04,
+        f"$R^2 = {r2:.3f}$ about 1:1\n({basis})",
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=6.5,
+        linespacing=1.3,
+        color=INK_SECONDARY,
+        zorder=5,
+    )
+
+
 def nearest_rank_p90(values: Sequence[float]) -> float:
     """p90 by nearest rank -- ceil(0.9n) -- matching the `fish_length_estimate`
     view exactly, so a number quoted from a figure equals the number the
@@ -126,6 +154,46 @@ def nearest_rank_p90(values: Sequence[float]) -> float:
     if n == 0:
         return float("nan")
     return float(arr[int(np.ceil(0.9 * n)) - 1])
+
+
+def r2_about_identity(reference: Sequence[float], measured: Sequence[float]) -> float:
+    """Fraction of the variance in `reference` that `measured` reproduces *on
+    the 1:1 line*: 1 - sum((y - x)^2) / sum((x - mean(x))^2).
+
+    The denominator is the **reference's** variance, not the measurement's,
+    which makes the null model "a flat guess at the mean reference length" --
+    the only baseline that means anything. Dividing by the measurement's
+    variance instead is a different number (0.844 rather than 0.807 on the
+    stereo pairs) whose null model is "the reference equals the mean of our own
+    readings", which is not a baseline at all. A draft of section 4.3 quoted
+    that number before this function existed.
+
+    This is the statistic an agreement figure needs, and it is not the one
+    `scipy.stats.linregress` reports. Pearson r^2 is scale- and offset-free, so
+    a set of measurements that were all 20 % short, or all 3 cm long, would
+    still score near 1.0 -- against eight targets that differ in size by a
+    factor of four, r^2 mostly certifies that the targets have different
+    lengths. R^2 about identity has no free parameters to absorb a bias, so it
+    falls whenever the cloud sits off the 1:1 datum the figure draws.
+
+    It can go negative, which is the honest behaviour: a negative value says
+    the measurements are further from the 1:1 line than a flat guess at the
+    mean reference length would have been.
+    """
+    x = np.asarray(reference, dtype=float)
+    y = np.asarray(measured, dtype=float)
+    if x.shape != y.shape:
+        raise ValueError(f"reference and measured differ in shape: {x.shape} vs {y.shape}")
+    keep = np.isfinite(x) & np.isfinite(y)
+    x, y = x[keep], y[keep]
+    if x.size < 2:
+        return float("nan")
+    denominator = float(np.sum((x - x.mean()) ** 2))
+    if denominator == 0.0:
+        # Every reference identical: there is no variance on x to explain, so
+        # the ratio is undefined rather than perfect.
+        return float("nan")
+    return float(1.0 - np.sum((y - x) ** 2) / denominator)
 
 
 # --- data ----------------------------------------------------------------
@@ -262,6 +330,8 @@ def fig_measured_vs_known(
     figsize: tuple[float, float] = (COL_WIDTH, 2.7),
     jitter: float = 0.0025,
     seed: int = 0,
+    r2: float | None = None,
+    r2_basis: str = "per-model $p_{90}$",
 ) -> plt.Figure:
     """Per-frame measured length against the model's known length, with the
     p90 estimator overlaid and a 1:1 reference.
@@ -335,6 +405,9 @@ def fig_measured_vs_known(
     ax.set_xlabel("Known fork length (m)")
     ax.set_ylabel("Measured length (m)")
     ax.legend(loc="upper left", handletextpad=0.4, borderaxespad=0.2)
+    # Passed in, never computed here: the notebook owns every number the paper
+    # quotes, so the annotation and the text cannot drift apart.
+    _r2_annotation(ax, r2, r2_basis)
     return fig
 
 
@@ -671,9 +744,11 @@ def save_figure(
             size = 7.5
             per_line = max(24, int(fig.get_size_inches()[0] * 72 / (0.52 * size)))
             text = "\n".join(textwrap.wrap(label, per_line)) if len(label) > per_line else label
-            # figure coordinates, so it rides above tight_layout without
-            # reflowing the axes the figure was composed against
-            art = fig.text(0.5, 0.995, text, ha="center", va="top",
+            # ABOVE the figure rectangle (y=1, anchored by its bottom), not
+            # inside it: `savefig.bbox = "tight"` grows the saved image to
+            # include the artist, so the title gains its own band instead of
+            # landing on an axes that reaches the top of the panel
+            art = fig.text(0.5, 1.0, text, ha="center", va="bottom",
                            fontsize=size, color=INK_SECONDARY)
         # no bbox_inches/pad_inches here: use_publication_style already sets
         # them, and overriding would silently re-crop every typeset PDF
@@ -1550,6 +1625,8 @@ def fig_paired_vs_stereo(
     ours: pd.DataFrame,
     pairs: Sequence[object],
     figsize: tuple[float, float] = (COL_WIDTH, 2.7),
+    r2: float | None = None,
+    r2_basis: str = "per-fish $p_{90}$",
 ) -> plt.Figure:
     """Our per-frame lengths against the stereo length, per paired individual.
 
@@ -1619,6 +1696,7 @@ def fig_paired_vs_stereo(
     ax.set_xlabel("Stereo-video length, same individual (cm)")
     ax.set_ylabel("FishSense Lite length (cm)")
     ax.legend(loc="upper left", handletextpad=0.4, borderaxespad=0.2)
+    _r2_annotation(ax, r2, r2_basis)
     fig.tight_layout()
     return fig
 

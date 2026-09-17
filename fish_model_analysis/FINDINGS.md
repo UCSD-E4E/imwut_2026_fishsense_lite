@@ -1667,3 +1667,40 @@ Species attribution across all of it remains the labeler's and unverified: the
 mislabel detector needs a known length and no wild fish has one. Frame 1378 of
 dive 25 was labelled Rainbow Parrotfish among nine Blue Parrotfish and was
 caught only because a human looked.
+
+## 13. $R^2$ about the 1:1 line, and the baseline that makes it mean something (2026-09-17)
+
+Figures 1 and 15 now carry $R^2$ about identity, computed in the notebook by
+`pubfig.r2_about_identity` and annotated on the **$p_{90}$ basis** — the reported
+estimator, so the figure and the text quote one number:
+
+| | $n$ | $R^2$ about 1:1 | Pearson $r^2$ | resid. RMS |
+|---|---|---|---|---|
+| Figure 15, per-fish $p_{90}$ | 7 | 0.807 | 0.838 | 3.0 cm |
+| Figure 15, per frame | 39 | 0.786 | 0.859 | 3.5 cm |
+| Figure 1, per-model $p_{90}$ | 5 | 0.999 | 0.999 | 3.2 mm |
+| Figure 1, per frame | 995 | 0.976 | 0.986 | 15.4 mm |
+
+Two traps, both of which caught a draft sentence before this section existed.
+
+**The denominator is the reference's variance, not ours.** The null model has to
+be "a flat guess at the mean reference length"; that is the only baseline with a
+meaning, and it is the Nash–Sutcliffe form. Dividing by the *measurement's*
+variance instead gives 0.844 on the stereo pairs rather than 0.807, and its null
+model is "the stereo equals the mean of our own readings", which is not a
+baseline at all. A draft quoted 0.8435 — the wrong baseline *and* the per-frame
+number where the p90 one was meant.
+
+**It is agreement, not correlation, and the distinction is the point.** These
+seven fish span 20–43 cm, so Pearson $r^2$ mostly certifies that they are
+different sizes: a uniform 20 % underestimate leaves $r^2$ at exactly 1.0 while
+dropping $R^2$-about-identity to 0.24, and a 40 % underestimate drops it below
+zero. `test_r2_about_identity_punishes_a_pure_scale_error_that_pearson_ignores`
+pins that. So "high correlation with the stereo system" is the weaker claim and
+is not what Figure 15 shows; what it shows is agreement to $R^2 = 0.807$ with a
+mean signed difference of +0.8 % and per-fish differences from −13.8 % to
++11.2 %.
+
+Neither number licenses "reproduces the stereo measurement" at $n = 7$. The
+supportable sentence is the one §12 already reached: two instruments agreeing to
+about ±10 % per individual with no detectable systematic offset.
