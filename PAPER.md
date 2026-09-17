@@ -754,8 +754,13 @@ caught any of this in the field.
   Five targets separate along the abscissa by their own lengths. Error bars are the
   interquartile range of frames; the diamond is the $p_{90}$.
 - **Figure 2** — Percent length error by target, accuracy cohort. Box: frame-level
-  interquartile range and whiskers; diamond: $p_{90}$, the reported estimator. The gap
-  between median and $p_{90}$ is the pose tail, not instrument spread.
+  interquartile range and whiskers; dots: every frame past a whisker; diamond: $p_{90}$,
+  the reported estimator. The gap between median and $p_{90}$ is the pose tail, not
+  instrument spread. The axis stops at ±12 % so the boxes are not crushed into a third of
+  the width by a one-sided tail; the twelve frames outside it are drawn as carets on the
+  boundary and the note gives the worst, −30.6 %. Both matter: a clipped axis that reports
+  only a count says the same thing whether the tail reaches −12 % or −31 %, and the size
+  of that tail is the whole reason the reported estimator is a high quantile.
 - **Figure 3** — Percent length error against laser range, accuracy cohort. Binned median
   and interquartile band over the per-frame cloud. The band does not widen with range.
 - **Figure 4** — Fitted in-plane laser angle for seven sessions of one unit, the parameter

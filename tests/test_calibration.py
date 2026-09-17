@@ -581,3 +581,45 @@ def test_the_notebook_draws_every_figure_the_paper_captions():
     # "fig10b_error_by_camera" -> "10b"; "figA_all_dives_percent" -> "A".
     drawn = {re.match(r"fig([0-9A-Za-z]+?)_", s).group(1) for s in saved}
     assert captioned <= drawn, f"captioned but not drawn: {sorted(captioned - drawn)}"
+
+
+def test_a_clipped_axis_reports_how_far_not_just_how_many():
+    """A clip note that counts but does not size the tail is not disclosure.
+
+    Figure 2's axis stops at -12 % while the worst frame in the cohort is
+    -30.6 %, and the earlier note said only "12 frame(s) beyond axis" -- true of
+    a -12.1 % tail and a -30.6 % one alike. Worse, `showfliers` was off, so 41
+    of 995 frames sat past a whisker unseen, four times what the note admitted.
+    The tail is the paper's own reason for reporting p90, so understating it
+    undercuts the argument the figure is there to support.
+    """
+    from fishsense_imwut import pubfig
+
+    rows = [r for r in cal.load_rows(DATA / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    acc = df[df.dive_id.isin(cal.CORPUS_ACCURACY_DIVES)
+             & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+
+    pubfig.use_publication_style()
+    fig = pubfig.fig_error_by_model_p90(acc)
+    ax = fig.axes[0]
+    notes = [t.get_text() for t in ax.texts if "beyond axis" in t.get_text()]
+    assert len(notes) == 1, "a clipped axis must say so exactly once"
+
+    worst = float(acc.pct_error.min())
+    assert f"{worst:+.1f}" in notes[0], (
+        f"the note must carry the extreme; got {notes[0]!r} against {worst:+.1f}")
+    assert "12 frame" in notes[0]
+
+    # and the clipped frames are drawn at the boundary rather than dropped
+    lo = ax.get_xlim()[0]
+    carets = [ln for ln in ax.lines
+              if ln.get_marker() in ("<", ">") and len(ln.get_xdata())]
+    assert carets, "clipped frames must be visible at the axis edge"
+    assert all(abs(ln.get_xdata()[0] - lo) < 1e-6 for ln in carets)
+
+    # fliers are on: the Box's worst frame is -11.2 % but its whisker stops
+    # near -3.8 %, so with them off that gap was invisible
+    fliers = [ln for ln in ax.lines if ln.get_marker() == "o" and ln.get_linestyle() == "None"]
+    assert sum(len(ln.get_xdata()) for ln in fliers) > 25

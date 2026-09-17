@@ -199,40 +199,61 @@ def _style_box(bp: dict, color: str) -> None:
         )
 
 
-def _clip_x(ax: plt.Axes, groups: Iterable[Sequence[float]], xlim) -> None:
-    """Optionally narrow the x-axis, and SAY how many points that hides.
+def _clip_x(ax: plt.Axes, groups, xlim, positions=None) -> None:
+    """Narrow the x-axis, and make what that hides VISIBLE, not just counted.
 
-    A long one-sided tail compresses every box into a third of the width, so
-    clipping is often the readable choice -- but a clipped axis that does not
-    admit it is a lie about the spread. The count goes on the figure.
+    An earlier version set the limit and wrote "N frame(s) beyond axis" below
+    the panel. That is not enough and it was rightly called disingenuous: the
+    count says how MANY but not how FAR, and "12 beyond axis" reads the same
+    whether the worst frame is -12.1 % or -30.6 %. The tail is one-sided and it
+    is the paper's own argument for reporting p90, so hiding its size understates
+    exactly the thing under discussion.
+
+    Now: every clipped frame is drawn as a caret pinned at the boundary, so the
+    reader sees that they exist and roughly where, and the note carries the
+    extreme value. Clipping stays because a -30 % tail would squeeze every box
+    into a third of the width, but it no longer costs the reader the number.
     """
     if xlim is None:
         return
     lo, hi = xlim
-    hidden = sum(
-        int(((np.asarray(v) < lo) | (np.asarray(v) > hi)).sum()) for v in groups
-    )
     ax.set_xlim(lo, hi)
+
+    hidden, worst, excursion = 0, None, -1.0
+    for i, values in enumerate(groups):
+        v = np.asarray(values, dtype=float)
+        out = v[(v < lo) | (v > hi)]
+        if not out.size:
+            continue
+        hidden += out.size
+        # the worst is the frame that overshoots ITS OWN boundary furthest;
+        # comparing |value| or mixing the two sides gets it wrong, and an
+        # earlier version reported -19.9 % on a tail that reaches -30.6 %
+        for side, candidates in ((lo, out[out < lo]), (hi, out[out > hi])):
+            if candidates.size:
+                pick = candidates.min() if side == lo else candidates.max()
+                if abs(pick - side) > excursion:
+                    excursion, worst = abs(pick - side), float(pick)
+        if positions is not None:
+            below, above = out[out < lo], out[out > hi]
+            for side, count, marker in ((lo, below.size, "<"), (hi, above.size, ">")):
+                if count:
+                    ax.plot([side], [positions[i]], marker=marker, markersize=4.5,
+                            color=SERIES_1, markeredgecolor=SURFACE,
+                            markeredgewidth=0.8, clip_on=False, zorder=6)
     if hidden:
-        # Below the axes, right-aligned, at a FIXED point offset rather than an
-        # axes fraction: a fraction scales with figure height, so the same
-        # offset that cleared the x-label on a tall panel landed on top of it
-        # on a short one. Above the plot is no good either -- the legend is
-        # there. The x-label is centred, so the right edge stays free.
+        note = f"{hidden} frame(s) beyond axis, worst {worst:+.1f} %"
         ax.annotate(
-            f"{hidden} frame(s) beyond axis",
+            note,
             xy=(1.0, 0.0),
             xycoords="axes fraction",
             xytext=(0, -40),
             textcoords="offset points",
             fontsize=6,
-            color=INK_MUTED,
-            va="top",
+            color=INK_SECONDARY,
             ha="right",
+            va="top",
         )
-
-
-# --- figure 1: measured vs. known ----------------------------------------
 
 
 def fig_measured_vs_known(
@@ -375,7 +396,7 @@ def fig_error_by_model(
     ax.set_ylim(-0.6, len(order) - 0.4)
     ax.set_xlabel("Length error (%)")
     ax.invert_yaxis()  # smallest model at the top, reading order
-    _clip_x(ax, groups, xlim)
+    _clip_x(ax, groups, xlim, positions)
     _annotate_counts(ax, groups, positions)
     return fig
 
@@ -535,7 +556,7 @@ def fig_error_by_dive(
     ax.set_ylim(-0.6, len(order) - 0.4)
     ax.set_xlabel("Length error (%)")
     ax.invert_yaxis()
-    _clip_x(ax, groups, xlim)
+    _clip_x(ax, groups, xlim, positions)
     _annotate_counts(ax, groups, positions)
 
     if dropped_dives:
@@ -652,7 +673,13 @@ def fig_error_by_model_p90(
             orientation="horizontal",
             widths=0.5,
             patch_artist=True,
-            showfliers=False,
+            # ON. With them off the reader saw whiskers stopping at -3.8 % on the
+            # Box whose worst frame is -11.2 %, and had no way to know: 41 of 995
+            # frames sat past a whisker, four times the number the clip note
+            # admitted to. The tail is the paper's own reason for reporting p90.
+            showfliers=True,
+            flierprops=dict(marker="o", markersize=2.2, markerfacecolor=colour,
+                            markeredgecolor="none", alpha=0.55),
             zorder=3,
         )
         _style_box(bp, colour)
@@ -673,7 +700,7 @@ def fig_error_by_model_p90(
     ax.set_ylim(-0.6, len(order) - 0.4)
     ax.set_xlabel("Length error (%)")
     ax.invert_yaxis()
-    _clip_x(ax, groups, xlim)
+    _clip_x(ax, groups, xlim, positions)
     _annotate_counts(ax, groups, positions)
 
     handles = [
