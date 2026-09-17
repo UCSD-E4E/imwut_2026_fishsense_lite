@@ -151,8 +151,30 @@ def load_field(path):
 # maximum, the noisiest order statistic there is. This measures what that costs.
 
 
+@dataclass(frozen=True)
+class RarefactionPoint:
+    """One sample size's worth of subsample behaviour.
+
+    `abs_p90` is the REPORTED statistic, for the same reason p90 is reported
+    everywhere else: it answers the question actually being asked, which is how
+    far wrong a p90 from n frames can be, not how far wrong it typically is.
+    `median`, `lo` and `hi` describe the SIGNED error and are kept because the
+    sign flips across the small-n range -- the maximum of two draws sits below
+    the true 90th percentile, the maximum of nine sits above it -- so a small
+    sample is not conservative in either direction.
+    """
+
+    n: int
+    rank: int
+    abs_p90: float      # 90th percentile of |error|, in pp
+    within: float       # fraction of draws inside +-tolerance
+    median: float       # median SIGNED error
+    lo: float           # 10th percentile of the signed error
+    hi: float           # 90th percentile of the signed error
+
+
 def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0,
-                    tolerance: float = 1.0):
+                    tolerance: float = 1.0) -> dict:
     """How far a p90 from `n` frames lands from the same group's full-sample p90.
 
     `groups` maps a key to that group's per-frame percent errors -- use
@@ -160,13 +182,10 @@ def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0
     `n` without replacement contribute at each `n`, so a group never competes
     with itself and `n` is never inflated by resampling.
 
-    Returns a dict ``n -> (median, p10, p90, within)`` of the ERROR of the
-    subsample estimate, in percentage points, pooled over groups and draws;
-    `within` is the fraction of draws landing inside +-`tolerance` pp.
-
-    Read it as the spread a diver with `n` frames of one fish actually faces.
-    The reference is each group's own full-sample p90, so this isolates the
-    estimator's sampling behaviour from how accurate that group happened to be.
+    Returns ``{n: RarefactionPoint}``. The reference is each group's own
+    full-sample p90, so this isolates the estimator's sampling behaviour from
+    how accurate that group happened to be. Read it as the error a diver with
+    `n` frames of one fish actually faces.
     """
     from .pubfig import nearest_rank_p90
 
@@ -183,20 +202,28 @@ def p90_rarefaction(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 0
             continue
         e = np.concatenate(errs)
         lo, hi = np.percentile(e, [10, 90])
-        out[int(n)] = (float(np.median(e)), float(lo), float(hi),
-                       float((np.abs(e) < tolerance).mean()))
+        out[int(n)] = RarefactionPoint(
+            n=int(n),
+            rank=int(np.ceil(0.9 * n)),
+            abs_p90=float(np.percentile(np.abs(e), 90)),
+            within=float((np.abs(e) < tolerance).mean()),
+            median=float(np.median(e)),
+            lo=float(lo),
+            hi=float(hi),
+        )
     return out
 
 
-def p90_min_frames(rarefaction, confidence: float = 0.90):
-    """Smallest n whose p90 lands inside the rarefaction's tolerance at least
-    `confidence` of the time, and stays there for every larger n tested.
+def p90_min_frames(rarefaction, tolerance: float = 1.0) -> int | None:
+    """Smallest n whose p90 is within `tolerance` pp of its own limit 90 % of
+    the time, and stays there for every larger n tested.
 
-    The tolerance is whichever one `p90_rarefaction` was given -- it is baked
-    into the `within` column, not re-applied here.
+    Reads `abs_p90` directly rather than the `within` column, so the threshold
+    asked for here is the one applied -- `p90_rarefaction`'s `tolerance` only
+    shapes `within`, which is the same statement seen from the other side.
     """
     ns = sorted(rarefaction)
     for i, n in enumerate(ns):
-        if all(rarefaction[m][3] >= confidence for m in ns[i:]):
+        if all(rarefaction[m].abs_p90 <= tolerance for m in ns[i:]):
             return n
     return None

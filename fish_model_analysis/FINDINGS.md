@@ -644,6 +644,13 @@ holding ≥ 30, take p90, compare with that cell's own full-sample p90, 1,000 dr
 | 20 | 18/20 | −0.07 | 0.89 | 92 % |
 | 30 | 27/30 | +0.00 | 0.68 | 97 % |
 
+**Two statistics at two levels, and getting them the wrong way round is easy.** Per fish
+the estimate is p90 of percent length error — the paper's estimator, because one fish's
+frames are a one-sided pose-corrupted distribution. Across draws and cells the summary is a
+MEDIAN, the same choice §8 makes across animals, because sampling error is not one-sided and
+has no tail that needs rejecting. The table's `p90 of |err|` column is kept only because the
+minimum-frames threshold is a spread question, not a location one.
+
 **Two thresholds, and the first one is arithmetic.** ceil(0.9n) = n for every n <= 10, so
 below ten frames p90 is the sample MAXIMUM rather than a quantile. Crossing that boundary
 narrows the 80 % interval from 2.08 to 1.35 pp on no extra information — purely because the

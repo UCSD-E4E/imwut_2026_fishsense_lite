@@ -1496,58 +1496,70 @@ def fig_p90_vs_sample_size(
     min_frames: int | None = None,
     figsize: tuple[float, float] = (COL_WIDTH, 2.6),
 ) -> plt.Figure:
-    """Error of a p90 estimate against the number of frames behind it.
+    """Error of a p90 length estimate against the number of frames behind it.
 
-    `rarefaction` is `repeatability.p90_rarefaction(...)`. The band is the
-    central 80 % of subsample draws and the line their median, both measured
-    against each group's own full-sample p90, so this shows the estimator's
-    spread and not how accurate any particular target was.
+    `rarefaction` is `repeatability.p90_rarefaction(...)`.
 
-    Two hues as everywhere: blue is the spread, orange the guidance drawn over
-    it. The step at n = 10 is annotated because a reader will otherwise read it
-    as a glitch -- it is where nearest rank stops returning the maximum.
+    **Two statistics, and which is which matters.** The per-fish statistic is
+    $p_{90}$ of percent length error -- the paper's estimator everywhere, because
+    a fish's own frames are a one-sided pose-corrupted distribution and a high
+    quantile rejects that tail. What this figure plots is how that estimate
+    moves when it is computed from `n` frames instead of all of them, and the
+    summary ACROSS draws and cells is a **median**, for the same reason §4.6
+    takes a median across animals: sampling error is not one-sided, and nothing
+    about a median of it discards a tail that needs discarding.
+
+    Blue is the central 80 % of the signed error. It is kept signed because the
+    sign flips across the small-n range -- the maximum of two draws sits below
+    the true 90th percentile, the maximum of nine sits above it -- so a small
+    sample is not conservative in either direction.
+
+    The step at n = 10 is annotated because a reader will otherwise take it for
+    a glitch: it is where nearest rank stops returning the maximum.
     """
-    ns = np.array(sorted(rarefaction))
-    med = np.array([rarefaction[n][0] for n in ns])
-    lo = np.array([rarefaction[n][1] for n in ns])
-    hi = np.array([rarefaction[n][2] for n in ns])
+    pts = [rarefaction[n] for n in sorted(rarefaction)]
+    ns = np.array([p.n for p in pts], dtype=float)
+    med = np.array([p.median for p in pts])
+    lo = np.array([p.lo for p in pts])
+    hi = np.array([p.hi for p in pts])
 
     fig, ax = plt.subplots(figsize=figsize)
     _grid(ax, axis="both")
     _zero_line(ax, orientation="h")
 
-    # clip the y range to the band rather than to n = 2's long lower tail,
-    # which would otherwise spend half the panel on one sample size
-    top = max(hi.max(), tolerance) + 0.35
-    bottom = min(lo[ns >= 4].min(), -tolerance) - 0.35
+    # ignore n = 2's long lower tail, which would otherwise spend a third of
+    # the panel on one sample size
+    top = max(hi.max(), tolerance) + 0.30
+    bottom = min(lo[ns >= 4].min(), -tolerance) - 0.30
 
     ax.axvspan(ns.min() - 0.5, 9.5, color=INK_MUTED, alpha=0.07, zorder=0)
     ax.fill_between(ns, lo, hi, color=SERIES_1, alpha=0.20, linewidth=0, zorder=2,
                     label="Central 80 % of draws")
-    ax.plot(ns, med, color=SERIES_1, linewidth=1.4, zorder=3, label="Median draw")
+    ax.plot(ns, med, color=SERIES_2, linewidth=1.8, zorder=4,
+            label="Median error")
 
     for y in (-tolerance, tolerance):
-        ax.axhline(y, color=SERIES_2, linestyle=":", linewidth=1.0, zorder=3)
+        ax.axhline(y, color=INK_MUTED, linestyle=":", linewidth=1.0, zorder=3)
     ax.annotate(f"$\\pm${tolerance:g} pp", xy=(ns.max(), tolerance),
                 xytext=(-2, 2), textcoords="offset points", fontsize=6,
-                color=SERIES_2, ha="right", va="bottom")
+                color=INK_SECONDARY, ha="right", va="bottom")
 
     if min_frames is not None:
-        ax.axvline(min_frames, color=SERIES_2, linewidth=1.1,
-                   linestyle=(0, (4, 2)), zorder=4)
-        ax.annotate(f"{min_frames} frames", xy=(min_frames, bottom),
-                    xytext=(4, 3), textcoords="offset points", fontsize=6.5,
-                    color=SERIES_2, ha="left", va="bottom", zorder=5)
+        ax.axvline(min_frames, color=INK_MUTED, linewidth=1.0,
+                   linestyle=(0, (4, 2)), zorder=3)
+        ax.annotate(f"{min_frames} frames:\n90 % of draws\ninside $\\pm${tolerance:g} pp",
+                    xy=(min_frames, top), xytext=(4, -3),
+                    textcoords="offset points", fontsize=6,
+                    color=INK_SECONDARY, ha="left", va="top", zorder=5)
 
-    ax.annotate(r"$p_{90}$ is the maximum below 10"
-                "\n" r"($\lceil 0.9n \rceil = n$)",
-                xy=(5.75, top), xytext=(0, -3), textcoords="offset points",
-                fontsize=6, color=INK_SECONDARY, ha="center", va="top", zorder=5)
+    ax.annotate(r"$p_{90}$ here is just" "\n" r"the maximum ($\lceil 0.9n \rceil = n$)",
+                xy=(5.75, bottom), xytext=(0, 3), textcoords="offset points",
+                fontsize=6, color=INK_SECONDARY, ha="center", va="bottom", zorder=5)
 
     ax.set_xlim(ns.min() - 0.5, ns.max() + 0.5)
     ax.set_ylim(bottom, top)
     ax.set_xlabel("Frames of one fish")
-    ax.set_ylabel("$p_{90}$ error vs full sample (pp)")
+    ax.set_ylabel("Error in the $p_{90}$ length estimate (pp)")
     ax.legend(loc="lower right", handletextpad=0.4, borderaxespad=0.3)
     fig.tight_layout()
     return fig

@@ -795,21 +795,28 @@ caught any of this in the field.
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
 - **Figure 16** *(§4.3)* — How many frames $p_{90}$ needs. Rarefaction: draw $n$ frames
-  without replacement from each of the fifteen cohort cells holding ≥ 30, take $p_{90}$,
-  and compare it with that cell's full-sample $p_{90}$; band is the central 80 % of 1,000
-  draws per cell, line their median. The reference is each cell's own value, so this shows
-  the **estimator's** sampling spread and not how accurate any target was. **The step at
-  $n = 10$ is arithmetic, not noise** — nearest rank is $\lceil 0.9n \rceil$, which equals
-  $n$ for every $n \le 10$, so below ten frames $p_{90}$ is the sample maximum, the noisiest
-  order statistic there is. Crossing that boundary narrows the 80 % interval from 2.08 pp
-  at $n = 9$ to 1.35 pp at $n = 10$ with no more information, purely because the estimator
-  stops taking the extreme. **Two thresholds follow**: ten frames to make $p_{90}$ a
-  quantile at all, and thirteen for it to land within 1 pp of its own limit 90 % of the
-  time (20 frames for 92 %, 30 for 97 %). The remaining sawtooth at $n = 20$ and $n = 30$
-  is the same arithmetic on a smaller scale.
+  without replacement from each of the fifteen cohort cells holding ≥ 30, take the
+  $p_{90}$ of percent length error, and compare it with that cell's full-sample $p_{90}$;
+  1,000 draws per cell. **Two statistics, at two levels.** Per fish the estimate is
+  $p_{90}$, the paper's estimator throughout, because one fish's frames are a one-sided
+  pose-corrupted distribution and a high quantile rejects that tail. Across draws and cells
+  the summary is a **median** — the same choice §4.6 makes across animals — because sampling
+  error is not one-sided and has no tail that needs rejecting. Band: central 80 % of draws,
+  kept signed because the bias changes sign. **The step at $n = 10$ is arithmetic, not
+  noise**: nearest rank is $\lceil 0.9n \rceil$, which equals $n$ for every $n \le 10$, so
+  below ten frames $p_{90}$ is the sample maximum — the noisiest order statistic there is.
+  Crossing that boundary narrows the 80 % interval from 2.08 pp at $n = 9$ to 1.35 at
+  $n = 10$ on no extra information, purely because the estimator stops taking the extreme.
+  **Two thresholds follow**: ten frames to make $p_{90}$ a quantile at all, and thirteen for
+  it to land within 1 pp of its own limit 90 % of the time (20 frames for 92 %, 30 for
+  97 %). The sawtooth at $n = 20$ and $30$ is the same arithmetic on a smaller scale. Note
+  also that the median error *changes sign* over the small-$n$ range, −0.70 pp at $n = 2$
+  through +0.21 at $n = 9$: the maximum of two draws sits below the true 90th percentile and
+  the maximum of nine sits above it, so a small sample is not conservative in either
+  direction.
   **What this figure does not cover**, and the ruler is the cautionary case: it measures
-  sampling spread on cells whose diver *did* vary pose. More frames only help if the
-  animal is presented broadside at some point — six frames all taken at 15° return a stable,
+  sampling spread on cells whose diver *did* vary pose. More frames help only if the animal
+  is presented broadside at some point — six frames all taken at 15° return a stable,
   confident, wrong answer, and no sample size fixes that.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
