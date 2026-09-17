@@ -468,6 +468,26 @@ inside a second housing really forms a two-pane stack. Simulating that stack dir
 two 6 mm panes separated by 5 to 30 mm of air — gives $+17.4$ to $+17.7\,\%$ at the edge
 and a crossing at 18.3° to 18.6°. The general case is treated in [??].
 
+**The optic removes the refraction, not the lens.** The in-air calibration still carries a
+radial distortion model, and what it leaves behind is worth one paragraph because it points
+at the same guidance §4.4 gives for a different reason. Distortion acts on where the clicked
+endpoints fall, and two things move them outward at once: a near target subtends more
+pixels, and so reaches further from the principal point, where the polynomial is steeper.
+Measuring both together on the cohort's own labels — how much undistortion actually changed
+each measured span — the effect runs from **0.02 % of length** at the far end to **0.76 %**
+inside 0.8 m, of which the radial reach contributes about half again on top of the size
+(a centred span of the same length would give 0.35 %). At the single most extreme frame in
+the corpus, a target spanning 2,939 px with an endpoint 1,709 px out, it reaches **4.1 %**.
+
+Those are ceilings on the whole model, not residuals: the labels are clicked on undistorted
+images, so a residual fraction $\epsilon$ of the model costs $\epsilon$ times those numbers.
+That is why distortion cannot be the near-field trend of Figure 3 — explaining a 3.7-point
+droop from a 0.74-point ceiling needs the model wrong by five times itself, and the sign is
+backwards, since undistortion *lengthens* a span and the near field reads short. But it is
+also why the guidance to centre the fish is an optical instruction as well as a pose one:
+the same frame carries forty times more distortion sensitivity at the edge, close in, than
+it does centred and far.
+
 Everything in §4.1–§4.4 is downstream of this optic, and none of those sections can
 demonstrate it: an error the port correction has already removed leaves no trace in the
 photographs. That is the reason the figure is simulated, and the reason it is one figure

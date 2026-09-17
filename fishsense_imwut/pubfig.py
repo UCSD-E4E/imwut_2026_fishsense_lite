@@ -1775,3 +1775,86 @@ def fig_flat_port_before_after(
     cb.outline.set_linewidth(0.6)
     cb.outline.set_edgecolor(BASELINE)
     return fig
+
+
+# --- figure D1 (repository only): the candidate range correction ---------
+#
+# Two panels because the answer has two halves and one of them is negative. A
+# panel showing only the pool would sell a fix the external check does not
+# support.
+
+
+def fig_depth_correction(
+    depths_m,
+    before_pct,
+    after_pct,
+    curve,
+    paired,
+    bins: int = 12,
+    figsize: tuple[float, float] = (FULL_WIDTH, 2.8),
+) -> plt.Figure:
+    """What the `a + b/z` range correction does, and what it does not.
+
+    Left: the pool cohort's binned median before and after, with the fitted
+    curve. `after_pct` should be LEAVE-ONE-SESSION-OUT residuals -- correcting
+    a session with a curve fitted on that same session flatters the fix and
+    measures nothing.
+
+    Right: the seven fish of the paired stereo day, each a line from its
+    as-measured difference to its corrected one. This is the only external
+    reference in the corpus, and it is where the fix stops working: the
+    correction only ever adds length, so it helps the fish that read short and
+    hurts the ones that read long.
+
+    `paired` is a sequence of `(label, before, after)` in percent.
+    """
+    z = np.asarray(depths_m, float)
+    b = np.asarray(before_pct, float)
+    a = np.asarray(after_pct, float)
+
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=figsize,
+                                 gridspec_kw={"width_ratios": [1.45, 1.0]})
+
+    # --- left: does it flatten the pool profile? ---
+    _grid(ax, axis="both")
+    _zero_line(ax, orientation="h")
+    edges = np.quantile(z, np.linspace(0, 1, bins + 1))
+    mid = [np.median(z[(z >= lo) & (z <= hi)]) for lo, hi in zip(edges[:-1], edges[1:])]
+    for values, colour, label in ((b, SERIES_1, "As measured"),
+                                  (a, SERIES_2, "Corrected (held out)")):
+        med = [np.median(values[(z >= lo) & (z <= hi)])
+               for lo, hi in zip(edges[:-1], edges[1:])]
+        ax.plot(mid, med, marker="o", markersize=3.5, linewidth=1.5, color=colour,
+                markeredgecolor=SURFACE, markeredgewidth=0.8, zorder=4, label=label)
+    grid_z = np.linspace(z.min(), z.max(), 200)
+    ax.plot(grid_z, curve[0] + curve[1] / grid_z, color=INK_MUTED, linewidth=1.0,
+            linestyle=(0, (4, 2)), zorder=3,
+            label=f"${curve[0]:+.2f} {curve[1]:+.2f}/z$")
+    # the fit overshoots the shortest bin, which is worth seeing but not worth
+    # half the panel; clip to the data and let the curve run off
+    lows = [np.median(b[(z >= lo) & (z <= hi)]) for lo, hi in zip(edges[:-1], edges[1:])]
+    ax.set_ylim(min(lows) - 1.2, 1.6)
+    ax.set_xlabel("Laser depth (m)")
+    ax.set_ylabel("Binned median length error (%)")
+    ax.legend(loc="lower right", handletextpad=0.4, borderaxespad=0.3, fontsize=6)
+    ax.set_title("Pool cohort: the fix works here", fontsize=7, pad=4)
+
+    # --- right: the only external reference says otherwise ---
+    _grid(bx, axis="y")
+    _zero_line(bx, orientation="h")
+    closer = 0
+    for label, was, now in paired:
+        closer += abs(now) < abs(was)
+        bx.plot([0, 1], [was, now], color=INK_MUTED, linewidth=0.9, zorder=2)
+        bx.plot([0], [was], marker="o", markersize=4, color=SERIES_1,
+                markeredgecolor=SURFACE, markeredgewidth=0.8, zorder=4)
+        bx.plot([1], [now], marker="o", markersize=4, color=SERIES_2,
+                markeredgecolor=SURFACE, markeredgewidth=0.8, zorder=4)
+    bx.set_xticks([0, 1])
+    bx.set_xticklabels(["as measured", "corrected"], fontsize=6.5)
+    bx.set_xlim(-0.35, 1.35)
+    bx.set_ylabel("Difference from the stereo rig (%)")
+    bx.set_title(f"Paired day: {closer} of {len(paired)} moved closer",
+                 fontsize=7, pad=4)
+    fig.tight_layout()
+    return fig

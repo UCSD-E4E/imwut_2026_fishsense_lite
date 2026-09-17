@@ -674,6 +674,63 @@ field p90 as if it carried a pool p90's precision.
 
 ---
 
+## 7d. The near-field droop is not optics, and the range correction is not applied (2026-09-16)
+
+Figure 3's binned median runs −6.3 % inside 0.6 m up to −1.5 % beyond 1.5 m. Two questions
+followed: can we correct it, and is it the lens?
+
+### The correction exists, flattens the pool, and fails the only external test
+
+`a + b/z` — not a line, because a FIXED depth-extent error (head and tail back-projected at
+one laser depth) is a shrinking PERCENTAGE of a longer length-at-range. Fitted on binned
+medians: `−0.56 − 2.40/z`, rms residual 0.43 pp against 1.33 flat.
+
+Leave-one-session-out, 995 frames:
+
+| correction | median \|err\| | p90 |
+|---|---|---|
+| none | 2.16 % | 6.79 |
+| one global constant | 1.81 % | 4.98 |
+| `a + b/z` | 1.75 % | 4.39 |
+
+Most of the gain is the constant; the range term adds 0.06 pp on the median. And on the
+paired stereo day — the only external reference in the corpus — it makes agreement WORSE:
+**3 of 7 fish move closer**, median |difference| 8.60 → 10.87 %. The correction only ever
+adds length, so it helps the three that read short and hurts the four that read long.
+`calibration.fit_depth_offset` / `depth_offset_gain`, Figure D1. **Not applied.**
+
+### Three optical routes, all closed
+
+1. **Endpoint radius.** Within one (session, target) cell at matched depth: median
+   −0.14 pp, negative in 11 of 20, sign p = 0.82. Pooled within-cell slope +4.8 pp per
+   1000 px, 95 % CI [−3.0, +13.1].
+2. **Between-camera differences.** The seven cameras' corrections at r = 900 px span
+   0.9869–0.9890 — 0.21 %. Nothing to hide a per-unit offset in.
+3. **Differential distortion across the target**, which is the strongest version: a near
+   target subtends more pixels AND reaches further out, and the two compound. Measured as
+   how much undistortion actually changed each span (`distortion.leverage`):
+   0.02 % far → 0.76 % near, of which radial reach is 1.5× on top of size, worst frame
+   4.15 %. Against 3.68 pp observed the model would have to be wrong by **5× itself**, and
+   the sign is backwards — undistortion LENGTHENS a span, the near field reads short.
+
+**A trap worth recording.** The first pass used the laser dot as the radial proxy and got
+12 of 16 cells negative, p = 0.077, slope −31 pp/1000 px — apparent support for a radial
+effect. It is an artefact: dot radius differs from endpoint radius by half the apparent
+span, which is itself ∝ 1/range, so partialling range out of the two leaves different
+residuals. `sql/extract_head_tail.sql` exports the endpoints; use those.
+
+### What survives
+
+Distortion sensitivity is ~40× higher for a large target near the edge, close in, than for
+a centred far one. That does not make the median, but it is a real argument for §4.4's
+"centre the fish" guidance on OPTICAL grounds as well as pose — now a paragraph in §4.5.
+
+What is left for the droop is pose: a diver shooting close is likelier to be oblique, and
+foreshortening reads one-sided short. Which is also why adding length back makes the stereo
+comparison worse.
+
+---
+
 ## 8. The SMILE stereo-video archive — what a field comparison can and cannot say (2026-09-13)
 
 `~/Downloads/SMILE_Archive_LengthData.csv` is our collaborators' EventMeasure export: 1,471

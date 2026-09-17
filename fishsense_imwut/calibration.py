@@ -768,3 +768,76 @@ def binned_angle_error(
         else:
             out.append((b, len(sel), sel.median(), sel.quantile(0.25), sel.quantile(0.75)))
     return pd.DataFrame(out, columns=["angle", "n", "median", "q1", "q3"]).set_index("angle")
+
+
+# --- a candidate range correction ----------------------------------------
+#
+# Figure 3's binned median is not flat: it runs -6.3 % inside 0.6 m up to about
+# -1.5 % beyond 1.5 m. That shape is what a FIXED depth-extent error looks like
+# expressed as a percentage -- stage 14 back-projects head and tail at the one
+# laser depth, so a target with any thickness or pose costs an absolute amount
+# that becomes a smaller fraction of a longer length-at-range. Hence `a + b/z`
+# rather than a line.
+#
+# NOTHING IN THE REPORTED PIPELINE USES THIS. It is fitted on known-length
+# targets, and HANDOFF section 0 forbids a reference-derived quantity from
+# re-entering the measurement it validates -- corrected accuracy numbers would
+# be a statement about the fit, not the instrument. It is here to be reported
+# and argued about, and `depth_offset_gain` is the honest way to size it: fit on
+# other sessions, score on a held-out one.
+
+
+def fit_depth_offset(depths_m, pct_errors, bins: int = 16) -> tuple[float, float]:
+    """Least squares `a + b/z` through equal-count binned medians.
+
+    Binned first so a session contributing many frames at one range cannot
+    outvote the rest, and medians so the pose tail does not drag the fit.
+    """
+    z = np.asarray(depths_m, dtype=float)
+    e = np.asarray(pct_errors, dtype=float)
+    edges = np.quantile(z, np.linspace(0, 1, bins + 1))
+    zs, es = [], []
+    for lo, hi in zip(edges[:-1], edges[1:]):
+        m = (z >= lo) & (z <= hi)
+        if m.sum() >= 5:
+            zs.append(np.median(z[m]))
+            es.append(np.median(e[m]))
+    zs, es = np.asarray(zs), np.asarray(es)
+    design = np.vstack([np.ones_like(zs), 1.0 / zs]).T
+    (a, b), *_ = np.linalg.lstsq(design, es, rcond=None)
+    return float(a), float(b)
+
+
+def apply_depth_offset(depths_m, pct_errors, coefficients) -> np.ndarray:
+    """Subtract a fitted `a + b/z` offset from percent errors."""
+    a, b = coefficients
+    z = np.asarray(depths_m, dtype=float)
+    return np.asarray(pct_errors, dtype=float) - (a + b / z)
+
+
+def depth_offset_gain(df, bins: int = 16) -> dict:
+    """Leave-one-session-out: what the range correction is worth out of sample.
+
+    Fitting and scoring on the same frames would only measure how flexible the
+    curve is. Each session is scored by a curve fitted on the other eighteen,
+    which is the closest this corpus gets to an honest test.
+
+    Returns the median and p90 of |percent error| under no correction, one
+    global constant, and the fitted curve -- the constant included because a
+    curve that only beats "do nothing" has not earned its second parameter.
+    """
+    out = {"none": [], "constant": [], "curve": []}
+    for dive in sorted(df.dive_id.unique()):
+        train = df[df.dive_id != dive]
+        test = df[df.dive_id == dive]
+        out["none"].append(test.pct_error.to_numpy())
+        out["constant"].append(test.pct_error.to_numpy() - np.median(train.pct_error))
+        coef = fit_depth_offset(train.depth_m, train.pct_error, bins)
+        out["curve"].append(apply_depth_offset(test.depth_m, test.pct_error, coef))
+    return {
+        k: {
+            "median_abs": float(np.median(np.abs(np.concatenate(v)))),
+            "p90_abs": float(np.percentile(np.abs(np.concatenate(v)), 90)),
+        }
+        for k, v in out.items()
+    }
