@@ -679,7 +679,7 @@ FIGURE_TITLES = {
     "fig15_paired_vs_stereo":
         "FishSense Lite against underwater stereo video, the same individuals",
     "fig16_p90_vs_sample_size":
-        "How many frames the $p_{90}$ estimate needs to settle",
+        "Convergence of the $p_{90}$ estimate with frames per fish",
     "figA_all_dives_percent": "Percent length error for every session",
     "figD1_depth_correction": "The range correction, and why it is not applied",
     "figD2_p90_budget":
@@ -1851,11 +1851,13 @@ def fig_p90_vs_sample_size(
     ax.fill_between(ns, lo, hi, color=SERIES_1, alpha=0.20, linewidth=0, zorder=2,
                     label="Central 80 % of draws")
     ax.plot(ns, med, color=SERIES_2, linewidth=1.8, zorder=4,
-            label="Median error")
+            # "change", not "error": the reference is the cell's own full-sample
+            # p90, so zero is its own answer and not the known length.
+            label="Median change")
 
     for y in (-tolerance, tolerance):
         ax.axhline(y, color=INK_MUTED, linestyle=":", linewidth=1.0, zorder=3)
-    ax.annotate(f"$\\pm${tolerance:g} pp", xy=(ns.max(), tolerance),
+    ax.annotate(f"$\\pm${tolerance:g} %", xy=(ns.max(), tolerance),
                 xytext=(-2, 2), textcoords="offset points", fontsize=6,
                 color=INK_SECONDARY, ha="right", va="bottom")
 
@@ -1870,7 +1872,7 @@ def fig_p90_vs_sample_size(
     if min_frames is not None:
         ax.axvline(min_frames, color=INK_MUTED, linewidth=1.0,
                    linestyle=(0, (4, 2)), zorder=3)
-        ax.annotate(f"{min_frames} frames:\n90 % of draws\ninside $\\pm${tolerance:g} pp",
+        ax.annotate(f"{min_frames} frames:\n90 % of draws\ninside $\\pm${tolerance:g} %",
                     xy=(min_frames, top), xytext=(5, -5),
                     textcoords="offset points", fontsize=6.2,
                     color=INK_SECONDARY, ha="left", va="top", zorder=5)
@@ -1882,12 +1884,21 @@ def fig_p90_vs_sample_size(
     ax.set_xlim(ns.min() - 1.0, ns.max() + 1.0)
     ax.set_ylim(bottom, top)
     ax.set_xlabel("Frames of one fish")
-    # Name the quantity, not just the unit. The unit was never in question --
-    # this axis and §4.2's percent error are both percentage points of length --
-    # but the ORIGIN differs: zero here is the cell's own full-sample p90, not
-    # the known length. That is what lets the band converge, and a reader who
-    # takes it for reported error will think the measurement converges on truth.
-    ax.set_ylabel("Sampling error in the $p_{90}$\nestimate (pp of length)")
+    # Name the quantity concretely. `delta` can be read two ways -- as a
+    # difference of two percent errors, whose unit is percentage points, or via
+    # the cancellation below as one length difference over a length, whose unit
+    # is plainly % of the known length. Same number; the second needs no
+    # reconciling, so it is what the axis says.
+    #
+    #   delta = p90(draw) - p90(all frames)
+    #         = 100 (L_draw - K)/K - 100 (L_all - K)/K
+    #         = 100 (L_draw - L_all)/K
+    #
+    # What no axis label can carry is the ORIGIN: zero here is the cell's own
+    # full-sample p90, not the known length, so delta = 0 means "the same answer
+    # every frame would have given", never "the right answer". The caption has
+    # to say so, or a reader takes this for a measurement converging on truth.
+    ax.set_ylabel("Change from the all-frames $p_{90}$\n(% of known length)")
     ax.margins(y=0.05)
     # above the axes, as Figure 4 does it, so the panel interior is all data
     ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.01), ncols=2,

@@ -898,12 +898,17 @@ caught any of this in the field.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
   Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
   holding ≥ 30, take the $p_{90}$ of percent length error, and compare it with that cell's
-  full-sample $p_{90}$; 1,000 draws per cell. **Read the origin, not just the unit.** The
-  axis is percentage points of length, the same unit §4.2 uses throughout, but zero here is
-  *that cell's own answer with all its frames*, not the known length. Subtracting each
-  cell's own $p_{90}$ is what removes the between-cell accuracy spread — those fifteen
-  values run −5.8 % to +2.7 % — and it is why this band can converge at all; a measurement
-  does not converge on truth, it converges on its own session's accuracy. So this figure
+  full-sample $p_{90}$; 1,000 draws per cell. **It is a convergence figure, and the axis
+  says what it measures**: *change from the all-frames $p_{90}$*, in percent of known
+  length — the same unit §4.2 uses throughout, since the $-K$ in each percent error
+  cancels, leaving
+  $\Delta = 100\,(\hat L_{\text{draw}} - \hat L_{\text{all}})/K$, one length difference
+  over a length. What differs from Figures 1–3 is where zero sits: *that cell's own answer
+  with all of its frames*, not the known length. So $\Delta = 0$ means "the same answer
+  every frame would have given", never "the right answer". Subtracting each cell's own
+  $p_{90}$ is what removes the between-cell accuracy spread — those fifteen values run
+  −5.8 % to +2.7 % — and it is why this band can converge at all; a measurement does not
+  converge on truth, it converges on its own session's accuracy. This figure therefore
   sizes the *sampling* term alone, and the note in the panel gives its scale: the ±15 %
   budget is seven times the full height shown. Frame count is not what puts a measurement
   outside the budget (§4.3 is). **Two statistics, at two levels.** Per fish the estimate is
@@ -914,14 +919,14 @@ caught any of this in the field.
   kept signed because the bias changes sign. **The step at $n = 10$ is arithmetic, not
   noise**: nearest rank is $\lceil 0.9n \rceil$, which equals $n$ for every $n \le 10$, so
   below ten frames $p_{90}$ is the sample maximum — the noisiest order statistic there is.
-  Crossing that boundary narrows the 80 % interval from 2.08 pp at $n = 9$ to 1.35 at
+  Crossing that boundary narrows the 80 % interval from 2.08 % at $n = 9$ to 1.35 at
   $n = 10$ on no extra information, purely because the estimator stops taking the extreme.
   **Two thresholds follow**: ten frames to make $p_{90}$ a quantile at all, and thirteen for
-  it to land within 1 pp of its own limit 90 % of the time (20 frames for 92 %, 30 for
-  97 %). The second is a consequence of the ±1 pp tolerance and moves with it — 1.5 pp gives
-  ten frames, 2 pp gives four — so it is a resolution target, not an accuracy requirement.
+  it to land within 1 % of its own limit 90 % of the time (20 frames for 92 %, 30 for
+  97 %). The second is a consequence of the ±1 % tolerance and moves with it — 1.5 % gives
+  ten frames, 2 % gives four — so it is a resolution target, not an accuracy requirement.
   The sawtooth at $n = 20$ and $30$ is the same arithmetic on a smaller scale. Note also
-  that the median error *changes sign* over the small-$n$ range, −0.70 pp at $n = 2$ through
+  that the median error *changes sign* over the small-$n$ range, −0.70 % at $n = 2$ through
   +0.21 at $n = 9$: the maximum of two draws sits below the true 90th percentile and the
   maximum of nine sits above it, so a small sample is not conservative in either direction.
   **What this figure does not cover**, and the ruler is the cautionary case: it measures

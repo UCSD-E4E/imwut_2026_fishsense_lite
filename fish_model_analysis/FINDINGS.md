@@ -634,7 +634,13 @@ rarefaction — draw n frames without replacement from each of the fifteen cohor
 holding ≥ 30, take p90, compare with that cell's own full-sample p90, 1,000 draws each.
 `repeatability.p90_rarefaction`, Figure 16.
 
-| n | rank | median err | 80 % interval | within 1 pp |
+Units: the table is in **% of the target's known length**. The p90 difference is a
+difference of two percent errors, so "percentage points" is also correct, but the `-K`
+cancels — `delta = 100 (L_draw - L_all) / K` — leaving one length over a length, and
+calling it % keeps it in the same unit as the rest of section 4. Zero is the cell's own
+full-sample p90, NOT the known length.
+
+| n | rank | median err | 80 % interval | within 1 % |
 |---|---|---|---|---|
 | 2 | 2/2 | −0.70 | 3.20 pp | 57 % |
 | 5 | 5/5 | −0.07 | 2.27 | 76 % |
