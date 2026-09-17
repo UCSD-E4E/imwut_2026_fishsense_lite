@@ -43,6 +43,11 @@ nix develop                     # or drop into the FHS shell
 Start with `post_labeling_analysis/HANDOFF.md` §0 and §7 — §0 is the ground rules learned
 the hard way, §7 is where a fresh analysis is most likely to repeat a dead end.
 
+## Handoff
+
+`HANDOFF_TO_P2.md` — pose, diver compliance, and the measurement this paper could not make.
+Staged here because P2's repo is not on every machine; move it there and delete it here.
+
 ## Sibling repos
 
 | repo | paper |
