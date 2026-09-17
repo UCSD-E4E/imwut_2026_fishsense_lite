@@ -363,4 +363,11 @@ def flat_port_cost(
         length_pct_error=100 * (measured - fish_length_m) / fish_length_m,
         range_pct_error=float(100 * (measured_depth - depth_m) / depth_m),
         d0_star=float(d0_star),
+        # the frame's own half-width at this range, so a caller can say where in
+        # the PICTURE a given field angle falls. Without it "19.6 degrees off
+        # axis" is unreadable: the figure's x axis is the target's position in
+        # frame, not its pose, and the two are easy to confuse (section 4.4's
+        # figure is in degrees too, and means the opposite thing).
+        half_frame_m=float(half_frame),
+        depth_m=float(depth_m),
     )

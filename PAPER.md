@@ -739,12 +739,17 @@ caught any of this in the field.
   the question is whether the units differ and the answer is no. Kept for the record rather
   than the paper, alongside Figures 5, 6 and 7.
 - **Figure 9** *(§4.5)* —
-  Length error against position in the frame with no refraction correction,
-  simulated for this camera at 2 m against a 300 mm target. Ignoring the water's index
-  expands the scene transversely by $n_w$ and shortens the laser range by $1/n_w$; on the
-  optical axis these
+  Length error against **where in the frame the target sits** with no refraction
+  correction, simulated for this camera at 2 m against a 300 mm target. **The abscissa is
+  position, not pose** — Figure 8's is also in degrees and means the opposite thing, so the
+  upper axis repeats it in picture terms, centre of frame through to edge. The two are
+  independent: a fish held perfectly broadside in the corner has 0° of pose and 20° of
+  frame position, and would read +17.7 % long. Ignoring the water's index expands the scene
+  transversely by $n_w$ and shortens the laser range by $1/n_w$; on the optical axis these
   cancel to +0.1 %, so the error appears only off axis and cannot be averaged away. Dotted:
-  the 15 % budget, crossed at 18°.
+  the 15 % budget, crossed at 18° — seven tenths of the way out. The plotted range stops at
+  three quarters of the half-frame (19.6°) because past it a 300 mm target no longer fits;
+  the frame itself reaches 25.4°, so the curve does not show the worst the port can do.
 - **Figure 11** — Within-individual repeatability, wild fish against posed models. Each
   point is one group: one wild individual (≥ 3 frames), or one (session, target) cell in
   the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.6

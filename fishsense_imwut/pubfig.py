@@ -917,7 +917,9 @@ def fig_flat_port_cost(
     length_pct_error: Sequence[float],
     range_pct_error: float | None = None,
     budget_pct: float = 15.0,
-    figsize: tuple[float, float] = (COL_WIDTH, 2.5),
+    half_frame_m: float | None = None,
+    depth_m: float | None = None,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.7),
 ) -> plt.Figure:
     """Length error against field position with no refraction correction.
 
@@ -930,6 +932,14 @@ def fig_flat_port_cost(
     be averaged away and why it is easy to miss on axis.
 
     `range_pct_error` annotates the laser-range error behind the cancellation.
+
+    **The x axis is WHERE IN THE PICTURE the target sits, not how it is posed.**
+    Section 4.4's figure is also in degrees and means the opposite thing -- the
+    fish's angle to the image plane -- and the two are independent: a fish held
+    perfectly broadside in the corner of the frame has 0 deg of pose and 20 deg
+    of frame position, and an uncorrected port would read it +17.7 % long. Pass
+    `half_frame_m` and `depth_m` (both returned by `refraction.flat_port_cost`)
+    to get the second axis that says this in picture terms, centre to edge.
     """
     x = np.asarray(field_angle_deg, dtype=float)
     y = np.asarray(length_pct_error, dtype=float)
@@ -960,16 +970,44 @@ def fig_flat_port_cost(
             )
 
     if range_pct_error is not None:
+        # in the clear block BELOW the curve on the right; the curve sweeps the
+        # diagonal, so the two free corners are upper-left and lower-right and
+        # the budget callouts already own the first
         ax.annotate(
-            f"laser range reads {range_pct_error:+.0f} %,\n"
-            "cancelling the transverse error on axis",
-            xy=(x[0], y[0]), xytext=(8, 10), textcoords="offset points",
+            f"on axis the laser range reads {range_pct_error:+.0f} %,\n"
+            "cancelling the transverse error exactly",
+            xy=(0.40, 0.06), xycoords="axes fraction",
             fontsize=6, color=INK_SECONDARY, ha="left", va="bottom",
         )
 
-    ax.set_xlabel("Target position in frame (degrees off axis)")
+    ax.set_xlabel("Target's distance from the image centre (degrees off axis)")
     ax.set_ylabel("Length error (%)")
-    ax.set_xlim(x.min(), x.max())
+
+    if half_frame_m is not None and depth_m is not None:
+        edge_deg = float(np.degrees(np.arctan(half_frame_m / depth_m)))
+        # show the whole half-frame, so the reader can see the plotted range
+        # stops short of the edge -- and why
+        ax.set_xlim(x.min(), edge_deg)
+        ax.axvspan(x.max(), edge_deg, color=INK_MUTED, alpha=0.07, zorder=0)
+        ax.annotate("a 30 cm target\nno longer fits",
+                    xy=(0.5 * (x.max() + edge_deg), ax.get_ylim()[1]),
+                    xytext=(0, -4), textcoords="offset points", fontsize=5.8,
+                    color=INK_SECONDARY, ha="center", va="top", zorder=5)
+
+        def _to_frac(deg):
+            return depth_m * np.tan(np.radians(deg)) / half_frame_m
+
+        def _to_deg(frac):
+            return np.degrees(np.arctan(np.asarray(frac) * half_frame_m / depth_m))
+
+        top = ax.secondary_xaxis("top", functions=(_to_frac, _to_deg))
+        top.set_xticks([0.0, 0.25, 0.5, 0.75, 1.0])
+        top.set_xticklabels(["centre", "\u00bc", "\u00bd", "\u00be", "edge"])
+        top.set_xlabel("Position across the frame", labelpad=2)
+        top.tick_params(length=2.5, width=0.6)
+    else:
+        ax.set_xlim(x.min(), x.max())
+
     ax.set_ylim(bottom=min(0.0, float(np.min(y))) - 0.5)
     ax.margins(x=0)
     fig.tight_layout()

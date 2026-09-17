@@ -463,3 +463,30 @@ def test_two_pane_stack_does_not_move_the_headline():
     assert max(edges) == pytest.approx(17.7, abs=0.1)
     assert min(crossings) == pytest.approx(18.3, abs=0.1)
     assert max(crossings) == pytest.approx(18.6, abs=0.1)
+
+
+def test_flat_port_cost_reports_the_frame_it_is_measured_against():
+    """The x axis of Figure 9 is a position in the picture, not a pose, and
+    without the frame's own half-width nobody can tell which.
+
+    Section 4.4's figure is also in degrees and means the fish's angle to the
+    image plane -- the opposite quantity. These two keys are what let the figure
+    carry a second axis reading centre-to-edge, so they are pinned rather than
+    left as an incidental part of the return value.
+    """
+    r = flat_port_cost()
+    assert r["depth_m"] == pytest.approx(2.0)
+    assert r["half_frame_m"] == pytest.approx(0.950, abs=0.005)
+
+    edge_deg = np.degrees(np.arctan(r["half_frame_m"] / r["depth_m"]))
+    assert edge_deg == pytest.approx(25.4, abs=0.1)
+
+    # the plotted span stops short of the frame edge: past three quarters of the
+    # half-width a 300 mm target no longer fits, so the curve is not the worst case
+    assert r["field_angle_deg"][-1] == pytest.approx(19.6, abs=0.1)
+    assert r["field_angle_deg"][-1] < edge_deg
+
+    # and the axis really is a position: its last point is MAX_FRAME_FRACTION
+    # of the half-width, in metres, not an angle of incidence
+    offset = r["depth_m"] * np.tan(np.radians(r["field_angle_deg"][-1]))
+    assert offset / r["half_frame_m"] == pytest.approx(0.75, abs=0.01)
