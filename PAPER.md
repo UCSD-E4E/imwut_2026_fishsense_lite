@@ -736,6 +736,16 @@ caught any of this in the field.
   15 %. Consider stating the broadside figure directly: "median −2.1 %, $p_{90}$ +0.36 %
   over 995 measurements of five targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
+- **Future work worth a line in the limitations paragraph.** Every pose statement about the
+  cohort is currently inferred from the error it explains, because those frames carry no
+  measured angle. A segmentation mask would break that: yaw foreshortens length by
+  $\cos\theta$ and leaves dorsal-ventral height unchanged, so the observed aspect ratio
+  gives $\theta$ scale-free — no range, no calibration, no known length, and no dependence
+  on the measurement. The angle experiment is a ready-made validation set for it (one rigid
+  target, 1,428 frames, designed angles with a card in frame). It would license a
+  pose-conditioned accuracy figure reported *beside* the unconditioned one, which is a claim
+  about diver compliance rather than a trimmed tail. Not attempted here; FINDINGS §7e has
+  the physics, the design and the failure modes (roll and fin state first).
 - **§3's promise about refraction is now met by §4.5**, written above as "What the port
   correction buys". It is placed after §4.4 rather than earlier so the empirical run
   §4.1–§4.4 is not interrupted by the one simulated result, which costs only the

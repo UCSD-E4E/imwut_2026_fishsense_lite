@@ -788,6 +788,73 @@ comparison worse.
 
 ---
 
+## 7e. FUTURE WORK: a segmentation mask would measure pose independently (2026-09-17)
+
+Not done, not planned for this paper. Recorded because it is the missing measurement behind
+three separate dead ends in §7b–7d, and because the validation set for it already exists.
+
+### The problem it solves
+
+Every pose question in the cohort is circular. The only per-frame pose number available is
+`arccos(1 + e/100)`, computed FROM the error it is meant to explain, so it cannot justify
+excluding a frame, conditioning an accuracy figure, or attributing a tail. §4.3 says as
+much: "the corpus frames carry no measured angle". The angle experiment has real angles,
+read off a protractor card in frame, but those sessions are excluded from the cohort by
+design and `angle_category` in `angles.csv` is a deterministic binning of the card reading
+— 1,428 frames, zero disagreement — so it is not evidence that a reviewer can judge pose
+from a photograph either.
+
+### The physics, and why a mask is the right instrument
+
+Yaw about a vertical axis foreshortens LENGTH by cos(theta) and leaves dorsal-ventral
+HEIGHT unchanged. So for observed height h and length l, and a broadside aspect ratio a0:
+
+    h_obs / l_obs = a0 / cos(theta)     ->     theta = arccos(a0 * l_obs / h_obs)
+
+**Scale-free.** No range, no calibration, no known length, and — the point — no dependence
+on the measured error. That is the independent pose label the cohort lacks.
+
+`a0` is exact and free for the rigid models: measure each one once. For wild fish it varies
+by individual, sex, condition and fin state, which is where the difficulty lives.
+
+### The validation set already exists
+
+The angle experiment: 1,428 frames, ONE rigid Snook, designed angles 0–45° in 5° steps,
+five sessions, two ranges, protractor in frame. Segment those, fit h/l against cos(theta),
+and you get the method's calibration AND its error bars against ground truth, with no new
+fieldwork. If it holds to about ±5° it can then be applied to the cohort.
+
+Prod has no segmentation table (`headtaillabel`, `laserlabel`, `specieslabel` only), so the
+masks are new labelling — but one rigid object on a plain pool background is close to the
+easiest segmentation there is, and a foundation model would likely do it unsupervised.
+
+### Failure modes, in the order they will bite
+
+* **Roll.** Height is invariant under yaw ONLY. A fish rotated about its long axis loses
+  apparent height, the aspect ratio drops, and the method infers a negative angle. Wild
+  fish roll; the rigid models on a diver's hand mostly do not, so the validation set will
+  not exercise this and will look better than the field case.
+* **Fin state.** Dorsal erect versus folded moves h by a lot on a live animal. Again absent
+  from the rigid-model validation.
+* **Body flex.** A swimming fish is curved and its straight-line length is not its length.
+* **Mask boundary.** Fins are thin and low-contrast; the boundary is exactly where the
+  measurement lives. A crude colour threshold is NOT sufficient — tried on four Snook
+  frames 2026-09-17: one failed outright, one captured the diver and returned an aspect of
+  1.43 (an absurd 68° pose on a −5.5 % frame), one behaved (31.4° measured against 36.8°
+  implied). Inconclusive, and a fair warning about doing this cheaply.
+
+### What it would license, in order of value
+
+1. **A pose-conditioned accuracy figure reported ALONGSIDE the unconditioned one** — what
+   the instrument does at the poses divers achieved, and what it does when the 15° guidance
+   is followed. That is a claim about compliance, which is a contribution. Trimming a tail
+   is not, and §7d shows a uniform >15° rule would drop 343 of 995 frames to move the
+   reported p90 by 0.38 pp.
+2. **Validating the implied-pose numbers** §4.3 currently has to hedge.
+3. **Flagging frames for review** without spending a known length.
+
+---
+
 ## 8. The SMILE stereo-video archive — what a field comparison can and cannot say (2026-09-13)
 
 `~/Downloads/SMILE_Archive_LengthData.csv` is our collaborators' EventMeasure export: 1,471
