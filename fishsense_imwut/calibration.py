@@ -854,3 +854,91 @@ def depth_offset_gain(df, bins: int = 16) -> dict:
         }
         for k, v in out.items()
     }
+
+
+# --- the calibration object: does a slate carry the checkerboard's scale? ----
+#
+# §4.3's first claim. The laser baseline is a property of the camera+laser rig
+# rather than of the dive, so a unit calibrated against both objects must report
+# the same baseline either way. Any disagreement is the objects' scales
+# disagreeing, and nothing else -- which is the one check available, because
+# metric scale enters through the calibration object and reprojection residual
+# provably cannot see it.
+
+#: Pool-corpus calibration fits are the cohort, minus two dives, each for a
+#: reason §4.3 states rather than for its result.
+#:
+#: 107 is the badly-conditioned fit the same section dissects: 16 observations
+#: spanning 0.03 m, a 12.95 cm baseline against a fleet that sits in
+#: 9.87-10.54, and a fit that reproduces its own working distance to -0.12 %
+#: and a distance 2.2 m out to -17.25 %. It is excluded as a failed
+#: calibration, not as an inconvenient one; today's 0.6 m lever-arm gate
+#: refuses it outright, and it survives in `laserextrinsics` only because it
+#: was fitted before that gate existed.
+#:
+#: 436 is a field dive (101624_Alligator0_FSL04). It reaches the pool exports
+#: only as a borrow and is not a pool calibration.
+BASELINE_COMPARISON_EXCLUDED = (107, 436)
+
+
+def load_calibration_fits(path):
+    """Load `data/calibration_fits.csv` -- every accepted laser calibration
+    with the object it was fitted from.
+
+    A refused calibration has no extrinsics row at all, so this is already the
+    set of calibrations the pipeline would use. See
+    `sql/extract_calibration_fits.sql`.
+    """
+    import pandas as pd
+
+    df = pd.read_csv(path)
+    df["baseline_cm"] = 100.0 * df["baseline_m"]
+    return df
+
+
+def baseline_by_standard(fits, dives, excluded=BASELINE_COMPARISON_EXCLUDED):
+    """Per-unit mean baseline under each calibration object, for the units that
+    carry both.
+
+    `dives` is the set of calibration dives the pool corpus resolves through.
+    Returns `{camera_id: {"checkerboard": mean_cm, "slate": mean_cm, ...}}`,
+    keeping the per-unit fit counts so a caller can report them.
+    """
+    keep = fits[fits.dive_id.isin(set(dives) - set(excluded))]
+    out = {}
+    for cam, g in keep.groupby("camera_id"):
+        by = {s: sub.baseline_cm.to_numpy(float) for s, sub in g.groupby("standard")}
+        if len(by) == 2:
+            out[int(cam)] = {
+                "checkerboard": float(np.mean(by["checkerboard"])),
+                "slate": float(np.mean(by["slate"])),
+                "n_checkerboard": int(by["checkerboard"].size),
+                "n_slate": int(by["slate"].size),
+                "diff_pct": float(100.0 * (np.mean(by["checkerboard"])
+                                           - np.mean(by["slate"])) / np.mean(by["slate"])),
+            }
+    return out
+
+
+def checkerboard_slate_difference(per_unit, resamples: int = 20_000, seed: int = 0):
+    """Mean checkerboard-minus-slate baseline difference over units, with a
+    95 % percentile bootstrap interval.
+
+    **The unit is the camera, not the fit.** Nineteen fits are not nineteen
+    independent observations -- fits of one rig share that rig's true baseline,
+    so resampling fits would report an interval far narrower than the evidence
+    supports. Resampling the six units is the honest choice and is why the
+    interval is as wide as it is.
+    """
+    d = np.array([u["diff_pct"] for u in per_unit.values()], dtype=float)
+    rng = np.random.default_rng(seed)
+    draws = np.array([rng.choice(d, d.size, replace=True).mean()
+                      for _ in range(resamples)])
+    return {
+        "n_units": int(d.size),
+        "n_checkerboard": int(sum(u["n_checkerboard"] for u in per_unit.values())),
+        "n_slate": int(sum(u["n_slate"] for u in per_unit.values())),
+        "mean_pct": float(d.mean()),
+        "ci_lo": float(np.percentile(draws, 2.5)),
+        "ci_hi": float(np.percentile(draws, 97.5)),
+    }

@@ -1527,7 +1527,7 @@ measured under extrinsics 54 and 55 — their refits, not the retired fits.
 4. **The two repaired baselines were said to be inside "the 9.99–10.45 cm the fleet
    occupies", and 10.52 cm is not.** 9.99–10.45 was the fleet IQR at the time, quoted as
    though it were the range. The fleet now holds 31 fits spanning 9.87–12.95 cm; 30 of them
-   lie in 9.87–10.54 and both repairs are inside that. The single outlier is dive 107 at
+   lie in 9.87–10.55 and both repairs are inside that. The single outlier is dive 107 at
    12.95 cm, whose observations span 2.8 cm along the ray — rejected by the conditioning
    criterion without reference to its baseline, which is the useful thing to say about it.
 5. **The unit-to-unit bound of "≤ 9 % (95 % upper limit, 34 hogfish)" does not reproduce,
@@ -1608,7 +1608,7 @@ ship first, and each one is written up in `CLAUDE.md`:
   one hogfish into two `Fish` rows carrying 4 and 7 measurements.
 
 The day's calibration is **dive 32** (`H Slate Dive 1`, 09:11), fitted at
-**10.551 cm** — inside the 9.87–10.54 cm band 30 of the fleet's 31 fits
+**10.551 cm** — inside the 9.87–10.55 cm band 30 of the fleet's 31 fits
 occupy. The other two H-Slate captures were refused on the lever arm: dive 22
 at 0.25 m over ten observations, dive 23 at **0.59 m** against a 0.60 m gate
 over five. Only the 09:11 burst varied range enough to be determinable, which

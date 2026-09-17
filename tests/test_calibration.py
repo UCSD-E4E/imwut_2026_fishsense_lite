@@ -709,3 +709,64 @@ def _figure_height_px(path) -> int:
     raw = path.read_bytes()
     assert raw[:8] == b"\x89PNG\r\n\x1a\n", f"not a PNG: {path}"
     return struct.unpack(">I", raw[20:24])[0]
+
+
+# --- the calibration object (4.3's first claim) ------------------------------
+
+
+def _baseline_cohort():
+    from fishsense_imwut import calibration as cal
+
+    data = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    fits = cal.load_calibration_fits(data / "calibration_fits.csv")
+    pool = cal.to_frame(cal.load_rows(data / "all.csv"))
+    corpus = cal.to_frame(cal.load_rows(data / "corpus.csv"))
+    dives = (set(pool.calibration_dive_id) | set(pool.dive_id)
+             | set(corpus.calibration_dive_id) | set(corpus.dive_id))
+    return fits, cal.baseline_by_standard(fits, dives)
+
+
+def test_checkerboard_and_slate_agree_within_the_scatter():
+    """Pins §4.3's headline: +0.66 % of baseline, 95 % CI −0.23 % to +1.69 %.
+
+    Unsourced in the draft until 2026-09-17 -- the calibration object per fit
+    lives only in `dive.calibration_target_id` and no export carried it, so the
+    number could not be recomputed from this repository at all.
+    """
+    import pytest
+
+    from fishsense_imwut import calibration as cal
+
+    fits, per_unit = _baseline_cohort()
+    r = cal.checkerboard_slate_difference(per_unit)
+    assert (r["n_units"], r["n_checkerboard"], r["n_slate"]) == (6, 11, 8)
+    assert r["mean_pct"] == pytest.approx(0.66, abs=0.01)
+    assert r["ci_lo"] == pytest.approx(-0.23, abs=0.01)
+    assert r["ci_hi"] == pytest.approx(1.69, abs=0.01)
+    assert r["ci_lo"] < 0 < r["ci_hi"], "the interval must span zero"
+
+
+def test_one_unit_dominates_the_baseline_spread():
+    """The +2.9 % unit and the 9.87 cm fit behind it, both quoted in §4.3."""
+    import pytest
+
+    fits, per_unit = _baseline_cohort()
+    worst = max(per_unit.values(), key=lambda u: abs(u["diff_pct"]))
+    assert worst["diff_pct"] == pytest.approx(2.94, abs=0.01)
+    assert fits.baseline_cm.min() == pytest.approx(9.87, abs=0.01)
+
+
+def test_the_fleet_baseline_range_excludes_only_the_lever_arm_failure():
+    """§4.3: dive 107 fits 12.95 cm and the other thirty lie within 9.87–10.55.
+
+    The draft said 10.54 until this test was written; the true maximum is dive
+    493 at 10.555 cm.
+    """
+    import pytest
+
+    fits, _ = _baseline_cohort()
+    assert len(fits) == 31
+    assert fits.loc[fits.dive_id == 107, "baseline_cm"].item() == pytest.approx(12.95, abs=0.01)
+    others = fits[fits.dive_id != 107].baseline_cm
+    assert others.min() == pytest.approx(9.87, abs=0.01)
+    assert others.max() == pytest.approx(10.554, abs=0.002)

@@ -67,7 +67,7 @@ range — and both were repaired rather than excluded. The frames they needed ex
 been removed by the per-dive outlier filter, which judged the calibration frames against a
 line its measurement frames dominate; reinstating them gives lever arms of 2.41 m and 1.30 m
 and baselines of 10.10 and 10.52 cm. Thirty of the fleet's thirty-one fitted baselines lie
-in 9.87–10.54 cm and both repairs land inside that band; the single exception is a pool
+in 9.87–10.55 cm and both repairs land inside that band; the single exception is a pool
 session whose observations span 2.8 cm along the ray, which the conditioning criterion of
 §4.3 rejects without reference to its baseline at all. All seven deployments therefore carry
 calibrations that pass every check in §4.3 and Appendix A. Laser range spans
@@ -133,7 +133,7 @@ hogfish numbering at one site runs 1–12 and both skip 10, so it is a shared
 registry rather than two independent counts. Seven individuals were measured by
 both instruments. This is a separate day from the seven deployments above and is
 not part of the 162 measurements; its lengths rest on a calibration fitted from
-that morning's slate burst (10.55 cm, inside the 9.87–10.54 cm band 30 of the
+that morning's slate burst (10.55 cm, inside the 9.87–10.55 cm band 30 of the
 fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time a
 borrowed calibration has produced field lengths checked against anything
 external.
@@ -473,7 +473,7 @@ laser-triangulated range can be compared against it frame by frame. In one sessi
 observations spanning 0.03 m of range, the stored calibration reproduces its own working
 distance to $-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and
 $n=15$ frames). Its fitted baseline, 12.95 cm, is the widest in the fleet by a wide margin;
-the other thirty fits lie within 9.87–10.54 cm.
+the other thirty fits lie within 9.87–10.55 cm.
 
 Three checks miss it, each for a different reason. The known-length targets in that session
 all sit within 0.1 m of its calibration distance and read $-2.4\,\%$ at 0° ($n=15$), which
