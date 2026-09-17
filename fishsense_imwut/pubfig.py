@@ -1705,3 +1705,73 @@ def fig_flat_port_error_field(
     cb.outline.set_edgecolor(BASELINE)
     fig.tight_layout()
     return fig
+
+
+def fig_flat_port_before_after(
+    uncorrected,
+    corrected,
+    budget_pct: float = 15.0,
+    figsize: tuple[float, float] = (FULL_WIDTH, 2.85),
+) -> plt.Figure:
+    """The port's cost beside what the corrective optic leaves, one colour scale.
+
+    Both panels are the same frame, the same target, the same scale, so the
+    comparison is the picture rather than a pair of numbers in the text.
+
+    **What the right panel is, and is not.** It is the same model with the index
+    step removed -- the air path the M52 lens restores at the port -- and NOT a
+    refraction *correction*. Pinax and the in-water single-viewpoint calibration
+    are the companion paper's contribution and neither they nor their code are
+    in this repository. So the right panel is close to tautological: take away
+    the water interface and there is no refraction error to have. Its job is
+    only to put the magnitude of what the optic removes on a scale the eye can
+    compare, which a sentence cannot do.
+    """
+    left = np.asarray(uncorrected["error_pct"], dtype=float)
+    right = np.asarray(corrected["error_pct"], dtype=float)
+    W, H = uncorrected["image_size_px"]
+    vmax = float(np.nanmax(left))
+
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    for ax, err, title in (
+        (axes[0], left, "Flat port, no corrective optic"),
+        (axes[1], right, "Air path restored by the optic"),
+    ):
+        im = ax.imshow(err, extent=uncorrected["extent"], origin="upper",
+                       aspect="equal", cmap=_PORT_ERROR_RAMP, vmin=0.0, vmax=vmax,
+                       interpolation="nearest", zorder=1)
+        ax.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor=INK_MUTED,
+                                   linewidth=0.8, zorder=4))
+        ax.plot([W / 2], [H / 2], marker="+", markersize=5, markeredgewidth=0.9,
+                color=INK_PRIMARY, zorder=5)
+        peak = float(np.nanmax(err))
+        ax.annotate(f"worst in frame {peak:+.1f} %", xy=(W / 2, 0.985 * H),
+                    xytext=(0, 0), textcoords="offset points", fontsize=6.5,
+                    color=INK_PRIMARY if peak < 1 else SURFACE,
+                    ha="center", va="bottom", zorder=6)
+        ax.set_title(title, fontsize=7, pad=4)
+        ax.set_xlim(0, W)
+        ax.set_ylim(H, 0)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+
+    if budget_pct is not None and np.nanmax(left) >= budget_pct:
+        xs = np.linspace(uncorrected["extent"][0], uncorrected["extent"][1],
+                         left.shape[1])
+        ys = np.linspace(uncorrected["extent"][3], uncorrected["extent"][2],
+                         left.shape[0])
+        cs = axes[0].contour(xs, ys, left, levels=[budget_pct], colors=[SURFACE],
+                             linewidths=1.3, zorder=3)
+        axes[0].clabel(cs, fmt=lambda v: f"{v:g} %", fontsize=6, inline=True,
+                       inline_spacing=5)
+
+    cb = fig.colorbar(im, ax=axes, orientation="horizontal", fraction=0.05,
+                      pad=0.06, aspect=48)
+    cb.set_label("Length error for a 30 cm target held horizontal (%)",
+                 fontsize=7, labelpad=2)
+    cb.ax.tick_params(labelsize=6, length=2, width=0.6)
+    cb.outline.set_linewidth(0.6)
+    cb.outline.set_edgecolor(BASELINE)
+    return fig

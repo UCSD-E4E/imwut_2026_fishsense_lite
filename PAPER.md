@@ -750,19 +750,26 @@ caught any of this in the field.
   the 15 % budget, crossed at 18° — seven tenths of the way out. The plotted range stops at
   three quarters of the half-frame (19.6°) because past it a 300 mm target no longer fits;
   the frame itself reaches 25.4°, so the curve does not show the worst the port can do.
-- **Figure 9b** *(§4.5, and the better of the two)* — The same flat-port cost drawn on the
-  frame it happens in: the panel **is** the 4014 × 3016 image, so "where in the picture"
+- **Figure 9b** *(§4.5, and the better of the two — needs `figure*`, full width)* — The
+  flat-port cost drawn on the frame it happens in, beside what the corrective optic leaves,
+  on one colour scale. Each panel **is** the 4014 × 3016 image, so "where in the picture"
   needs no translation into degrees and cannot be misread as the fish's pose. White contour:
   the 15 % budget. Grey: a 300 mm target centred there would not fit in frame.
-  **The field is not radially symmetric, and that is the argument.** The port is
+  **The left field is not radially symmetric, and that is the argument.** The port is
   rotationally symmetric but the target is not a point — held horizontal it lies *along* a
   radius at the left and right edges and *across* one at the top and bottom, and radial and
-  tangential magnification differ. So the same fish at the same distance from the centre
-  reads **+23 % at the side of the frame and +6 % at the top**, and +0.1 % at the centre.
-  That is why no calibration can absorb this: a single scale factor cannot be right at the
-  centre, the side and the top at once. The corner reaches **+29.5 %**, well past the
-  +17.7 % Figure 9's one-dimensional slice ends at — that slice runs out along the
-  horizontal axis at three quarters of the half-width, so it never sees the worst case.
+  tangential magnification differ. The same fish at the same distance from the centre reads
+  **+23 % at the side and +6 % at the top**, +0.1 % at the centre, and **+29.5 %** in the
+  corner. No single scale factor is right at all three, which is why a calibration cannot
+  absorb this.
+  **What the right panel is, and is not.** It is the same model with the index step removed
+  — the air path the M52 lens restores at the port — and *not* a refraction correction; the
+  Pinax model and the in-water single-viewpoint calibration are the companion paper's
+  contribution and appear nowhere here. So it is close to tautological: take the water
+  interface away and there is no refraction error to have. It earns its half of the figure
+  by putting the magnitude of what the optic removes on a scale the eye can compare, which
+  the text cannot. A column-width single-panel variant exists
+  (`pubfig.fig_flat_port_error_field`) if the full width is not affordable.
 - **Figure 11** — Within-individual repeatability, wild fish against posed models. Each
   point is one group: one wild individual (≥ 3 frames), or one (session, target) cell in
   the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.6

@@ -532,3 +532,23 @@ def test_the_error_field_samples_square_cells():
 
     # NaN only ever means "would not fit", never "off the end of the grid"
     assert np.isfinite(f["error_pct"][h // 2, w // 2])
+
+
+def test_removing_the_index_step_removes_the_error():
+    """Figure 9b's right panel: the air path the corrective optic restores.
+
+    Deliberately close to tautological -- with no water interface there is no
+    refraction error to have -- and pinned anyway, because the panel's whole job
+    is to carry that magnitude beside the left one. If this ever stops being
+    ~zero, the model has grown a term that is not refraction.
+
+    Note what this is NOT: the Pinax correction and the in-water single-viewpoint
+    calibration belong to the companion paper and are absent from this module by
+    design. Nothing here corrects anything; it only takes the interface away.
+    """
+    corrected = flat_port_error_field(n_water=1.0, cell_px=16.0)
+    assert np.nanmax(corrected["error_pct"]) < 0.1
+    assert abs(corrected["range_pct_error"]) < 0.2
+
+    uncorrected = flat_port_error_field(cell_px=16.0)
+    assert np.nanmax(uncorrected["error_pct"]) > 25.0
