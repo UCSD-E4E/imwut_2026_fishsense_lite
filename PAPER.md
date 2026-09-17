@@ -386,135 +386,122 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
 
 #### 4.3 Calibration stability
 
-Two questions sit under every number in §4.2, and they have opposite answers. Is the
-object the calibration is fitted *from* sound? That is checkable, and it checks out. Is
-the parameter it fits stable between uses? It is not, and by more than the accuracy we
-report.
+§4.2's numbers rest on two properties of the calibration, and only one of them holds. The
+object the calibration is fitted from is sound. The parameter it fits is not stable between
+uses, and it moves by more than the accuracy we report.
 
-Replacing the checkerboard with a dive slate is only defensible if the substitute carries
-the same scale, and that is checkable without reference to any fish. The pipeline's metric
-scale does not come from the targets: it comes from the calibration object, and a wrong one
-would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
-The laser baseline, though, is a property of the rig rather than the dive, so any unit
-calibrated both ways must report the same baseline either way. Over the six units carrying
-both in the pool corpus (19 calibration *fits* — 11 checkerboard, 8 slate — which is a
-different 19 from the session count, and coincidental) the mean
-checkerboard-minus-slate difference is **+0.66 % of baseline (95 % CI −0.23 % to +1.69 %)**,
-an interval that spans zero and is of the same order as the scatter between two
-calibrations of one unit under one standard (sd 0.135 cm). One unit dominates the spread:
-its slate side includes the fleet's shortest fit at 9.87 cm, which alone carries that unit
-to +2.9 %.
+Take the object first. Substituting a dive slate for the checkerboard is safe only if the
+two carry the same scale, and that is checkable without any fish. Metric scale enters the
+pipeline through the calibration object rather than the targets, so an error in it would
+rescale every length without disturbing the reprojection residual (§3.3). The laser
+baseline gives us a handle, since it is a property of the rig: a unit calibrated against
+both objects must report the same baseline either way. Six units in the pool corpus carry
+both, over 19 calibration *fits*, 11 checkerboard and 8 slate. (That 19 is not the session
+count; the coincidence is unfortunate.) The mean checkerboard-minus-slate difference is
+**+0.66 % of baseline, 95 % CI −0.23 % to +1.69 %**. The interval spans zero, and its width
+is comparable to the scatter between two calibrations of one unit under a single standard
+(sd 0.135 cm). Most of the spread comes from one unit, whose slate side includes the
+fleet's shortest fit at 9.87 cm and which alone reads +2.9 %.
 
-The sign of that figure changed with the grid-pitch correction and is worth recording,
-because it is the substitution's cost being measured rather than asserted. Before the
-correction the checkerboard read **−0.27 %** against the slate; refitting the twelve
-checkerboard calibrations at the tape-measured pitch moved them up by +0.39 % to +0.79 %
-each, and the comparison crossed zero. The two objects agreed within the scatter before and
-agree within it now, on either side of it — which is the claim, and it did not depend on
-which side the central value happened to fall.
+That figure changed sign when we corrected the grid pitch. Before the correction the
+checkerboard read **−0.27 %** against the slate; refitting the twelve checkerboard
+calibrations at the tape-measured pitch raised each by +0.39 % to +0.79 %, and the
+comparison crossed zero. The two objects agreed within the scatter before the correction
+and agree within it after, on opposite sides of it.
 
-The session calibration offsets, which are reproducible from the committed export, agree
-to about half a point: a median **+1.35 pp** over the fourteen checkerboard
-sessions of the cohort against **+0.77 pp** over the five slate sessions. The deployable
-object therefore reproduces the standard one to about a percent, which is what licenses
-the substitution, and it places the dominant uncertainty in §4.2's accuracy figures on the
-target lengths rather than on the calibration.
+The session calibration offsets, which are reproducible from the committed export, agree to
+about half a point: a median **+1.35 pp** over the cohort's fourteen checkerboard sessions
+against **+0.77 pp** over its five slate sessions. The deployable object reproduces the
+standard one to roughly a percent. That is what licenses the substitution, and it puts the
+dominant uncertainty in §4.2 on the target lengths rather than on the calibration chain.
 
-Two limits belong with that. Only five of the nineteen cohort sessions are
-slate-calibrated, so the deployable path carries the smaller share of the accuracy
-evidence and its offset spread (sd 2.10 pp against the checkerboard's 1.81) rests on five
-points. And neither check can see an error common to both objects, or one in the camera
-intrinsics, which rescale the calibration object and the laser together. We do not compare
-the two groups' raw errors, because they photographed disjoint target sets (§4.2) and any
-difference would be the targets rather than the calibration.
+Two limits go with that. Only five of the nineteen cohort sessions are slate-calibrated, so
+the deployable path carries the smaller share of the accuracy evidence, and its offset
+spread (sd 2.10 pp, against the checkerboard's 1.81) rests on five points. And neither
+check can see an error common to both objects, or one in the camera intrinsics, which
+rescale the calibration object and the laser together. We do not compare the two groups'
+raw errors, because they photographed disjoint target sets (§4.2) and any difference would
+be the targets.
 
-A sound calibration object is not a sound calibration, and Appendix A excludes all six
-of its
-calibration-rejected sessions on the state of a single parameter. It is worth saying plainly why
-that parameter needs watching. The laser's in-plane pointing angle sets metric scale and
-is invisible to any reprojection check (§3.3): rotating the axis within the camera–laser
-plane moves the projected dot by less than $10^{-12}$ px, so a calibration can be wrong by
-an amount no fit residual can reveal. Figure 4 plots that angle, fitted per session, for
-seven sessions of one unit.
+A sound object does not make a sound calibration, and Appendix A rejects six sessions on
+the state of a single parameter. That parameter is the laser's in-plane pointing angle. It
+sets metric scale, and no reprojection check can see it (§3.3): rotating the axis within
+the camera–laser plane moves the projected dot by less than $10^{-12}$ px, so a calibration
+can be wrong by an amount no fit residual will reveal. Figure 4 plots the angle, fitted per
+session, for seven sessions of one unit.
 
-It is also not stable. Across those seven sessions the angle spans 0.27°, against a
-sensitivity of $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m — so the
-between-session spread alone exceeds the accuracy we report below. The whole corpus spans
-seventeen days, so this is drift within a fortnight of ordinary handling rather than
-ageing over years. Nor is a session a safe
-unit. In one session two calibrations of the same rig, taken seven minutes apart, differ by
-0.82°; the target frames shot between them agree with the earlier one, while frames from
-25 minutes before agree with neither, placing the mount in a third state.
+The angle also moves. Across those seven sessions it spans 0.27°, against a sensitivity of
+$-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m, so the between-session
+spread by itself exceeds the accuracy we report. The corpus spans seventeen days, which
+makes this drift under a fortnight of ordinary handling rather than ageing over years. A
+session is no safer a unit. In one session two calibrations of the same rig, taken seven
+minutes apart, differ by 0.82°; the target frames shot between them agree with the earlier
+fit, while frames from 25 minutes before agree with neither, putting the mount in a third
+state.
 
 One field deployment shows the same thing without needing a second calibration to compare
-against, and it is the cleanest instance we have. The dive holds two bursts of calibration
-frames, 52 minutes apart, and 71 laser dots on its measurement frames. Those 71 define a
-line to 0.64 px; the first burst's dots sit 42.6–46.2 px off that line and the second's sit
-66.5–72.9 px, each burst internally tight. Three distinguishable laser states in one dive,
-measured against the dive's own frames rather than against another fit — and the dots are
-correctly placed, which we verified by inspecting the frames at the pixel level after the
-offsets first suggested mislabelling. A calibration is valid for the frames it was taken
-with and not reliably beyond them, and in this dive no calibration is valid for the frames
-that would be measured: it yields no lengths at all.
+against. The dive holds two bursts of calibration frames 52 minutes apart, and 71 laser
+dots on its measurement frames. Those 71 define a line to 0.64 px; the first burst's dots
+sit 42.6–46.2 px off that line and the second's sit 66.5–72.9 px, each burst internally
+tight. That is three distinguishable laser states in one dive, measured against the dive's
+own frames rather than against another fit. We inspected the frames at the pixel level
+after the offsets first suggested mislabelling, and the dots are correctly placed. No
+calibration in that dive is valid for the frames that would be measured, so it yields no
+lengths at all.
 
-Three consequences follow, and they shape the rest of the paper. The pipeline re-fits the
-laser per dive rather than trusting a stored calibration. A per-session validation target
-remains good practice, because the failure is silent — this is what the range check of
-Appendix A
-supplies, and it needs no reference length. And calibration state is the dominant reason a
-session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 6
-fail a calibration criterion in Appendix A — five flagged by the scale-free range check, and
-one more held out on the same evidence. An instrument whose scale parameter drifts by more
-than its own measurement error between uses is one that must be calibrated, and validated,
-at the point of use.
+Three things follow. The pipeline re-fits the laser per dive instead of trusting a stored
+calibration. A per-session validation target remains good practice because the failure is
+silent, and Appendix A's range check supplies one without needing a reference length.
+And calibration state is the main reason a session is not accuracy evidence: of the 30
+sessions here with enough frames to judge, 6 fail a calibration criterion in Appendix A,
+five flagged by the scale-free range check and one more held out on the same evidence. An
+instrument whose scale parameter drifts further than its own measurement error between uses
+has to be calibrated, and validated, at the point of use.
 
-A second failure mode of the same parameter is that a session's own fit can fail to
-determine it. What fixes the laser's direction is the spread of the calibration
-observations *along* the ray — the lever arm — against the noise in locating the dot, not
-their number: one pixel of dot-label noise at range $z$ is $z/f$ metres of lateral error,
-so it rotates the fitted axis by about $(z/f)/\ell$ radians for a lever $\ell$. Two
-observations a metre apart therefore determine the axis far better than sixteen at one
-distance, and a burst shot at a single distance does not determine it at all.
+The same parameter fails a second way: a session's own fit can leave it undetermined. What
+fixes the laser's direction is the spread of the calibration observations *along* the ray —
+the lever arm — against the noise in locating the dot, rather than their number. One pixel
+of dot-label noise at range $z$ is $z/f$ metres of lateral error, which rotates the fitted
+axis by about $(z/f)/\ell$ radians for a lever $\ell$. Two observations a metre apart
+therefore pin the axis far better than sixteen at one distance, and a burst shot at a
+single distance does not pin it at all.
 
-The consequence is not a large error everywhere. It is a fit that is accurate where it was
-taken and wrong away from it, which makes it invisible to a validation performed at the
-working distance. The calibration frames themselves supply the check: the target's pose
-gives a per-frame distance that does not involve the laser at all, so laser-triangulated
-range can be compared against it frame by frame. For one session of 16 observations
-spanning 0.03 m of range, the stored calibration reproduces its own working distance to
-$-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and $n=15$ frames);
-its fitted baseline, 12.95 cm, is the widest in the fleet by a wide margin — the other
-thirty fits lie within 9.87–10.54 cm.
+Such a fit is accurate where it was taken and wrong away from it, so a validation performed
+at the working distance will not catch it. The calibration frames supply their own check:
+the target's pose gives a per-frame distance that does not involve the laser, so
+laser-triangulated range can be compared against it frame by frame. In one session of 16
+observations spanning 0.03 m of range, the stored calibration reproduces its own working
+distance to $-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and
+$n=15$ frames). Its fitted baseline, 12.95 cm, is the widest in the fleet by a wide margin;
+the other thirty fits lie within 9.87–10.54 cm.
 
-Three checks miss it, and the pattern in how they miss is the point. The known-length
-targets in that session all sit within 0.1 m of its calibration distance and read
-$-2.4\,\%$ at $0°$ ($n=15$) — ordinary. Reprojection residual cannot see it, for the
-reason given above. And leave-one-out cross-validation over the calibration observations
-reports 0.56 % median error on the held-out frame, *better* than the eleven sound sessions
-(0.52–1.48 %), because a frame held out of a single-distance burst is predicted at the
-distance the remaining frames already anchor. Every check evaluated where the data already
-lies is blind to conditioning; only the geometry of the observations, or an evaluation at a
-different distance, reveals it.
+Three checks miss it, each for a different reason. The known-length targets in that session
+all sit within 0.1 m of its calibration distance and read $-2.4\,\%$ at 0° ($n=15$), which
+is ordinary. Reprojection residual cannot see it, for the reason given above. And
+leave-one-out cross-validation over the calibration observations reports 0.56 % median
+error on the held-out frame, *better* than the eleven sound sessions (0.52–1.48 %), because
+a frame held out of a single-distance burst is predicted at the distance the remaining
+frames already anchor. Any check evaluated where the data already lies is blind to
+conditioning; only the geometry of the observations, or an evaluation at a different
+distance, reveals it.
 
 The pipeline therefore refuses to store a calibration whose observations span less than
 0.6 m of range, so such a session cannot reach the accuracy analysis at all. The bound
-needs no threshold search and no reference length — it is a statement about the geometry of
-the observations, not about any measured error, so it applies before a validation target
-exists — and it separates the sessions we can check cleanly: of the eleven whose stored
+needs no threshold search and no reference length, since it describes the geometry of the
+observations rather than any measured error, and it applies before a validation target
+exists. It also separates the sessions we can check cleanly: of the eleven whose stored
 observations we can recover, the sound ones span 1.02–2.32 m against 0.03 and 0.07 m for
-the two refused. That caveat is real and worth stating: the slate path stores the
-per-frame observations it fitted, while the checkerboard path does not, so for
-checkerboard-calibrated sessions the lever arm is verifiable only going forward, as a gate
-at the moment of fitting, and not retrospectively.
+the two refused. One caveat is worth stating. The slate path stores the per-frame
+observations it fitted and the checkerboard path does not, so for checkerboard-calibrated
+sessions the lever arm can be verified only at the moment of fitting, not retrospectively.
 
-Where two bursts of one mount state exist at different distances, the remedy is to fit
-them jointly. Combining the session above with a burst 5.5 h later at 4.2 m gives a 2.25 m
+Where two bursts of one mount state exist at different distances, fitting them jointly is
+the remedy. Combining the session above with a burst 5.5 h later at 4.2 m gives a 2.25 m
 lever and a 10.87 cm baseline that reproduces both distances to $-0.22\,\%$ and
 $-1.10\,\%$, with held-out medians of $-0.23\,\%$ and $-1.19\,\%$; neither burst alone
-predicts the other's distance (to $-17.25\,\%$ and $-127.6\,\%$). That the two agree is
-also the one direct piece of evidence here that a mount can hold for hours — the failure
-documented above is not that it always moves, but that nothing in the data tells you
-whether it did without a check at a second distance.
+predicts the other's distance, at $-17.25\,\%$ and $-127.6\,\%$. Their agreement is also
+the only direct evidence here that a mount can hold for hours. The failure documented above
+is that nothing in the data tells you whether it did, absent a check at a second distance.
 
 #### 4.4 Fish pose
 
