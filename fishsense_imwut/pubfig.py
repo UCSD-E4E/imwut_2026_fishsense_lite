@@ -14,6 +14,7 @@ at three slots.
 Figures carry no title by default: the caption is the title in LaTeX.
 """
 
+import textwrap
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -575,15 +576,62 @@ def fig_error_by_dive(
 # --- output --------------------------------------------------------------
 
 
+#: Title per figure, used ONLY on the previewable PNG -- see `save_figure`.
+#: Keyed by the name passed to `save_figure`, so a notebook cell needs no change.
+#:
+#: **No figure numbers here, deliberately.** The numbering is the paper's to
+#: choose and will not survive a reordering of the draft; a title that says
+#: "Fig 15" on a file that becomes Figure 11 is worse than no title at all.
+#: These name what the figure SHOWS, which does not change when it moves.
+FIGURE_TITLES = {
+    "fig1_measured_vs_known": "Measured length against known length, pool cohort",
+    "fig2_error_by_model": "Percent length error by target",
+    "fig3_error_vs_range": "Percent length error against laser range",
+    "fig4_phi_mount_state": "Fitted in-plane laser angle, seven sessions of one unit",
+    "fig5_yaw_floor_repair": "Implied yaw floor before and after the August repair",
+    "fig6_shark_anomaly": "The shark model's disputed reference length",
+    "fig7_fork_probe": "Tail-landmark probe: implied shift against apparent length",
+    "fig8_error_vs_angle": "Percent length error against fish angle to the image plane",
+    "fig9_flat_port_cost": "Uncorrected flat-port cost across the frame",
+    "fig9b_flat_port_error_field":
+        "Flat-port cost on the frame, with and without the corrective optic",
+    "fig10_no_rig_bias": "Session calibration offset by camera unit",
+    "fig10b_error_by_camera": "Percent length error by camera unit (repository only)",
+    "fig11_field_repeatability":
+        "Within-individual repeatability, wild fish against posed models",
+    "fig12_field_species": "Measured fork length by species, seven deployments",
+    "fig13_field_by_camera": "Hogfish fork length by camera unit",
+    "fig14_field_vs_stereo":
+        "FishSense Lite against underwater stereo video, per-species medians",
+    "fig15_paired_vs_stereo":
+        "FishSense Lite against underwater stereo video, the same individuals",
+    "fig16_p90_vs_sample_size":
+        "Error in the $p_{90}$ length estimate against frames per fish",
+    "figA_all_dives_percent": "Percent length error for every session",
+    "figD1_depth_correction": "The range correction, and why it is not applied",
+}
+
+
 def save_figure(
     fig: plt.Figure,
     name: str,
     outdir: Path | str = "figures",
     synthetic: bool = False,
     formats: Sequence[str] = ("pdf", "png"),
+    title: str | None = None,
+    title_in_pdf: bool = False,
 ) -> list[Path]:
-    """Write a figure to `outdir` as vector PDF (for LaTeX) and PNG (for
-    previewing in a notebook or slide).
+    """Write a figure as vector PDF (for LaTeX) and PNG (for previewing).
+
+    **The PDF stays untitled and the PNG gets one.** In `acmart` the caption is
+    the title, so a title drawn inside the figure duplicates it and spends
+    vertical space a column-width panel cannot afford. But a PDF opened on its
+    own -- in a file browser, a review thread, an IDE tab -- has no caption at
+    all, and twenty of these are not distinguishable by their axes. So the
+    preview copy carries a title and the typeset copy does not.
+
+    `title` overrides the `FIGURE_TITLES` entry for `name`; `title_in_pdf=True`
+    puts it on both, for slides or a standalone report.
 
     `synthetic=True` stamps the figure so a placeholder can never be mistaken
     for a result. Refuses to write an unstamped file from synthetic data.
@@ -608,10 +656,30 @@ def save_figure(
         )
         name = f"SYNTHETIC_{name}"
 
+    label = title if title is not None else FIGURE_TITLES.get(
+        name[len("SYNTHETIC_"):] if name.startswith("SYNTHETIC_") else name)
+
     written = []
     for fmt in formats:
         path = outdir / f"{name}.{fmt}"
+        stamp = label is not None and (fmt != "pdf" or title_in_pdf)
+        art = None
+        if stamp:
+            # wrap to the panel's own width: a 68-character title is 3.5 in at
+            # 7.5 pt and a column figure is 3.33, so an unwrapped one would run
+            # off the crop on exactly the figures that need it most
+            size = 7.5
+            per_line = max(24, int(fig.get_size_inches()[0] * 72 / (0.52 * size)))
+            text = "\n".join(textwrap.wrap(label, per_line)) if len(label) > per_line else label
+            # figure coordinates, so it rides above tight_layout without
+            # reflowing the axes the figure was composed against
+            art = fig.text(0.5, 0.995, text, ha="center", va="top",
+                           fontsize=size, color=INK_SECONDARY)
+        # no bbox_inches/pad_inches here: use_publication_style already sets
+        # them, and overriding would silently re-crop every typeset PDF
         fig.savefig(path, dpi=300 if fmt == "png" else None)
+        if art is not None:
+            art.remove()
         written.append(path)
     return written
 

@@ -634,3 +634,45 @@ def test_where_clipping_survives_it_says_how_far():
 
     carets = [ln for ln in ax.lines if ln.get_marker() in ("<", ">")]
     assert carets, "clipped frames must be visible at the boundary"
+
+
+def test_the_typeset_pdf_carries_no_title_but_the_preview_does():
+    """In `acmart` the caption is the title, so a title inside the figure
+    duplicates it and spends column height. But a PDF opened on its own has no
+    caption, and twenty of these are not distinguishable by their axes.
+
+    So the split: PNG titled for previewing, PDF clean for LaTeX. Pinned because
+    it is exactly the kind of convention a later regeneration erases by accident.
+    """
+    import subprocess
+    import tempfile
+
+    from fishsense_imwut import pubfig
+
+    pubfig.use_publication_style()
+    fig = pubfig.fig_p90_vs_sample_size(
+        {n: pubfig  # a stand-in shaped like a RarefactionPoint
+         for n in ()} or _tiny_rarefaction())
+    with tempfile.TemporaryDirectory() as tmp:
+        written = pubfig.save_figure(fig, "fig16_p90_vs_sample_size", tmp)
+        pdf = next(p for p in written if p.suffix == ".pdf")
+        text = subprocess.run(["strings", str(pdf)], capture_output=True,
+                              text=True).stdout
+        assert "frames per fish" not in text, "the typeset PDF must stay untitled"
+
+    # and every committed figure has a title registered for its preview
+    figures = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "figures"
+    names = {p.stem for p in figures.glob("*.pdf")
+             if not p.stem.startswith(("full_", "tail_", "wide_"))}
+    missing = names - set(pubfig.FIGURE_TITLES)
+    assert not missing, f"no preview title registered for: {sorted(missing)}"
+
+
+def _tiny_rarefaction():
+    """Two sample sizes, enough to draw Figure 16 without touching the corpus."""
+    from fishsense_imwut.repeatability import RarefactionPoint
+
+    return {n: RarefactionPoint(n=n, rank=max(1, int(np.ceil(0.9 * n))),
+                                abs_p90=2.0 / n, within=0.9, median=0.0,
+                                lo=-1.0 / n, hi=1.0 / n)
+            for n in (4, 8, 12, 20)}
