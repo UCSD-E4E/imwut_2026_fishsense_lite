@@ -636,13 +636,16 @@ def test_where_clipping_survives_it_says_how_far():
     assert carets, "clipped frames must be visible at the boundary"
 
 
-def test_the_typeset_pdf_carries_no_title_but_the_preview_does():
-    """In `acmart` the caption is the title, so a title inside the figure
-    duplicates it and spends column height. But a PDF opened on its own has no
-    caption, and twenty of these are not distinguishable by their axes.
+def test_both_formats_carry_the_title_and_it_can_be_turned_off():
+    """A figure opened on its own has no caption, and twenty of these are not
+    distinguishable by their axes, so BOTH formats carry the title.
 
-    So the split: PNG titled for previewing, PDF clean for LaTeX. Pinned because
-    it is exactly the kind of convention a later regeneration erases by accident.
+    This was PNG-only at first, to avoid duplicating an `acmart` caption. That
+    argument covers the one place a figure is typeset and cost a title in every
+    other place these files are read, so it was reversed; `title_in_pdf=False`
+    is still there for a figure going straight into the paper. Pinned in both
+    directions because it is exactly the kind of convention a later regeneration
+    erases by accident.
     """
     import subprocess
     import tempfile
@@ -656,9 +659,19 @@ def test_the_typeset_pdf_carries_no_title_but_the_preview_does():
     with tempfile.TemporaryDirectory() as tmp:
         written = pubfig.save_figure(fig, "fig16_p90_vs_sample_size", tmp)
         pdf = next(p for p in written if p.suffix == ".pdf")
-        text = subprocess.run(["strings", str(pdf)], capture_output=True,
-                              text=True).stdout
-        assert "frames per fish" not in text, "the typeset PDF must stay untitled"
+        png = next(p for p in written if p.suffix == ".png")
+        # The title is drawn above the figure rectangle and `bbox="tight"` grows
+        # the canvas to include it, so a titled file is materially taller than
+        # an untitled one. Comparing heights is the check that works for both
+        # formats -- a vector PDF subsets its fonts, so the string is not in it.
+        titled = _figure_height_px(png)
+        assert titled > 0
+        bare = pubfig.save_figure(
+            pubfig.fig_p90_vs_sample_size(_tiny_rarefaction()),
+            "fig16_untitled", tmp, title_in_pdf=False)
+        assert _pdf_height_pt(pdf) > _pdf_height_pt(
+            next(p for p in bare if p.suffix == ".pdf")), \
+            "the PDF must carry its title; title_in_pdf=False must drop it"
 
     # and every committed figure has a title registered for its preview
     figures = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "figures"
@@ -676,3 +689,23 @@ def _tiny_rarefaction():
                                 abs_p90=2.0 / n, within=0.9, median=0.0,
                                 lo=-1.0 / n, hi=1.0 / n)
             for n in (4, 8, 12, 20)}
+
+
+def _pdf_height_pt(path) -> float:
+    """Height of a one-page PDF in points, from its MediaBox."""
+    import re
+
+    raw = path.read_bytes().decode("latin-1")
+    box = re.search(r"/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)",
+                    raw)
+    assert box, f"no MediaBox in {path}"
+    return float(box.group(4)) - float(box.group(2))
+
+
+def _figure_height_px(path) -> int:
+    """Height of a PNG in pixels, from its IHDR chunk."""
+    import struct
+
+    raw = path.read_bytes()
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n", f"not a PNG: {path}"
+    return struct.unpack(">I", raw[20:24])[0]

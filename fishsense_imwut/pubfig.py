@@ -694,19 +694,22 @@ def save_figure(
     synthetic: bool = False,
     formats: Sequence[str] = ("pdf", "png"),
     title: str | None = None,
-    title_in_pdf: bool = False,
+    title_in_pdf: bool = True,
 ) -> list[Path]:
     """Write a figure as vector PDF (for LaTeX) and PNG (for previewing).
 
-    **The PDF stays untitled and the PNG gets one.** In `acmart` the caption is
-    the title, so a title drawn inside the figure duplicates it and spends
-    vertical space a column-width panel cannot afford. But a PDF opened on its
-    own -- in a file browser, a review thread, an IDE tab -- has no caption at
-    all, and twenty of these are not distinguishable by their axes. So the
-    preview copy carries a title and the typeset copy does not.
+    **Both formats carry the title.** A figure opened on its own -- in a file
+    browser, a review thread, an IDE tab, a slide -- has no caption, and twenty
+    of these are not distinguishable by their axes.
 
-    `title` overrides the `FIGURE_TITLES` entry for `name`; `title_in_pdf=True`
-    puts it on both, for slides or a standalone report.
+    This was PNG-only at first, on the argument that `acmart` makes the caption
+    the title and a title inside the figure duplicates it. That argument holds
+    only for the one place a figure is typeset, and it cost the author a title
+    in every other place these files are read. So it is reversed, and the
+    duplication is dealt with where it occurs: pass `title_in_pdf=False` for a
+    figure going straight into the paper with a LaTeX caption, or leave the
+    caption to carry the number and the detail while the stamped title carries
+    the name. `title` overrides the `FIGURE_TITLES` entry for `name`.
 
     `synthetic=True` stamps the figure so a placeholder can never be mistaken
     for a result. Refuses to write an unstamped file from synthetic data.
