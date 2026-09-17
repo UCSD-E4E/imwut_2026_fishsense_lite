@@ -1864,14 +1864,6 @@ def fig_p90_vs_sample_size(
                 xytext=(-2, 2), textcoords="offset points", fontsize=6,
                 color=INK_SECONDARY, ha="right", va="bottom")
 
-    # The comparison a reader needs and the panel cannot hold: the sampling term
-    # is a few pp, the accuracy budget is 15 %, and drawing the latter would
-    # crush the former into a flat line. So it is stated at the scale it is.
-    ax.annotate("for scale: the \u00b115 % error budget\n"
-                f"spans {30.0 / (top - bottom):.0f}\u00d7 this panel",
-                xy=(ns.max(), bottom), xytext=(-2, 3), textcoords="offset points",
-                fontsize=6, color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
-
     if min_frames is not None:
         ax.axvline(min_frames, color=INK_MUTED, linewidth=1.0,
                    linestyle=(0, (4, 2)), zorder=3)

@@ -909,9 +909,9 @@ caught any of this in the field.
   $p_{90}$ is what removes the between-cell accuracy spread — those fifteen values run
   −5.8 % to +2.7 % — and it is why this band can converge at all; a measurement does not
   converge on truth, it converges on its own session's accuracy. This figure therefore
-  sizes the *sampling* term alone, and the note in the panel gives its scale: the ±15 %
-  budget is seven times the full height shown. Frame count is not what puts a measurement
-  outside the budget (§4.3 is). **Two statistics, at two levels.** Per fish the estimate is
+  sizes the *sampling* term alone, and that term is small against the accuracy it is
+  drawn beside: the whole panel is under ±2 %, a seventh of the ±15 % budget. Frame count
+  is not what puts a measurement outside the budget (§4.3 is). **Two statistics, at two levels.** Per fish the estimate is
   $p_{90}$, the paper's estimator throughout, because one fish's frames are a one-sided
   pose-corrupted distribution and a high quantile rejects that tail. Across draws and cells
   the summary is a **median** — the same choice §4.1 makes across animals — because sampling
