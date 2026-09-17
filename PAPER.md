@@ -4,7 +4,7 @@ Draft text for the FishCamera / FishSense Lite paper, written against the figure
 numbers in `fish_model_analysis/` as of **2026-09-16**, re-pulled after the calibration
 board's grid pitch was corrected 0.042 → 0.04217 m and all twelve checkerboard
 calibrations refitted. That moved the accuracy cohort from seventeen sessions to
-**nineteen** (503 and 504 entered), so §4.1, §4.2, §4.3's Table 1 and §4.6's pool
+**nineteen** (503 and 504 entered), so §4.2, §4.3, Table 1 and §4.1's field
 repeatability all carry different numbers than the 2026-09-12 draft did. The earlier
 export is kept as `data/corpus_20260912.csv`; two tests use it to hold the
 reference-independence claim, which the live export can no longer exercise on its own.
@@ -21,13 +21,200 @@ Part A is the section draft. Part B is the recommendation on the August repair f
 
 ### 4 RESULTS
 
-We evaluate FishCamera in two settings: controlled pool sessions against rigid targets of
-known length, which give an absolute accuracy figure and isolate the dominant error source
-(fish pose); and open-water deployments on wild fish, which show the system in the hands
-of the divers it is designed for. §4.1–§4.4 are the pool results, §4.5 the one
-simulated result they rest on, and §4.6 carries the existing field-deployment text.
+FishCamera was used by volunteer divers on seven open-water deployments and produced 162
+measurements of 73 wild fish. §4.1 reports what that yielded and how repeatable it was,
+because it is the result the system exists for. What those numbers are worth rests on the
+pool cohort: §4.2 gives the absolute accuracy against rigid targets of known length, §4.3
+the calibration stability that dominates it, §4.4 the fish pose that dominates what is
+left, and §4.5 the one simulated result — what the port's corrective optic prevents.
+Appendix A carries the rule that decides which pool sessions are accuracy evidence; it is
+a rule rather than a finding, and nothing in it reads a reference length.
 
-#### 4.1 Known-length targets
+#### 4.1 Field deployments
+
+*(The existing narrative text — Florida Keys deployments, the red/green laser comparison,
+Figures 5–6, the mount failures and the in-field recalibration procedure — goes here
+unchanged. What follows replaces the stereo-comparison paragraph, which the data does not
+support; see the note at the end of this subsection.)*
+
+**Repeatability transfers to the field with a measurable penalty.** Where a diver captured the
+same individual in three or more frames we can measure the system's repeatability directly, and
+this is the one field figure that needs nothing external: a calibration error is common to all
+frames of one fish and cancels in a relative spread, as does any error in the length
+convention, and no comparison population is involved. (The cancellation is exact for a pure
+scale error, which is why the two repaired calibrations barely moved it: 3.3 % before and 2.9 %
+after. It is only *barely* rather than not at all because a refit turns the laser axis as well
+as changing the baseline, so the correction factor varies a little with range instead of being
+exactly common to a fish's frames.) Over 25 such individuals — 97 of the 162 measurements — the
+within-fish coefficient of variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a
+$p_{90}$ of 11.4 %**. The identical statistic on the pool cohort — repeat frames of one target
+in one session, 30 cells — is **1.4 % (95 % CI 1.2–2.1 %), $p_{90}$ 3.2 %**. So a repeat
+measurement of a wild fish varies about 2.1× as much as a repeat measurement of a posed model,
+and its tail about 3.6× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
+against 1.2–2.0 %), so this is a difference in point estimate rather than a cleanly separated
+one; with 25 field individuals it is the sample size and not the effect that limits the claim.
+That penalty is what the field adds: the animal moves between frames, the water is turbid, and
+the snout and fork are harder to place. It is consistent with §4.4 — a few degrees of pose
+change between frames is worth a few percent of length — and it is the number a survey designer
+should use when deciding how many frames per fish to require.
+
+**Where the measurements came from, and why all seven deployments count.** Volunteer
+divers measured wild fish on seven deployments at one Florida reef, yielding 162
+measurements of 73 individuals on six camera units, across nine named species and one
+nontarget category. Two of the seven calibrations initially failed the conditioning
+criterion of §4.3 — one fitted from a single frame, the other from two dots 26 cm apart in
+range — and both were repaired rather than excluded. The frames they needed existed but had
+been removed by the per-dive outlier filter, which judged the calibration frames against a
+line its measurement frames dominate; reinstating them gives lever arms of 2.41 m and 1.30 m
+and baselines of 10.10 and 10.52 cm. Thirty of the fleet's thirty-one fitted baselines lie
+in 9.87–10.54 cm and both repairs land inside that band; the single exception is a pool
+session whose observations span 2.8 cm along the ray, which the conditioning criterion of
+§4.3 rejects without reference to its baseline at all. All seven deployments therefore carry
+calibrations that pass every check in §4.3 and Appendix A. Laser range spans
+0.46–3.90 m with a median
+of 1.49 m — closer than the pool median — and 90 % of the frames fall between 0.72 and
+3.16 m.
+
+**The species attributions are unverified, and the per-species comparison below inherits
+that.** A labeler names the animal from the frame, and nothing in the field data can check
+the name: the one detector we have for a mislabel compares the head-to-tail pixel separation
+a frame implies, $L f / z$, against what the named species' length would require — which
+found six mislabelled frames in the pool corpus, and needs a known length to run at all. No
+wild fish has one. So a species column here is a labeler's judgement, not a measurement, and
+a systematic confusion between two similarly-shaped species would appear as a per-species
+offset we would have no way to distinguish from a measurement bias. Only the repeatability
+above is immune, because it is computed within one individual whatever that individual is.
+
+**What this sample cannot do is measure field accuracy**, and we state the limit rather than
+work around it. No known-length reference was in the water on these dives, so the scale-free
+range check of Appendix A cannot be applied to them: it needs one rigid object
+measured repeatedly
+across a wide range spread, and the best-spanned wild individual in the set covers only
+1.9× — 1.6× among those with the three frames the repeatability needs, and 1.04× for the one
+fish with eight. The per-unit sample is 4 to 18 fish, and with the 18 % between-fish size
+spread observed among hogfish the standard error on a unit's median length is 7 % at ten
+fish and 13 % at three — larger than any bias worth detecting. A one-way variance-components
+fit on 33 hogfish finds **no detectable unit effect** ($F = 1.03$ across the six camera
+units, $p = 0.42$; $F = 1.55$, $p = 0.20$ if the seven deployments are taken separately),
+with a point estimate of 1.5 % between cameras against 18 % between fish. What it cannot do
+is bound that tightly: a nonparametric bootstrap over individuals puts the 95 % upper limit
+at 13 % between cameras and 16 % between deployments, and the $F$-based interval is
+degenerate at these sample sizes. A unit-to-unit bias of order the fish spread itself is
+therefore not excluded, which is a statement about the sample and not about the instrument.
+
+**Two independent comparisons against a stereo-video archive are available, and
+they agree with each other: neither detects a systematic offset, and neither can
+rule one out.** Our collaborators measured the same species at the same reef in
+the same seasons with a calibrated stereo rig — 1,120 lengths over ten sites, to
+the same fork-length convention — and on one day they measured the *same
+individual animals* we did. The two comparisons differ in design by a lot, so we
+give both and let the weaker one be superseded rather than dropped.
+
+**The population comparison cannot carry a conclusion, and the reason is
+instructive.** Each animal reduces to one length at $p_{90}$ as above, and the
+species is then summarised by the median across animals — a population statistic,
+where $p_{90}$ would name the ninetieth-percentile *fish* rather than a
+measurement. On that footing our species medians differ from theirs by −21 % to
++12 %, with bootstrap intervals spanning zero for three of the five species that
+have enough of our fish to compare. But split by camera unit, the same species at the same
+reef scatters by as much between our own units as it does against the stereo, and
+that scatter is not distinguishable from sampling 2–10 fish at a per-fish spread
+of 19 %. Two further cautions belong with it. The two systems' spreads are the
+same — between-fish CV 19.1 % against 19.1 % on the best-sampled species — so no
+claim of a narrower distribution is supported. And the stereo's quoted precision is a
+propagated click-error (1.0 % of length) rather than a measured repeatability, with
+essentially one measurement per individual in the archive, so it is not
+comparable to the 2.9 % above.
+
+**The paired comparison is the better design, and it is what the archive
+unexpectedly permits.** On 2023-08-03 at two sites, each of our dive folders
+holds one fish and the archive numbers the same fish the same way — both sides'
+hogfish numbering at one site runs 1–12 and both skip 10, so it is a shared
+registry rather than two independent counts. Seven individuals were measured by
+both instruments. This is a separate day from the seven deployments above and is
+not part of the 162 measurements; its lengths rest on a calibration fitted from
+that morning's slate burst (10.55 cm, inside the 9.87–10.54 cm band 30 of the
+fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time a
+borrowed calibration has produced field lengths checked against anything
+external.
+
+**The comparison is reported at $p_{90}$, the estimator used everywhere else in
+this paper**, and the reason it is not a median is visible in this data. Because
+head and tail are back-projected at a single laser-derived depth, an out-of-plane
+fish can only read *short* — on these frames the measured length is 0.9972–0.9997
+of the flat in-plane span its clicked pixels subtend at that range, never above
+1.0. A median over frames therefore inherits however much the pose varied, and a
+high-order statistic rejects it; that is the same argument §4.2 makes against a
+mean. Over the seven pairs $p_{90}$ gives a difference of **+3.5 %** (mean
++0.8 %, sd 10.1 %, Figure 15), and **four of the seven read longer than the
+stereo, by 3.5 to 11.2 %**, which our own foreshortening cannot account for in
+either direction. The estimator does not manufacture that result: the same four
+individuals exceed the stereo under any summary that is not the median, and the
+median itself would report −3.7 % — a small negative bias that is an artefact of
+summarising a one-sided error at its centre.
+
+One property of nearest rank has to be stated here rather than left for a reader
+to find. $p_{90}$ is the $\lceil 0.9n \rceil$-th of $n$ frames, which is $n$
+itself for every $n \le 10$, and these fish carry 3 to 11 frames each. For five
+of the seven, $p_{90}$ is therefore that animal's longest frame, and only the two
+best-sampled separate the two at all. It is a high-order statistic on this day,
+not a tail estimate. The same is true throughout §4.1: no wild animal here has
+more than eight frames, so every field $p_{90}$ is a longest frame. This is
+intended rather than tolerated — with a one-sided error the longest frame is the
+one least corrupted by pose — but it is why the field figures should not be read
+as carrying the same estimator precision the pool figures do, where a cell holds
+26 frames at the median.
+
+**What the paired day excludes, and what it cannot.** The disagreement is not a
+calibration error, and the reason is the fitted baseline rather than the range
+trend. All seven fish resolve through a single slate calibration shot the same
+morning at 08:58, between 26 minutes and 1 h 42 before the fish themselves — the
+point-of-use practice §4.3 recommends, not a borrow. Its baseline is 10.55 cm,
+within the 9.87–10.55 cm every other sound fit in the fleet returns, and
+reproducing a $+8.6\,\%$ offset by scale alone would need 11.5 cm. The scale-free
+range check of Appendix A applied to the best-sampled fish (11 frames over a 1.55× range
+spread) is flat at $+0.8\,\%$ per metre ($r=0.03$), which excludes an in-plane
+angle error but not a scale error — a wrong baseline is flat with range, so it is
+the baseline's value, not the trend, that rules that out. It is not the
+projection, which is self-consistent to a fraction of a percent above. And it is
+not a landmark convention: the two individuals of one species on this day disagree
+in *opposite* directions, and their tail landmarks sit at the fork on the one
+reading long and at the fin tip on the one reading short — the reverse of what a
+systematic over-reach would produce. What remains is a residual we cannot
+attribute: either we read long on four of seven fish, or the stereo reads short,
+or the pairing is wrong on those individuals, and with seven pairs and no third
+instrument those are not separable. The mean difference spans zero — −6.7 % to
++8.3 % at 95 % — as it does in the population comparison.
+
+**The two comparisons disagree about the sign of our bias, and that is worth
+stating numerically because it bounds what any correction could do.** Over the
+four species with enough of our animals, our medians sit **−15.4 %** against the
+archive; over the seven paired individuals we read **+3.5 %** long. A candidate
+range correction fitted on the pool cohort — the pool's own near-field trend,
+$-0.56 - 2.40/z$ per cent, which flattens that trend from a 1.40 pp spread of
+binned medians to 0.50 — adds between 1.2 % and 6.2 % at field ranges, median
+2.2 %. Applied to our side it moves the population comparison from a median
+absolute offset of 15.4 % to 14.4 %, and the paired comparison from 8.6 % to
+10.9 %: it helps the one that says we read short and hurts the one that says we
+read long, because it only ever adds length. Two things follow. The correction is
+**a tenth of the disagreement it would have to explain**, so neither result
+licenses it and it is not applied. And a population comparison that a
+same-individual comparison contradicts by nineteen points is not a weak
+measurement of a bias, it is a measurement of something else — which is the
+caution the preceding paragraphs give, here with a number on it.
+
+**So the two comparisons reach the same place from opposite ends, and neither
+changes the conclusion of the preceding paragraphs.** The population comparison
+is limited by between-unit scatter on 2–10 fish per unit; the paired comparison
+is limited by seven individuals at $\pm 8$ points. Field accuracy remains
+unmeasured. What the paired day supports is narrower and worth stating exactly:
+on one day, seven wild fish measured by two independent instruments agreed to
+within about 10 % per individual with no detectable systematic offset. It is also
+a template — the same-individual design, and a slate burst shot at two clearly
+different standoffs, is what would make a future deployment answer the question
+this corpus cannot.
+
+#### 4.2 Accuracy against known lengths
 
 Five rigid targets were measured: four painted fish models — a purple angelfish (192 mm), a
 stylised rainbow trout (313 mm), a grouper (360 mm) and a snook (455 mm) — and a 150 mm box.
@@ -48,7 +235,7 @@ tool, and one that has to be kept flat, dry and undamaged. The remaining twelve 
 August) used the duct-tape dive slate of §3.3, photographed in a companion session. We
 moved *away* from the checkerboard deliberately: a slate is something a volunteer diver
 already carries and can photograph in situ, and a system meant to be operated by citizen
-scientists cannot depend on a printed board surviving a dive bag. §4.2 reports what that
+scientists cannot depend on a printed board surviving a dive bag. §4.3 reports what that
 substitution costs.
 
 Spreading the corpus over many sessions, sites and weather is only useful if no single
@@ -66,194 +253,6 @@ fail the checks below are likewise spread across five of the seven units rather 
 concentrated on one, which is what a bad unit, as opposed to a bad session, would look
 like.
 
-Not every session is accuracy evidence, and we do not choose which are by hand. A per-frame
-error has two additive components: a per-*session* term, which is the calibration offset
-and moves every target in that session together; and a per-*target* term, which is a
-reference or landmark offset and follows the target across sessions. We separate them with
-a Tukey median polish on the $p_{90}$ percent error of each (session, target) cell with at
-least five frames [Tukey 1977]. Fifty-two cells are observed over 30 sessions and 7 targets,
-and the additive fit accounts for them closely: the median absolute residual is 0.15
-percentage points, and 0.45 points over the ten sessions that carry more than one target and
-so can exhibit a residual at all. One caveat follows from which targets went in the water
-where: the checkerboard sessions photographed the box and the trout, and the slate sessions
-the fish models, with no target in common, so the session and target terms are anchored
-separately within each group and the polish's centring is what places the two groups on a
-single scale.
-A reference error common to one group's targets would therefore shift that group's session
-offsets bodily against the other's; within a group it could not.
-
-A session is accuracy evidence unless something about *how it was produced* disqualifies
-it. There is deliberately no threshold on how large its error came out: a rule that drops
-sessions for disagreeing with the references, and then reports the survivors' agreement
-with the references, selects on its own outcome. Two things disqualify a session, and
-neither looks at the size of its error. The five angle-experiment sessions of §4.4 are set
-aside because they are a different experiment — one target driven through 0–45° on
-purpose, reported there rather than here. And a scale-free check that uses no reference
-length: a rigid target must read the same length at every range, so a session whose
-targets show a length trend with range — the Theil–Sen slope over frames beyond 0.8 m,
-with its 95 % interval clear of ±2 % per metre — has a calibration error in the in-plane
-laser angle that no reprojection test can see (§3.3), and is excluded. That check removes
-five sessions. Three of the five carry a single target and the reference lengths
-independently grade every one of them as wrong; the remaining two are rejected on one
-target while a second target in the same session shows no trend, and one of those two is
-already held out as an August repair, so little in the reported figures turns on them. One
-further session is held out on the same scale-free evidence, where the automatic threshold
-narrowly misses it: two of its targets show consistent trends of −2.2 and −2.3 % per
-metre, implying −0.13°, but each interval reaches −1.2 and so fails the requirement that
-the whole interval clear ±2 %. It is named rather than loosening the threshold until it is
-caught, which would be the same error in another costume. Of the thirty sessions with a
-polish cell, that leaves 19 admitted and 995 measurements; fourteen are
-checkerboard-calibrated and five slate-calibrated. Nothing is excluded for reading far
-from a reference.
-
-The check has also now caught something the known lengths could not, which is the
-strongest argument for keeping it. Two sessions used to be rejected for a trend of about
-+5 % per metre while their median error looked unremarkable, the signature of a short
-fitted baseline paired with a compensating angle that cancel at mid-range. Re-measuring
-the calibration board's grid pitch and refitting moved their shared calibration from
-8.90 to 10.39 cm, their trends fell to +0.6 and +0.8 % per metre, and they entered the
-cohort. A check that spends no known length agreed with a tape measurement — and it did so
-on sessions whose medians had given no warning.
-
-Of the three parameters this leaves, two are not delicate: neither the 0.8 m floor
-(0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions are rejected. The
-trend bound does. Widening it from 2 to 4 % per metre admits three more sessions, 19 to
-22, and readers should take the stability claim to be about the reported statistic rather
-than about cohort membership: $p_{90}$ holds between +0.36 % and +0.15 % across that
-range, while the median drifts from −2.06 % to −2.89 %.
-
-#### 4.2 Calibration stability
-
-Two questions sit under every number in §4.1, and they have opposite answers. Is the
-object the calibration is fitted *from* sound? That is checkable, and it checks out. Is
-the parameter it fits stable between uses? It is not, and by more than the accuracy we
-report.
-
-Replacing the checkerboard with a dive slate is only defensible if the substitute carries
-the same scale, and that is checkable without reference to any fish. The pipeline's metric
-scale does not come from the targets: it comes from the calibration object, and a wrong one
-would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
-The laser baseline, though, is a property of the rig rather than the dive, so any unit
-calibrated both ways must report the same baseline either way. Over the six units carrying
-both in the pool corpus (19 calibration *fits* — 11 checkerboard, 8 slate — which is a
-different 19 from the session count, and coincidental) the mean
-checkerboard-minus-slate difference is **+0.66 % of baseline (95 % CI −0.23 % to +1.69 %)**,
-an interval that spans zero and is of the same order as the scatter between two
-calibrations of one unit under one standard (sd 0.135 cm). One unit dominates the spread:
-its slate side includes the fleet's shortest fit at 9.87 cm, which alone carries that unit
-to +2.9 %.
-
-The sign of that figure changed with the grid-pitch correction and is worth recording,
-because it is the substitution's cost being measured rather than asserted. Before the
-correction the checkerboard read **−0.27 %** against the slate; refitting the twelve
-checkerboard calibrations at the tape-measured pitch moved them up by +0.39 % to +0.79 %
-each, and the comparison crossed zero. The two objects agreed within the scatter before and
-agree within it now, on either side of it — which is the claim, and it did not depend on
-which side the central value happened to fall.
-
-The session calibration offsets, which are reproducible from the committed export, agree
-to about half a point: a median **+1.35 pp** over the fourteen checkerboard
-sessions of the cohort against **+0.77 pp** over the five slate sessions. The deployable
-object therefore reproduces the standard one to about a percent, which is what licenses
-the substitution, and it places the dominant uncertainty in §4.3's accuracy figures on the
-target lengths rather than on the calibration.
-
-Two limits belong with that. Only five of the nineteen cohort sessions are
-slate-calibrated, so the deployable path carries the smaller share of the accuracy
-evidence and its offset spread (sd 2.10 pp against the checkerboard's 1.81) rests on five
-points. And neither check can see an error common to both objects, or one in the camera
-intrinsics, which rescale the calibration object and the laser together. We do not compare
-the two groups' raw errors, because they photographed disjoint target sets (§4.1) and any
-difference would be the targets rather than the calibration.
-
-A sound calibration object is not a sound calibration, and §4.1 excludes all six of its
-calibration-rejected sessions on the state of a single parameter. It is worth saying plainly why
-that parameter needs watching. The laser's in-plane pointing angle sets metric scale and
-is invisible to any reprojection check (§3.3): rotating the axis within the camera–laser
-plane moves the projected dot by less than $10^{-12}$ px, so a calibration can be wrong by
-an amount no fit residual can reveal. Figure 4 plots that angle, fitted per session, for
-seven sessions of one unit.
-
-It is also not stable. Across those seven sessions the angle spans 0.27°, against a
-sensitivity of $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m — so the
-between-session spread alone exceeds the accuracy we report below. The whole corpus spans
-seventeen days, so this is drift within a fortnight of ordinary handling rather than
-ageing over years. Nor is a session a safe
-unit. In one session two calibrations of the same rig, taken seven minutes apart, differ by
-0.82°; the target frames shot between them agree with the earlier one, while frames from
-25 minutes before agree with neither, placing the mount in a third state.
-
-One field deployment shows the same thing without needing a second calibration to compare
-against, and it is the cleanest instance we have. The dive holds two bursts of calibration
-frames, 52 minutes apart, and 71 laser dots on its measurement frames. Those 71 define a
-line to 0.64 px; the first burst's dots sit 42.6–46.2 px off that line and the second's sit
-66.5–72.9 px, each burst internally tight. Three distinguishable laser states in one dive,
-measured against the dive's own frames rather than against another fit — and the dots are
-correctly placed, which we verified by inspecting the frames at the pixel level after the
-offsets first suggested mislabelling. A calibration is valid for the frames it was taken
-with and not reliably beyond them, and in this dive no calibration is valid for the frames
-that would be measured: it yields no lengths at all.
-
-Three consequences follow, and they shape the rest of the paper. The pipeline re-fits the
-laser per dive rather than trusting a stored calibration. A per-session validation target
-remains good practice, because the failure is silent — this is what the range check of §4.1
-supplies, and it needs no reference length. And calibration state is the dominant reason a
-session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 6
-fail a calibration criterion in §4.1 — five flagged by the scale-free range check, and
-one more held out on the same evidence. An instrument whose scale parameter drifts by more
-than its own measurement error between uses is one that must be calibrated, and validated,
-at the point of use.
-
-A second failure mode of the same parameter is that a session's own fit can fail to
-determine it. What fixes the laser's direction is the spread of the calibration
-observations *along* the ray — the lever arm — against the noise in locating the dot, not
-their number: one pixel of dot-label noise at range $z$ is $z/f$ metres of lateral error,
-so it rotates the fitted axis by about $(z/f)/\ell$ radians for a lever $\ell$. Two
-observations a metre apart therefore determine the axis far better than sixteen at one
-distance, and a burst shot at a single distance does not determine it at all.
-
-The consequence is not a large error everywhere. It is a fit that is accurate where it was
-taken and wrong away from it, which makes it invisible to a validation performed at the
-working distance. The calibration frames themselves supply the check: the target's pose
-gives a per-frame distance that does not involve the laser at all, so laser-triangulated
-range can be compared against it frame by frame. For one session of 16 observations
-spanning 0.03 m of range, the stored calibration reproduces its own working distance to
-$-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and $n=15$ frames);
-its fitted baseline, 12.95 cm, is the widest in the fleet by a wide margin — the other
-thirty fits lie within 9.87–10.54 cm.
-
-Three checks miss it, and the pattern in how they miss is the point. The known-length
-targets in that session all sit within 0.1 m of its calibration distance and read
-$-2.4\,\%$ at $0°$ ($n=15$) — ordinary. Reprojection residual cannot see it, for the
-reason given above. And leave-one-out cross-validation over the calibration observations
-reports 0.56 % median error on the held-out frame, *better* than the eleven sound sessions
-(0.52–1.48 %), because a frame held out of a single-distance burst is predicted at the
-distance the remaining frames already anchor. Every check evaluated where the data already
-lies is blind to conditioning; only the geometry of the observations, or an evaluation at a
-different distance, reveals it.
-
-The pipeline therefore refuses to store a calibration whose observations span less than
-0.6 m of range, so such a session cannot reach the accuracy analysis at all. The bound
-needs no threshold search and no reference length — it is a statement about the geometry of
-the observations, not about any measured error, so it applies before a validation target
-exists — and it separates the sessions we can check cleanly: of the eleven whose stored
-observations we can recover, the sound ones span 1.02–2.32 m against 0.03 and 0.07 m for
-the two refused. That caveat is real and worth stating: the slate path stores the
-per-frame observations it fitted, while the checkerboard path does not, so for
-checkerboard-calibrated sessions the lever arm is verifiable only going forward, as a gate
-at the moment of fitting, and not retrospectively.
-
-Where two bursts of one mount state exist at different distances, the remedy is to fit
-them jointly. Combining the session above with a burst 5.5 h later at 4.2 m gives a 2.25 m
-lever and a 10.87 cm baseline that reproduces both distances to $-0.22\,\%$ and
-$-1.10\,\%$, with held-out medians of $-0.23\,\%$ and $-1.19\,\%$; neither burst alone
-predicts the other's distance (to $-17.25\,\%$ and $-127.6\,\%$). That the two agree is
-also the one direct piece of evidence here that a mount can hold for hours — the failure
-documented above is not that it always moves, but that nothing in the data tells you
-whether it did without a check at a second distance.
-
-#### 4.3 Accuracy
-
 Figure 1 plots measured against known length for every cohort frame; Figure 2 gives the
 per-target error distribution; Table 1 summarises. We report the $p_{90}$ of a target's
 frames rather than a mean, and the reason is physical: the pipeline back-projects snout and
@@ -265,14 +264,14 @@ $p_{90}$ is nearest-rank ($\lceil 0.9n \rceil$), the same statistic the deployed
 reports.
 
 **This is the paper's only estimator**, used wherever a set of frames becomes one length:
-the pool targets here, and in §4.6 each wild animal, in Figures 13, 14 and 15 alike. One
+the pool targets here, and in §4.1 each wild animal, in Figures 13, 14 and 15 alike. One
 consequence of nearest rank is worth stating once, because the two settings differ. A pool
 cell holds 26 frames at the median, where $\lceil 0.9n \rceil$ is a genuine high quantile;
 a wild animal here holds at most eight, and $\lceil 0.9n \rceil$ is $n$ for every
 $n \le 10$, so **every field $p_{90}$ is that animal's longest frame**. With a one-sided
 error that is the intended reading — the longest frame is the one least corrupted by
 pose — but the field estimates should not be credited with the precision the pool
-estimates carry. Where a *population* is summarised rather than a measurement, §4.6 takes
+estimates carry. Where a *population* is summarised rather than a measurement, §4.1 takes
 the median across animals: a $p_{90}$ there would name the ninetieth-percentile fish,
 which is a different quantity.
 
@@ -315,7 +314,7 @@ claim is stated at $p_{90}$ and the pose claim is made in §4.4, where the angle
 off a card in frame.
 
 The rule has no free parameter fitted to an outcome, which is the point of stating it that
-way. Its one threshold sits in the scale-free range check, and §4.1 reports what moves
+way. Its one threshold sits in the scale-free range check, and Appendix A reports what moves
 with it: three sessions enter as the bound widens from 2 to 4 % per metre, while the
 reported $p_{90}$ holds within 0.2 points. A stronger property follows from having no
 error-magnitude criterion at all: the cohort does not depend on the reference lengths.
@@ -378,6 +377,138 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
 \end{table}
 ```
 
+#### 4.3 Calibration stability
+
+Two questions sit under every number in §4.2, and they have opposite answers. Is the
+object the calibration is fitted *from* sound? That is checkable, and it checks out. Is
+the parameter it fits stable between uses? It is not, and by more than the accuracy we
+report.
+
+Replacing the checkerboard with a dive slate is only defensible if the substitute carries
+the same scale, and that is checkable without reference to any fish. The pipeline's metric
+scale does not come from the targets: it comes from the calibration object, and a wrong one
+would rescale every length invisibly, since reprojection residual cannot see scale (§3.3).
+The laser baseline, though, is a property of the rig rather than the dive, so any unit
+calibrated both ways must report the same baseline either way. Over the six units carrying
+both in the pool corpus (19 calibration *fits* — 11 checkerboard, 8 slate — which is a
+different 19 from the session count, and coincidental) the mean
+checkerboard-minus-slate difference is **+0.66 % of baseline (95 % CI −0.23 % to +1.69 %)**,
+an interval that spans zero and is of the same order as the scatter between two
+calibrations of one unit under one standard (sd 0.135 cm). One unit dominates the spread:
+its slate side includes the fleet's shortest fit at 9.87 cm, which alone carries that unit
+to +2.9 %.
+
+The sign of that figure changed with the grid-pitch correction and is worth recording,
+because it is the substitution's cost being measured rather than asserted. Before the
+correction the checkerboard read **−0.27 %** against the slate; refitting the twelve
+checkerboard calibrations at the tape-measured pitch moved them up by +0.39 % to +0.79 %
+each, and the comparison crossed zero. The two objects agreed within the scatter before and
+agree within it now, on either side of it — which is the claim, and it did not depend on
+which side the central value happened to fall.
+
+The session calibration offsets, which are reproducible from the committed export, agree
+to about half a point: a median **+1.35 pp** over the fourteen checkerboard
+sessions of the cohort against **+0.77 pp** over the five slate sessions. The deployable
+object therefore reproduces the standard one to about a percent, which is what licenses
+the substitution, and it places the dominant uncertainty in §4.2's accuracy figures on the
+target lengths rather than on the calibration.
+
+Two limits belong with that. Only five of the nineteen cohort sessions are
+slate-calibrated, so the deployable path carries the smaller share of the accuracy
+evidence and its offset spread (sd 2.10 pp against the checkerboard's 1.81) rests on five
+points. And neither check can see an error common to both objects, or one in the camera
+intrinsics, which rescale the calibration object and the laser together. We do not compare
+the two groups' raw errors, because they photographed disjoint target sets (§4.2) and any
+difference would be the targets rather than the calibration.
+
+A sound calibration object is not a sound calibration, and Appendix A excludes all six
+of its
+calibration-rejected sessions on the state of a single parameter. It is worth saying plainly why
+that parameter needs watching. The laser's in-plane pointing angle sets metric scale and
+is invisible to any reprojection check (§3.3): rotating the axis within the camera–laser
+plane moves the projected dot by less than $10^{-12}$ px, so a calibration can be wrong by
+an amount no fit residual can reveal. Figure 4 plots that angle, fitted per session, for
+seven sessions of one unit.
+
+It is also not stable. Across those seven sessions the angle spans 0.27°, against a
+sensitivity of $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m — so the
+between-session spread alone exceeds the accuracy we report below. The whole corpus spans
+seventeen days, so this is drift within a fortnight of ordinary handling rather than
+ageing over years. Nor is a session a safe
+unit. In one session two calibrations of the same rig, taken seven minutes apart, differ by
+0.82°; the target frames shot between them agree with the earlier one, while frames from
+25 minutes before agree with neither, placing the mount in a third state.
+
+One field deployment shows the same thing without needing a second calibration to compare
+against, and it is the cleanest instance we have. The dive holds two bursts of calibration
+frames, 52 minutes apart, and 71 laser dots on its measurement frames. Those 71 define a
+line to 0.64 px; the first burst's dots sit 42.6–46.2 px off that line and the second's sit
+66.5–72.9 px, each burst internally tight. Three distinguishable laser states in one dive,
+measured against the dive's own frames rather than against another fit — and the dots are
+correctly placed, which we verified by inspecting the frames at the pixel level after the
+offsets first suggested mislabelling. A calibration is valid for the frames it was taken
+with and not reliably beyond them, and in this dive no calibration is valid for the frames
+that would be measured: it yields no lengths at all.
+
+Three consequences follow, and they shape the rest of the paper. The pipeline re-fits the
+laser per dive rather than trusting a stored calibration. A per-session validation target
+remains good practice, because the failure is silent — this is what the range check of
+Appendix A
+supplies, and it needs no reference length. And calibration state is the dominant reason a
+session is not accuracy evidence: of the 30 sessions here with enough frames to judge, 6
+fail a calibration criterion in Appendix A — five flagged by the scale-free range check, and
+one more held out on the same evidence. An instrument whose scale parameter drifts by more
+than its own measurement error between uses is one that must be calibrated, and validated,
+at the point of use.
+
+A second failure mode of the same parameter is that a session's own fit can fail to
+determine it. What fixes the laser's direction is the spread of the calibration
+observations *along* the ray — the lever arm — against the noise in locating the dot, not
+their number: one pixel of dot-label noise at range $z$ is $z/f$ metres of lateral error,
+so it rotates the fitted axis by about $(z/f)/\ell$ radians for a lever $\ell$. Two
+observations a metre apart therefore determine the axis far better than sixteen at one
+distance, and a burst shot at a single distance does not determine it at all.
+
+The consequence is not a large error everywhere. It is a fit that is accurate where it was
+taken and wrong away from it, which makes it invisible to a validation performed at the
+working distance. The calibration frames themselves supply the check: the target's pose
+gives a per-frame distance that does not involve the laser at all, so laser-triangulated
+range can be compared against it frame by frame. For one session of 16 observations
+spanning 0.03 m of range, the stored calibration reproduces its own working distance to
+$-0.12\,\%$ and a distance 2.2 m further out to $-17.25\,\%$ ($n=16$ and $n=15$ frames);
+its fitted baseline, 12.95 cm, is the widest in the fleet by a wide margin — the other
+thirty fits lie within 9.87–10.54 cm.
+
+Three checks miss it, and the pattern in how they miss is the point. The known-length
+targets in that session all sit within 0.1 m of its calibration distance and read
+$-2.4\,\%$ at $0°$ ($n=15$) — ordinary. Reprojection residual cannot see it, for the
+reason given above. And leave-one-out cross-validation over the calibration observations
+reports 0.56 % median error on the held-out frame, *better* than the eleven sound sessions
+(0.52–1.48 %), because a frame held out of a single-distance burst is predicted at the
+distance the remaining frames already anchor. Every check evaluated where the data already
+lies is blind to conditioning; only the geometry of the observations, or an evaluation at a
+different distance, reveals it.
+
+The pipeline therefore refuses to store a calibration whose observations span less than
+0.6 m of range, so such a session cannot reach the accuracy analysis at all. The bound
+needs no threshold search and no reference length — it is a statement about the geometry of
+the observations, not about any measured error, so it applies before a validation target
+exists — and it separates the sessions we can check cleanly: of the eleven whose stored
+observations we can recover, the sound ones span 1.02–2.32 m against 0.03 and 0.07 m for
+the two refused. That caveat is real and worth stating: the slate path stores the
+per-frame observations it fitted, while the checkerboard path does not, so for
+checkerboard-calibrated sessions the lever arm is verifiable only going forward, as a gate
+at the moment of fitting, and not retrospectively.
+
+Where two bursts of one mount state exist at different distances, the remedy is to fit
+them jointly. Combining the session above with a burst 5.5 h later at 4.2 m gives a 2.25 m
+lever and a 10.87 cm baseline that reproduces both distances to $-0.22\,\%$ and
+$-1.10\,\%$, with held-out medians of $-0.23\,\%$ and $-1.19\,\%$; neither burst alone
+predicts the other's distance (to $-17.25\,\%$ and $-127.6\,\%$). That the two agree is
+also the one direct piece of evidence here that a mount can hold for hours — the failure
+documented above is not that it always moves, but that nothing in the data tells you
+whether it did without a check at a second distance.
+
 #### 4.4 Fish pose
 
 The single-depth back-projection is the system's principal approximation, and its cost is
@@ -400,7 +531,7 @@ holding a rigid model against a protractor card, and no such condition exists on
 animal: a diver can choose *when* to release the shutter, which is what the guidance below
 asks, but cannot ask the fish to hold a pose. It is also one target in five sessions,
 carrying their calibrations with it. Treat it as a floor — what remains when pose is
-removed entirely — and §4.3's cohort, with the pose real divers achieved, as the
+removed entirely — and §4.2's cohort, with the pose real divers achieved, as the
 expectation. And the guidance that follows is stated with margin rather than at the
 boundary, and is about shutter timing rather than about arranging the animal: **release
 the shutter when the fish is within 15° of broadside.** Over the 542 frames inside that
@@ -446,11 +577,11 @@ that length no longer fits in frame.
 
 The shape is what makes it dangerous, more than the size. It is exactly zero where a
 careful person would check it, so centring the target on a known length is the one test
-that cannot detect it. It is not a scale error, so no calibration of the kind §4.2 reports
+that cannot detect it. It is not a scale error, so no calibration of the kind §4.3 reports
 can absorb it — a single multiplier cannot be right at the centre and at the edge at once.
 And it is a function of where the fish happened to fall in the frame, which is not
 recorded, is not under the diver's control, and has no reason to be balanced within a
-session, so it would not average away: it would enter §4.1's per-session spread as an
+session, so it would not average away: it would enter §4.2's per-session spread as an
 uncontrolled term larger at the frame edge than the $-13.4\,\%$ a 30° pose costs, and
 without any of the visual cues a posed fish gives the labeler.
 
@@ -493,188 +624,69 @@ demonstrate it: an error the port correction has already removed leaves no trace
 photographs. That is the reason the figure is simulated, and the reason it is one figure
 rather than a section.
 
-#### 4.6 Field deployments
+#### Appendix A — how the accuracy cohort is selected
 
-*(The existing narrative text — Florida Keys deployments, the red/green laser comparison,
-Figures 5–6, the mount failures and the in-field recalibration procedure — goes here
-unchanged. What follows replaces the stereo-comparison paragraph, which the data does not
-support; see the note at the end of this subsection.)*
+*(Moved out of the results proper. This is the rule rather than a finding, and a reader
+after the headline numbers should not have to pass through it to reach them. §4.2's
+cohort is whatever this rule returns, and nothing in it reads a reference length.)*
 
-Volunteer divers measured wild fish on seven deployments at one Florida reef, yielding 162
-measurements of 73 individuals on six camera units, across nine named species and one
-nontarget category. Two of the seven calibrations initially failed the conditioning
-criterion of §4.2 — one fitted from a single frame, the other from two dots 26 cm apart in
-range — and both were repaired rather than excluded. The frames they needed existed but had
-been removed by the per-dive outlier filter, which judged the calibration frames against a
-line its measurement frames dominate; reinstating them gives lever arms of 2.41 m and 1.30 m
-and baselines of 10.10 and 10.52 cm. Thirty of the fleet's thirty-one fitted baselines lie
-in 9.87–10.54 cm and both repairs land inside that band; the single exception is a pool
-session whose observations span 2.8 cm along the ray, which the conditioning criterion of
-§4.2 rejects without reference to its baseline at all. All seven deployments therefore carry
-calibrations that pass every check in §4.1–4.2. Laser range spans 0.46–3.90 m with a median
-of 1.49 m — closer than the pool median — and 90 % of the frames fall between 0.72 and
-3.16 m.
+Not every session is accuracy evidence, and we do not choose which are by hand. A per-frame
+error has two additive components: a per-*session* term, which is the calibration offset
+and moves every target in that session together; and a per-*target* term, which is a
+reference or landmark offset and follows the target across sessions. We separate them with
+a Tukey median polish on the $p_{90}$ percent error of each (session, target) cell with at
+least five frames [Tukey 1977]. Fifty-two cells are observed over 30 sessions and 7 targets,
+and the additive fit accounts for them closely: the median absolute residual is 0.15
+percentage points, and 0.45 points over the ten sessions that carry more than one target and
+so can exhibit a residual at all. One caveat follows from which targets went in the water
+where: the checkerboard sessions photographed the box and the trout, and the slate sessions
+the fish models, with no target in common, so the session and target terms are anchored
+separately within each group and the polish's centring is what places the two groups on a
+single scale.
+A reference error common to one group's targets would therefore shift that group's session
+offsets bodily against the other's; within a group it could not.
 
-**Repeatability transfers to the field with a measurable penalty.** Where a diver captured the
-same individual in three or more frames we can measure the system's repeatability directly, and
-this is the one field figure that needs nothing external: a calibration error is common to all
-frames of one fish and cancels in a relative spread, as does any error in the length
-convention, and no comparison population is involved. (The cancellation is exact for a pure
-scale error, which is why the two repaired calibrations barely moved it: 3.3 % before and 2.9 %
-after. It is only *barely* rather than not at all because a refit turns the laser axis as well
-as changing the baseline, so the correction factor varies a little with range instead of being
-exactly common to a fish's frames.) Over 25 such individuals — 97 of the 162 measurements — the
-within-fish coefficient of variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a
-$p_{90}$ of 11.4 %**. The identical statistic on the pool cohort — repeat frames of one target
-in one session, 30 cells — is **1.4 % (95 % CI 1.2–2.1 %), $p_{90}$ 3.2 %**. So a repeat
-measurement of a wild fish varies about 2.1× as much as a repeat measurement of a posed model,
-and its tail about 3.6× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
-against 1.2–2.0 %), so this is a difference in point estimate rather than a cleanly separated
-one; with 25 field individuals it is the sample size and not the effect that limits the claim.
-That penalty is what the field adds: the animal moves between frames, the water is turbid, and
-the snout and fork are harder to place. It is consistent with §4.4 — a few degrees of pose
-change between frames is worth a few percent of length — and it is the number a survey designer
-should use when deciding how many frames per fish to require.
+A session is accuracy evidence unless something about *how it was produced* disqualifies
+it. There is deliberately no threshold on how large its error came out: a rule that drops
+sessions for disagreeing with the references, and then reports the survivors' agreement
+with the references, selects on its own outcome. Two things disqualify a session, and
+neither looks at the size of its error. The five angle-experiment sessions of §4.4 are set
+aside because they are a different experiment — one target driven through 0–45° on
+purpose, reported there rather than here. And a scale-free check that uses no reference
+length: a rigid target must read the same length at every range, so a session whose
+targets show a length trend with range — the Theil–Sen slope over frames beyond 0.8 m,
+with its 95 % interval clear of ±2 % per metre — has a calibration error in the in-plane
+laser angle that no reprojection test can see (§3.3), and is excluded. That check removes
+five sessions. Three of the five carry a single target and the reference lengths
+independently grade every one of them as wrong; the remaining two are rejected on one
+target while a second target in the same session shows no trend, and one of those two is
+already held out as an August repair, so little in the reported figures turns on them. One
+further session is held out on the same scale-free evidence, where the automatic threshold
+narrowly misses it: two of its targets show consistent trends of −2.2 and −2.3 % per
+metre, implying −0.13°, but each interval reaches −1.2 and so fails the requirement that
+the whole interval clear ±2 %. It is named rather than loosening the threshold until it is
+caught, which would be the same error in another costume. Of the thirty sessions with a
+polish cell, that leaves 19 admitted and 995 measurements; fourteen are
+checkerboard-calibrated and five slate-calibrated. Nothing is excluded for reading far
+from a reference.
 
-**The species attributions are unverified, and the per-species comparison below inherits
-that.** A labeler names the animal from the frame, and nothing in the field data can check
-the name: the one detector we have for a mislabel compares the head-to-tail pixel separation
-a frame implies, $L f / z$, against what the named species' length would require — which
-found six mislabelled frames in the pool corpus, and needs a known length to run at all. No
-wild fish has one. So a species column here is a labeler's judgement, not a measurement, and
-a systematic confusion between two similarly-shaped species would appear as a per-species
-offset we would have no way to distinguish from a measurement bias. Only the repeatability
-above is immune, because it is computed within one individual whatever that individual is.
+The check has also now caught something the known lengths could not, which is the
+strongest argument for keeping it. Two sessions used to be rejected for a trend of about
++5 % per metre while their median error looked unremarkable, the signature of a short
+fitted baseline paired with a compensating angle that cancel at mid-range. Re-measuring
+the calibration board's grid pitch and refitting moved their shared calibration from
+8.90 to 10.39 cm, their trends fell to +0.6 and +0.8 % per metre, and they entered the
+cohort. A check that spends no known length agreed with a tape measurement — and it did so
+on sessions whose medians had given no warning.
 
-**What this sample cannot do is measure field accuracy**, and we state the limit rather than
-work around it. No known-length reference was in the water on these dives, so the scale-free
-range check of §4.1 cannot be applied to them: it needs one rigid object measured repeatedly
-across a wide range spread, and the best-spanned wild individual in the set covers only
-1.9× — 1.6× among those with the three frames the repeatability needs, and 1.04× for the one
-fish with eight. The per-unit sample is 4 to 18 fish, and with the 18 % between-fish size
-spread observed among hogfish the standard error on a unit's median length is 7 % at ten
-fish and 13 % at three — larger than any bias worth detecting. A one-way variance-components
-fit on 33 hogfish finds **no detectable unit effect** ($F = 1.03$ across the six camera
-units, $p = 0.42$; $F = 1.55$, $p = 0.20$ if the seven deployments are taken separately),
-with a point estimate of 1.5 % between cameras against 18 % between fish. What it cannot do
-is bound that tightly: a nonparametric bootstrap over individuals puts the 95 % upper limit
-at 13 % between cameras and 16 % between deployments, and the $F$-based interval is
-degenerate at these sample sizes. A unit-to-unit bias of order the fish spread itself is
-therefore not excluded, which is a statement about the sample and not about the instrument.
+Of the three parameters this leaves, two are not delicate: neither the 0.8 m floor
+(0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions are rejected. The
+trend bound does. Widening it from 2 to 4 % per metre admits three more sessions, 19 to
+22, and readers should take the stability claim to be about the reported statistic rather
+than about cohort membership: $p_{90}$ holds between +0.36 % and +0.15 % across that
+range, while the median drifts from −2.06 % to −2.89 %.
 
-**Two independent comparisons against a stereo-video archive are available, and
-they agree with each other: neither detects a systematic offset, and neither can
-rule one out.** Our collaborators measured the same species at the same reef in
-the same seasons with a calibrated stereo rig — 1,120 lengths over ten sites, to
-the same fork-length convention — and on one day they measured the *same
-individual animals* we did. The two comparisons differ in design by a lot, so we
-give both and let the weaker one be superseded rather than dropped.
-
-**The population comparison cannot carry a conclusion, and the reason is
-instructive.** Each animal reduces to one length at $p_{90}$ as above, and the
-species is then summarised by the median across animals — a population statistic,
-where $p_{90}$ would name the ninetieth-percentile *fish* rather than a
-measurement. On that footing our species medians differ from theirs by −21 % to
-+12 %, with bootstrap intervals spanning zero for three of the five species that
-have enough of our fish to compare. But split by camera unit, the same species at the same
-reef scatters by as much between our own units as it does against the stereo, and
-that scatter is not distinguishable from sampling 2–10 fish at a per-fish spread
-of 19 %. Two further cautions belong with it. The two systems' spreads are the
-same — between-fish CV 19.1 % against 19.1 % on the best-sampled species — so no
-claim of a narrower distribution is supported. And the stereo's quoted precision is a
-propagated click-error (1.0 % of length) rather than a measured repeatability, with
-essentially one measurement per individual in the archive, so it is not
-comparable to the 2.9 % above.
-
-**The paired comparison is the better design, and it is what the archive
-unexpectedly permits.** On 2023-08-03 at two sites, each of our dive folders
-holds one fish and the archive numbers the same fish the same way — both sides'
-hogfish numbering at one site runs 1–12 and both skip 10, so it is a shared
-registry rather than two independent counts. Seven individuals were measured by
-both instruments. This is a separate day from the seven deployments above and is
-not part of the 162 measurements; its lengths rest on a calibration fitted from
-that morning's slate burst (10.55 cm, inside the 9.87–10.54 cm band 30 of the
-fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time a
-borrowed calibration has produced field lengths checked against anything
-external.
-
-**The comparison is reported at $p_{90}$, the estimator used everywhere else in
-this paper**, and the reason it is not a median is visible in this data. Because
-head and tail are back-projected at a single laser-derived depth, an out-of-plane
-fish can only read *short* — on these frames the measured length is 0.9972–0.9997
-of the flat in-plane span its clicked pixels subtend at that range, never above
-1.0. A median over frames therefore inherits however much the pose varied, and a
-high-order statistic rejects it; that is the same argument §4.3 makes against a
-mean. Over the seven pairs $p_{90}$ gives a difference of **+3.5 %** (mean
-+0.8 %, sd 10.1 %, Figure 15), and **four of the seven read longer than the
-stereo, by 3.5 to 11.2 %**, which our own foreshortening cannot account for in
-either direction. The estimator does not manufacture that result: the same four
-individuals exceed the stereo under any summary that is not the median, and the
-median itself would report −3.7 % — a small negative bias that is an artefact of
-summarising a one-sided error at its centre.
-
-One property of nearest rank has to be stated here rather than left for a reader
-to find. $p_{90}$ is the $\lceil 0.9n \rceil$-th of $n$ frames, which is $n$
-itself for every $n \le 10$, and these fish carry 3 to 11 frames each. For five
-of the seven, $p_{90}$ is therefore that animal's longest frame, and only the two
-best-sampled separate the two at all. It is a high-order statistic on this day,
-not a tail estimate. The same is true throughout §4.6: no wild animal here has
-more than eight frames, so every field $p_{90}$ is a longest frame. This is
-intended rather than tolerated — with a one-sided error the longest frame is the
-one least corrupted by pose — but it is why the field figures should not be read
-as carrying the same estimator precision the pool figures do, where a cell holds
-26 frames at the median.
-
-**What the paired day excludes, and what it cannot.** The disagreement is not a
-calibration error, and the reason is the fitted baseline rather than the range
-trend. All seven fish resolve through a single slate calibration shot the same
-morning at 08:58, between 26 minutes and 1 h 42 before the fish themselves — the
-point-of-use practice §4.2 recommends, not a borrow. Its baseline is 10.55 cm,
-within the 9.87–10.55 cm every other sound fit in the fleet returns, and
-reproducing a $+8.6\,\%$ offset by scale alone would need 11.5 cm. The scale-free
-range check of §4.1 applied to the best-sampled fish (11 frames over a 1.55× range
-spread) is flat at $+0.8\,\%$ per metre ($r=0.03$), which excludes an in-plane
-angle error but not a scale error — a wrong baseline is flat with range, so it is
-the baseline's value, not the trend, that rules that out. It is not the
-projection, which is self-consistent to a fraction of a percent above. And it is
-not a landmark convention: the two individuals of one species on this day disagree
-in *opposite* directions, and their tail landmarks sit at the fork on the one
-reading long and at the fin tip on the one reading short — the reverse of what a
-systematic over-reach would produce. What remains is a residual we cannot
-attribute: either we read long on four of seven fish, or the stereo reads short,
-or the pairing is wrong on those individuals, and with seven pairs and no third
-instrument those are not separable. The mean difference spans zero — −6.7 % to
-+8.3 % at 95 % — as it does in the population comparison.
-
-**The two comparisons disagree about the sign of our bias, and that is worth
-stating numerically because it bounds what any correction could do.** Over the
-four species with enough of our animals, our medians sit **−15.4 %** against the
-archive; over the seven paired individuals we read **+3.5 %** long. A candidate
-range correction fitted on the pool cohort — the pool's own near-field trend,
-$-0.56 - 2.40/z$ per cent, which flattens that trend from a 1.40 pp spread of
-binned medians to 0.50 — adds between 1.2 % and 6.2 % at field ranges, median
-2.2 %. Applied to our side it moves the population comparison from a median
-absolute offset of 15.4 % to 14.4 %, and the paired comparison from 8.6 % to
-10.9 %: it helps the one that says we read short and hurts the one that says we
-read long, because it only ever adds length. Two things follow. The correction is
-**a tenth of the disagreement it would have to explain**, so neither result
-licenses it and it is not applied. And a population comparison that a
-same-individual comparison contradicts by nineteen points is not a weak
-measurement of a bias, it is a measurement of something else — which is the
-caution the preceding paragraphs give, here with a number on it.
-
-**So the two comparisons reach the same place from opposite ends, and neither
-changes the conclusion of the preceding paragraphs.** The population comparison
-is limited by between-unit scatter on 2–10 fish per unit; the paired comparison
-is limited by seven individuals at $\pm 8$ points. Field accuracy remains
-unmeasured. What the paired day supports is narrower and worth stating exactly:
-on one day, seven wild fish measured by two independent instruments agreed to
-within about 10 % per individual with no detectable systematic offset. It is also
-a template — the same-individual design, and a slate burst shot at two clearly
-different standoffs, is what would make a future deployment answer the question
-this corpus cannot.
-
-#### Sessions the rule rejects
+##### Sessions the rule rejects
 
 *(For the paper's limitations paragraph, or an appendix; Figure A gives every session.)*
 Five sessions are rejected, and **every one of them by the scale-free range check** —
@@ -684,7 +696,7 @@ dominated this list have since been refitted or retired. What is left is the par
 reprojection test can see, with implied in-plane errors of 0.17° to 0.37° on the flagging
 cells. **Four of the five borrow** their calibration from another session — every one but
 509, which fitted its own. Borrowing is therefore the single strongest predictor of
-rejection in the corpus, and §4.2's recommendation follows from it directly. Dive 60 is
+rejection in the corpus, and §4.3's recommendation follows from it directly. Dive 60 is
 held out on the same evidence, its two independently-measured targets agreeing on −2.2 and
 −2.3 % per metre, where the flag rule asks the whole interval to clear ±2 and these reach
 −1.2.
@@ -748,8 +760,8 @@ caught any of this in the field.
   the physics, the design and the failure modes (roll and fin state first).
 - **§3's promise about refraction is now met by §4.5**, written above as "What the port
   correction buys". It is placed after §4.4 rather than earlier so the empirical run
-  §4.1–§4.4 is not interrupted by the one simulated result, which costs only the
-  §4.5→§4.6 renumber. It is scoped to what an *uncorrected* port costs and stops there,
+  §4.2–§4.4 is not interrupted by the one simulated result. It is scoped to what an
+  *uncorrected* port costs and stops there,
   so the WUWNet submission keeps the correction itself — Pinax, and the in-water
   single-viewpoint calibration — as its own contribution and loses no motivation to this
   paper. Every number comes from `fishsense_imwut/refraction.py` (`flat_port_cost`) and is
@@ -823,7 +835,7 @@ caught any of this in the field.
   (`pubfig.fig_flat_port_error_field`) if the full width is not affordable.
 - **Figure 11** — Within-individual repeatability, wild fish against posed models. Each
   point is one group: one wild individual (≥ 3 frames), or one (session, target) cell in
-  the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.6
+  the pool cohort. Bar: the median, with its bootstrap interval. This is the only §4.1
   figure that measures the system rather than the sample — a calibration error is common to
   every frame of one animal and cancels in a relative spread — and the intervals overlap at
   the margin, which the figure shows rather than hides.
@@ -848,7 +860,7 @@ caught any of this in the field.
   1:1 is error. Here the two axes are **different animals** — ours and theirs, same reef and
   season, and for the five species plotted never the same individual — so a departure is
   error *or* a difference in which fish each encountered, and nothing in this figure
-  separates them. The seven paired individuals of §4.6 are the exception and are
+  separates them. The seven paired individuals of §4.1 are the exception and are
   deliberately not shown here: pooling a same-individual comparison into a
   population-median plot would hide the very distinction this caption draws. The arms differ by 12×
   across these five species because the samples do, and that asymmetry is the result: Nassau
@@ -857,7 +869,7 @@ caught any of this in the field.
   at least five of our fish: Hogfish (33 vs 119), Stoplight Parrotfish (16 vs 391),
   Nassau Grouper (7 vs 8), Black Grouper (6 vs 51), Rainbow Parrotfish (5 vs 59). Medians
   differ by −21 % to +12 %.
-- **Figure 15** *(§4.6)* — The paired day: our per-frame lengths against the stereo
+- **Figure 15** *(§4.1)* — The paired day: our per-frame lengths against the stereo
   length of the **same individual**, seven fish over 39 frames, with the $p_{90}$ estimator
   and a 1:1 datum. **Figure 1's form and Figure 1's estimator**, so the two read the same
   way — but the 1:1 line here is *agreement*, not truth, because both axes are instruments
@@ -870,13 +882,13 @@ caught any of this in the field.
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
-- **Figure 16** *(§4.3)* — How many frames $p_{90}$ needs. Rarefaction: draw $n$ frames
+- **Figure 16** *(§4.2)* — How many frames $p_{90}$ needs. Rarefaction: draw $n$ frames
   without replacement from each of the fifteen cohort cells holding ≥ 30, take the
   $p_{90}$ of percent length error, and compare it with that cell's full-sample $p_{90}$;
   1,000 draws per cell. **Two statistics, at two levels.** Per fish the estimate is
   $p_{90}$, the paper's estimator throughout, because one fish's frames are a one-sided
   pose-corrupted distribution and a high quantile rejects that tail. Across draws and cells
-  the summary is a **median** — the same choice §4.6 makes across animals — because sampling
+  the summary is a **median** — the same choice §4.1 makes across animals — because sampling
   error is not one-sided and has no tail that needs rejecting. Band: central 80 % of draws,
   kept signed because the bias changes sign. **The step at $n = 10$ is arithmetic, not
   noise**: nearest rank is $\lceil 0.9n \rceil$, which equals $n$ for every $n \le 10$, so
@@ -913,7 +925,7 @@ Drop-in: figures are sized for the `acmart` column already (`\includegraphics` w
 
 ## Part B — Figures 4 and 5 (the August repair)
 
-**Recommendation: keep Figure 4 and cut Figure 5. Figure 4 is now the figure for §4.2;
+**Recommendation: keep Figure 4 and cut Figure 5. Figure 4 is now the figure for §4.3;
 Figure 5 stays in the repository only.**
 
 *Revised 2026-09-13. This section previously recommended cutting both and keeping Figure 4's
@@ -923,7 +935,7 @@ by 0.82° — which is a qualitatively stronger claim than between-session drift
 carried by one sentence. And the WUWNet analysis independently measured 0.378° across one
 session boundary from two direct beam fits, so the drift is now corroborated by a second
 observable rather than inferred from length errors alone. Calibration stability has become a
-result, §4.2 states it, and Figure 4 is its figure.*
+result, §4.3 states it, and Figure 4 is its figure.*
 
 Figure 4 (per-session mount state $\varphi$) and Figure 5 (the implied-yaw floor before and
 after repairing sessions 60 and 76) were built when the accuracy claim rested on seven
@@ -939,7 +951,7 @@ slate-borrowed sessions and the paper needed to explain why two of them were rep
    in-plane rotation is invisible to the laser dots) and then a method that uses a known
    length to fix a calibration — which a reviewer will read as circular unless the
    scale-free ruler-at-two-ranges argument is also made. That is a different paper.
-3. **But the mount state is no longer a passing remark.** §4.2 now reports calibration
+3. **But the mount state is no longer a passing remark.** §4.3 now reports calibration
    stability as a result: the angle spans 0.27° across seven sessions, 0.82° between two
    calibrations seven minutes apart, and calibration state is the dominant reason a session
    fails to be accuracy evidence (6 of 30). That is three quantities and a mechanism, and
@@ -951,10 +963,10 @@ slate-borrowed sessions and the paper needed to explain why two of them were rep
    60. Both positions are defensible, but defending both costs more words than either is
    worth. Cut it.
 
-§3.3 ("must be calibrated per dive site") should now forward-reference §4.2 rather than
+§3.3 ("must be calibrated per dive site") should now forward-reference §4.3 rather than
 carry its own version of the number, so the claim is made once:
 
 > The laser's in-plane pointing angle sets metric scale and no reprojection check can
-> observe it; §4.2 measures how far it moves between uses and what that costs.
+> observe it; §4.3 measures how far it moves between uses and what that costs.
 
 Figures 6 and 7 remain diagnostic figures for the repository, not for the paper.
