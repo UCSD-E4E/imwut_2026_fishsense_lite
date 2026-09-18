@@ -588,3 +588,33 @@ def test_the_range_error_matches_flat_port_cost_at_the_same_depth():
     s = rf.flat_port_range_error(depths_m=[rf.MEASUREMENT_DEPTH_M])
     one = rf.flat_port_cost(depth_m=rf.MEASUREMENT_DEPTH_M, n_points=3)
     assert s["pct_error"][0] == pytest.approx(one["range_pct_error"], abs=1e-9)
+
+
+def test_the_range_curvature_is_the_dot_going_off_axis_not_the_pane():
+    """What Figure 9c's second curve is for, and it corrects a draft claim.
+
+    The mounted laser sits 11.7 cm off the optical axis and runs parallel to it,
+    so the dot's field angle SHRINKS with range -- 13.2 degrees at 0.5 m, 1.2 at
+    5.5 -- and a near-field dot is an off-axis dot. Move the laser nearly
+    coaxial and the depth dependence collapses. A draft of the caption blamed
+    the pane's thickness against a small standoff; this asserts it is geometry,
+    and reconciles the figure with `flat_port_error_field`, which shows the same
+    radial term across the frame instead of along the dot's track.
+    """
+    from fishsense_imwut import refraction as rf
+
+    s = rf.flat_port_range_error()
+    mounted_span = s["pct_error"].max() - s["pct_error"].min()
+    coaxial_span = s["coaxial_pct_error"].max() - s["coaxial_pct_error"].min()
+    assert mounted_span > 1.5, "the mounted sweep should curve"
+    assert coaxial_span < 0.1, "the coaxial sweep should be flat"
+    assert mounted_span > 20 * coaxial_span
+
+    # the dot really does walk in from the edge of the frame toward the centre
+    a = s["dot_field_angle_deg"]
+    assert a[0] == pytest.approx(13.2, abs=0.1)
+    assert a[-1] == pytest.approx(1.2, abs=0.1)
+    assert (np.diff(a) < 0).all()
+
+    # and the module constant is left exactly as it was found
+    assert rf.LASER_POSITION_M.tolist() == [-0.04, -0.11, 0.0]

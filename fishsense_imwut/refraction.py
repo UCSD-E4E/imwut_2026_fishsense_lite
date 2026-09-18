@@ -469,35 +469,64 @@ def flat_port_range_error(
     n_water: float = SALTY_WATER,
     glass_thickness_m: float = GLASS_THICKNESS_M,
     n_glass: float = N_GLASS,
+    coaxial_baseline_m: float = 0.011,
 ) -> dict:
     """Laser range error against true range, with no refraction correction.
 
     `flat_port_cost` reports this at one depth because that is where its length
-    figure lives; swept over depth it is the term that makes the length figure
-    work, and it is worth seeing on its own.
+    figure lives. Swept over depth it is the term that makes the length figure
+    work, and it decomposes into two parts that are easy to confuse.
 
-    The error is very nearly a pure scale: ignoring refraction shortens a
-    triangulated range by `1 / n_water`, so the curve is a straight line through
-    the origin at that slope, and the only departure is close to the port, where
-    the pane's own thickness still matters relative to the standoff. That is why
-    a centred length comes out right despite a range this wrong -- the same
-    `n_water` that shortens the range expands the scene transversely, and on
-    axis the two cancel exactly (see `flat_port_cost`).
+    **The scale.** Ignoring refraction shortens a triangulated range by
+    `1 / n_water`, so the error is a constant, and `asymptote_pct` is it. That
+    constancy is what lets a centred length come out right: the same `n_water`
+    expands the scene transversely, and on axis the two cancel exactly (see
+    `flat_port_cost`).
 
-    Returns `depth_m`, `measured_m`, `pct_error` and `asymptote_pct`, the last
-    being `100 (1/n_water - 1)`, the limit the error approaches once the
-    standoff dominates the pane.
+    **The off-axis term, which is not a range dependence at all.** The laser
+    sits `LASER_POSITION_M` off the optical axis -- 11.7 cm as mounted -- and
+    runs parallel to it, so the dot's own field angle *shrinks* with range:
+    13.2 degrees at 0.5 m, 1.2 at 5.5. A near-field dot is therefore an
+    off-axis dot, and the extra error it carries is the same radial term the
+    length field shows (`flat_port_error_field`), reached along the dot's track
+    through the frame rather than across it. Re-run with the laser nearly
+    coaxial and the depth dependence collapses to 0.06 pp over the whole sweep,
+    which is the proof that it is geometry and not the pane: `coaxial_pct_error`
+    is that curve, from a `coaxial_baseline_m` laser.
+
+    An earlier draft of this docstring blamed the pane's thickness against a
+    small standoff. It is not that.
+
+    Returns `depth_m`, `measured_m`, `pct_error`, `dot_field_angle_deg`,
+    `coaxial_pct_error`, and `asymptote_pct` = `100 (1/n_water - 1)`.
     """
     depths = np.asarray(depths_m, dtype=float)
-    pct = np.array([
-        flat_port_cost(n_water=n_water, glass_thickness_m=glass_thickness_m,
-                       n_glass=n_glass, depth_m=float(z), n_points=3)["range_pct_error"]
-        for z in depths
-    ])
+    kw = dict(n_water=n_water, glass_thickness_m=glass_thickness_m,
+              n_glass=n_glass, n_points=3)
+    pct = np.array([flat_port_cost(depth_m=float(z), **kw)["range_pct_error"]
+                    for z in depths])
+
+    global LASER_POSITION_M
+    offset = float(np.hypot(*LASER_POSITION_M[:2]))
+    mounted = LASER_POSITION_M
+    try:
+        # Same module-level constant the forward model reads, swapped for the
+        # length of the comparison sweep only. Restored in `finally` so an
+        # exception here cannot leave the module describing a camera nobody has.
+        LASER_POSITION_M = np.array([0.0, -coaxial_baseline_m, 0.0])
+        coaxial = np.array([flat_port_cost(depth_m=float(z), **kw)["range_pct_error"]
+                            for z in depths])
+    finally:
+        LASER_POSITION_M = mounted
+
     return {
         "depth_m": depths,
         "measured_m": depths * (1.0 + pct / 100.0),
         "pct_error": pct,
+        "dot_field_angle_deg": np.degrees(np.arctan(offset / depths)),
+        "coaxial_pct_error": coaxial,
+        "coaxial_baseline_m": float(coaxial_baseline_m),
+        "laser_offset_m": offset,
         "asymptote_pct": float(100.0 * (1.0 / n_water - 1.0)),
         "n_water": float(n_water),
     }

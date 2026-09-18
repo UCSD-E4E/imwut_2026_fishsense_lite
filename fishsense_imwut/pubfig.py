@@ -1732,35 +1732,38 @@ def _short_span(first: str, last: str) -> str:
 
 def fig_flat_port_range(
     sweep,
-    figsize: tuple[float, float] = (FULL_WIDTH, 2.6),
+    figsize: tuple[float, float] = (FULL_WIDTH, 3.05),
 ) -> plt.Figure:
-    """Laser range under a flat port with no refraction correction, against the
-    true range, and the same thing as a percentage.
+    """Laser range under a flat port with no refraction correction, and the two
+    terms the error decomposes into.
 
     `sweep` is `refraction.flat_port_range_error(...)`.
 
     **This is the term Figure 9's cancellation runs on, and it is enormous.** An
     uncorrected flat port shortens a triangulated range by a quarter: 0.36 m
-    read at 0.50, 4.10 m read at 5.50. The pipeline gets a centred length right
+    read at 0.50, 4.10 m at 5.50. The pipeline gets a centred length right
     anyway because the same `n_water` that shortens the range expands the scene
-    transversely by the same factor, so the two errors divide out on axis -- and
-    Figure 9 is what happens off it, where the angular compression stops being a
-    pure scale and the cancellation stops being exact. A reader who has not seen
-    this panel has no way to know how much is cancelling.
+    transversely by the same factor, so the two divide out on axis.
 
-    Two panels because they answer different questions with the same numbers.
-    Left: is it a scale error or an offset? A straight line through the origin
-    says scale, which is the fact that lets it cancel at all; an offset would
-    not cancel and would show here as a line missing the origin. Right: how
-    constant is that scale? Near enough, and the dotted limit is where it is
-    heading -- $100(1/n_w - 1)$, the pure Snell factor. The 1.7 pp of extra
-    error inside 1 m is the pane's own thickness still mattering against a small
-    standoff; past 2 m the standoff dominates and the curve flattens onto the
-    limit.
+    **The curvature is not a range dependence, and saying so is the point of the
+    second curve.** The laser sits 11.7 cm off the optical axis and runs
+    parallel to it, so the dot's own field angle shrinks as the range grows --
+    13.2 degrees at 0.5 m, 1.2 at 5.5 -- and a near-field dot is an off-axis
+    dot. Move the laser nearly coaxial and the whole sweep flattens to 0.06 pp.
+    So the flat curve is Snell's factor and the gap above it is the same radial
+    term Figure 9b maps over the frame, met along the dot's track rather than
+    across it. The two figures agree; read together they say the port correction
+    is load-bearing in range as well as in length.
+
+    The top axis carries the dot's field angle, because a reader looking at
+    Figure 9b will want to know where in the frame each of these points sits,
+    and the answer is not constant.
     """
     z = np.asarray(sweep["depth_m"], dtype=float)
     measured = np.asarray(sweep["measured_m"], dtype=float)
     pct = np.asarray(sweep["pct_error"], dtype=float)
+    coaxial = np.asarray(sweep["coaxial_pct_error"], dtype=float)
+    angle = np.asarray(sweep["dot_field_angle_deg"], dtype=float)
 
     fig, (left, right) = plt.subplots(1, 2, figsize=figsize)
 
@@ -1776,32 +1779,48 @@ def fig_flat_port_range(
     left.set_aspect("equal", adjustable="box")
     left.set_xlabel("True laser range (m)")
     left.set_ylabel("Triangulated range (m)")
-    left.set_title("(a) a scale error, not an offset", fontsize=7,
-                   color=INK_SECONDARY, loc="left", pad=4)
     left.legend(loc="upper left", handletextpad=0.5, borderaxespad=0.2)
 
     _grid(right, axis="both")
     right.axhline(sweep["asymptote_pct"], color=INK_MUTED, linestyle=":",
                   linewidth=1.0, zorder=2)
+    # Above the line and on the LEFT: below it both curves converge, and the
+    # right end is under the second axis's tick row.
     right.annotate(f"$100(1/n_w - 1) = {sweep['asymptote_pct']:.1f}$ %",
-                   xy=(z.max(), sweep["asymptote_pct"]), xytext=(-2, 4),
+                   xy=(z.min(), sweep["asymptote_pct"]), xytext=(2, 3),
                    textcoords="offset points", fontsize=6,
-                   color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
-    right.plot(z, pct, color=SERIES_1, linewidth=1.6, marker="o",
-               markersize=3.4, markeredgewidth=0, zorder=3)
+                   color=INK_SECONDARY, ha="left", va="bottom", zorder=5)
+    right.plot(z, coaxial, color=SERIES_1, linewidth=1.6, marker="o",
+               markersize=3.4, markeredgewidth=0, zorder=3,
+               label=f"Coaxial laser ({100 * sweep['coaxial_baseline_m']:.0f} cm)")
+    right.plot(z, pct, color=SERIES_2, linewidth=1.6, marker="D",
+               markersize=3.4, markeredgewidth=0, zorder=4,
+               label=f"As mounted ({100 * sweep['laser_offset_m']:.1f} cm off axis)")
     right.set_xlabel("True laser range (m)")
     right.set_ylabel("Range error (%)")
-    right.set_title("(b) and very nearly a constant one", fontsize=7,
-                    color=INK_SECONDARY, loc="left", pad=4)
-    # Say what the zoom is doing. This axis spans under 2 pp of a 25 % error,
-    # so without the note the curve reads as a large range dependence when the
-    # figure's point is that there is almost none.
-    right.annotate(f"axis spans {pct.max() - pct.min():.1f} pp"
-                   f" of a {abs(pct.mean()):.0f} % error",
-                   xy=(0.98, 0.04), xycoords="axes fraction", fontsize=6,
-                   color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
+    right.legend(loc="lower right", handletextpad=0.4, borderaxespad=0.3,
+                 fontsize=6)
 
-    fig.tight_layout()
+    # A second x axis in the dot's own field angle: the same points, relabelled,
+    # so a reader can carry a value straight to Figure 9b's frame position.
+    top = right.secondary_xaxis("top")
+    ticks = [z[i] for i in (0, 1, 3, 6, len(z) - 1)]
+    top.set_xticks(ticks)
+    top.set_xticklabels([f"{np.interp(t, z, angle):.1f}\u00b0" for t in ticks])
+    # No axis label: it centres under the panel label and collides with it. The
+    # degree signs on the ticks already say the row is an angle, and the caption
+    # says which angle -- the dot's own position in the frame.
+    top.tick_params(labelsize=6)
+
+    # `rect` reserves the top band for the panel labels, which `tight_layout`
+    # cannot see because they are figure text rather than axes titles -- and they
+    # have to be figure text: `set_title` on the right panel is lifted clear of
+    # its secondary axis, so two equal pads render at two different heights.
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
+    for ax, label in ((left, "(a) a scale error, not an offset"),
+                      (right, "(b) the curvature is the dot going off axis")):
+        fig.text(ax.get_position().x0, 0.995, label, fontsize=7,
+                 color=INK_SECONDARY, ha="left", va="top")
     return fig
 
 
