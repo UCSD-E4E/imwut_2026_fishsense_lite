@@ -1732,84 +1732,88 @@ def _short_span(first: str, last: str) -> str:
 
 def fig_flat_port_range(
     sweep,
+    near_m: float = 1.0,
     figsize: tuple[float, float] = (FULL_WIDTH, 3.05),
 ) -> plt.Figure:
-    """Laser range under a flat port with no refraction correction, and the two
-    terms the error decomposes into.
+    """Laser range under a flat port with no refraction correction: the reading
+    itself, and the error in it.
 
     `sweep` is `refraction.flat_port_range_error(...)`.
 
     **This is the term Figure 9's cancellation runs on, and it is enormous.** An
-    uncorrected flat port shortens a triangulated range by a quarter: 0.36 m
-    read at 0.50, 4.10 m at 5.50. The pipeline gets a centred length right
+    uncorrected flat port shortens a triangulated range by a quarter: 0.21 m
+    read at 0.30, 4.10 m at 5.50. The pipeline gets a centred length right
     anyway because the same `n_water` that shortens the range expands the scene
     transversely by the same factor, so the two divide out on axis.
 
-    **The curvature is not a range dependence, and saying so is the point of the
-    second curve.** The laser sits 11.7 cm off the optical axis and runs
-    parallel to it, so the dot's own field angle shrinks as the range grows --
-    13.2 degrees at 0.5 m, 1.2 at 5.5 -- and a near-field dot is an off-axis
-    dot. Move the laser nearly coaxial and the whole sweep flattens to 0.06 pp.
-    So the flat curve is Snell's factor and the gap above it is the same radial
-    term Figure 9b maps over the frame, met along the dot's track rather than
-    across it. The two figures agree; read together they say the port correction
-    is load-bearing in range as well as in length.
+    **The division of labour between the panels is deliberate.** At the scale of
+    the working range the reading IS a straight line through the origin -- that
+    is panel (a), and it is the property that lets the error cancel at all. All
+    of the departure from it lives inside the shaded first metre, where it is a
+    few parts in a hundred of a five-metre axis and invisible; panel (b) is that
+    metre magnified, on the error rather than the reading. A log axis would show
+    both at once and was tried, but it costs more in readability than it buys.
 
-    The top axis carries the dot's field angle, because a reader looking at
-    Figure 9b will want to know where in the frame each of these points sits,
-    and the answer is not constant.
+    **The near-field rise is not a range dependence.** The laser sits 11.7 cm
+    off the optical axis and runs parallel to it, so the dot's own field angle
+    shrinks as the range grows -- 21.3 degrees at 0.30 m, 1.2 at 5.5, given on
+    the top axis -- and a near-field dot is an off-axis dot. So the departure
+    from the dotted Snell limit is the same radial term `flat_port_error_field`
+    maps across the frame, met along the dot's track rather than across it.
+    Re-run with the laser nearly coaxial and the whole sweep flattens to
+    0.06 pp, which is the proof; it is in the notebook rather than drawn here.
     """
     z = np.asarray(sweep["depth_m"], dtype=float)
     measured = np.asarray(sweep["measured_m"], dtype=float)
     pct = np.asarray(sweep["pct_error"], dtype=float)
-    coaxial = np.asarray(sweep["coaxial_pct_error"], dtype=float)
     angle = np.asarray(sweep["dot_field_angle_deg"], dtype=float)
+    span = np.array([0.0, max(z.max(), measured.max()) * 1.05])
 
     fig, (left, right) = plt.subplots(1, 2, figsize=figsize)
 
-    _grid(left, axis="both")
-    span = np.array([0.0, z.max() * 1.05])
+    for ax in (left, right):
+        _grid(ax, axis="both")
+        ax.set_xlim(*span)
+        # The same band on both panels: in (b) it is where the curve lives, in
+        # (a) it is the answer to "where is the bend?", which at this scale is
+        # otherwise invisible -- and that invisibility is itself the point.
+        ax.axvspan(0.0, near_m, color=INK_MUTED, alpha=0.07, zorder=0)
+        ax.set_xlabel("True laser range (m)")
+
     left.plot(span, span, color=INK_MUTED, linewidth=0.8, linestyle=(0, (4, 3)),
               zorder=2, label="No refraction (true range)")
-    left.plot(z, measured, color=SERIES_1, linewidth=1.6, marker="o",
-              markersize=3.4, markeredgewidth=0, zorder=3,
+    left.plot(z, measured, color=SERIES_1, linewidth=1.8, zorder=3,
               label="Uncorrected flat port")
-    left.set_xlim(*span)
+    # From the measured series, not from `span`: taking it from the range axis
+    # clipped the curve, which reads 0.209 m at 0.30 m true -- the near field,
+    # the whole reason the sweep starts there, fell off the bottom.
     left.set_ylim(*span)
     left.set_aspect("equal", adjustable="box")
-    left.set_xlabel("True laser range (m)")
     left.set_ylabel("Triangulated range (m)")
-    left.legend(loc="upper left", handletextpad=0.5, borderaxespad=0.2)
+    left.legend(loc="upper left", handletextpad=0.5, borderaxespad=0.2,
+                fontsize=6)
 
-    _grid(right, axis="both")
     right.axhline(sweep["asymptote_pct"], color=INK_MUTED, linestyle=":",
                   linewidth=1.0, zorder=2)
-    # Above the line and on the LEFT: below it both curves converge, and the
-    # right end is under the second axis's tick row.
     right.annotate(f"$100(1/n_w - 1) = {sweep['asymptote_pct']:.1f}$ %",
-                   xy=(z.min(), sweep["asymptote_pct"]), xytext=(2, 3),
+                   xy=(span[1], sweep["asymptote_pct"]), xytext=(-3, 4),
+                   textcoords="offset points", fontsize=6,
+                   color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
+    right.plot(z, pct, color=SERIES_1, linewidth=1.8, zorder=4)
+    # Headroom for the limit's label: the curve converges onto that line, so
+    # there is no room below it.
+    right.set_ylim(top=sweep["asymptote_pct"] + 0.55)
+    right.set_ylabel("Range error (%)")
+    right.annotate("inside 1 m", xy=(near_m, pct.min()), xytext=(4, 2),
                    textcoords="offset points", fontsize=6,
                    color=INK_SECONDARY, ha="left", va="bottom", zorder=5)
-    right.plot(z, coaxial, color=SERIES_1, linewidth=1.6, marker="o",
-               markersize=3.4, markeredgewidth=0, zorder=3,
-               label=f"Coaxial laser ({100 * sweep['coaxial_baseline_m']:.0f} cm)")
-    right.plot(z, pct, color=SERIES_2, linewidth=1.6, marker="D",
-               markersize=3.4, markeredgewidth=0, zorder=4,
-               label=f"As mounted ({100 * sweep['laser_offset_m']:.1f} cm off axis)")
-    right.set_xlabel("True laser range (m)")
-    right.set_ylabel("Range error (%)")
-    right.legend(loc="lower right", handletextpad=0.4, borderaxespad=0.3,
-                 fontsize=6)
 
-    # A second x axis in the dot's own field angle: the same points, relabelled,
+    # A second x axis in the dot's own field angle: the same points relabelled,
     # so a reader can carry a value straight to Figure 9b's frame position.
     top = right.secondary_xaxis("top")
-    ticks = [z[i] for i in (0, 1, 3, 6, len(z) - 1)]
+    ticks = [t for t in (0.3, 1.0, 2.0, 4.0) if z.min() <= t <= z.max()]
     top.set_xticks(ticks)
     top.set_xticklabels([f"{np.interp(t, z, angle):.1f}\u00b0" for t in ticks])
-    # No axis label: it centres under the panel label and collides with it. The
-    # degree signs on the ticks already say the row is an angle, and the caption
-    # says which angle -- the dot's own position in the frame.
     top.tick_params(labelsize=6)
 
     # `rect` reserves the top band for the panel labels, which `tight_layout`
@@ -1818,7 +1822,7 @@ def fig_flat_port_range(
     # its secondary axis, so two equal pads render at two different heights.
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
     for ax, label in ((left, "(a) a scale error, not an offset"),
-                      (right, "(b) the curvature is the dot going off axis")):
+                      (right, "(b) the error, and where it lives")):
         fig.text(ax.get_position().x0, 0.995, label, fontsize=7,
                  color=INK_SECONDARY, ha="left", va="top")
     return fig

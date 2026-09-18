@@ -464,8 +464,18 @@ def flat_port_error_field(
     )
 
 
+#: Dense below a metre and coarse above it, because that is where the curve is.
+#: The error is flat past ~2 m and turns over sharply inside 0.5, so an evenly
+#: spaced sweep spends its points where nothing happens and draws the near field
+#: as one straight segment between 0.5 and 1.0 m -- which is what an earlier
+#: version did, hiding the steepest part of the figure. Starts at 0.30 m because
+#: the pool corpus reaches 0.28: this is measured range, not extrapolation.
+RANGE_SWEEP_M = np.concatenate([np.arange(0.30, 1.0, 0.05),
+                                np.arange(1.0, 5.55, 0.25)])
+
+
 def flat_port_range_error(
-    depths_m=np.linspace(0.5, 5.5, 11),
+    depths_m=RANGE_SWEEP_M,
     n_water: float = SALTY_WATER,
     glass_thickness_m: float = GLASS_THICKNESS_M,
     n_glass: float = N_GLASS,

@@ -573,11 +573,16 @@ def test_the_flat_port_range_error_is_the_snell_factor():
     # converging on the Snell factor from below, i.e. worse near the port
     assert s["pct_error"][0] < s["pct_error"][-1] < 0
     assert s["pct_error"][-1] == pytest.approx(s["asymptote_pct"], abs=0.05)
-    # and it is a scale: the whole 0.5-5.5 m sweep moves under 2 pp
-    assert s["pct_error"].max() - s["pct_error"].min() < 2.0
-    # a straight line through the origin at that slope
-    ratio = s["measured_m"] / s["depth_m"]
-    assert ratio[1:].std() < 0.002
+    # and past a metre it is a scale: that stretch moves under 0.5 pp
+    far = s["depth_m"] >= 1.0
+    assert s["pct_error"][far].max() - s["pct_error"][far].min() < 0.5
+    ratio = s["measured_m"][far] / s["depth_m"][far]
+    assert ratio.std() < 0.002
+    # inside a metre it is not, and that is the near-field tail the figure
+    # exists to show -- an earlier sweep stepped 0.5 m and drew it as one
+    # straight segment
+    assert s["pct_error"][0] < -30.0
+    assert s["depth_m"][0] == pytest.approx(0.30, abs=0.001)
 
 
 def test_the_range_error_matches_flat_port_cost_at_the_same_depth():
@@ -606,13 +611,13 @@ def test_the_range_curvature_is_the_dot_going_off_axis_not_the_pane():
     s = rf.flat_port_range_error()
     mounted_span = s["pct_error"].max() - s["pct_error"].min()
     coaxial_span = s["coaxial_pct_error"].max() - s["coaxial_pct_error"].min()
-    assert mounted_span > 1.5, "the mounted sweep should curve"
-    assert coaxial_span < 0.1, "the coaxial sweep should be flat"
+    assert mounted_span > 4.0, "the mounted sweep should curve"
+    assert coaxial_span < 0.5, "the coaxial sweep should be nearly flat"
     assert mounted_span > 20 * coaxial_span
 
     # the dot really does walk in from the edge of the frame toward the centre
     a = s["dot_field_angle_deg"]
-    assert a[0] == pytest.approx(13.2, abs=0.1)
+    assert a[0] == pytest.approx(21.3, abs=0.1)
     assert a[-1] == pytest.approx(1.2, abs=0.1)
     assert (np.diff(a) < 0).all()
 

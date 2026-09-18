@@ -907,21 +907,26 @@ caught any of this in the field.
   directions, which is the landmark-convention point the text makes.
 - **Figure 9c** *(§4.5)* — Laser range under a flat port with no refraction correction,
   from the same model as Figures 9 and 9b (Pinax geometry, salt water $n_w = 1.342$, the
-  housing's fitted standoff). **(a)** The error is a scale, not an offset: a straight line
-  through the origin at slope $1/n_w$, 0.36 m read at 0.50 and 4.10 m at 5.50. **This is
-  the term Figure 9's cancellation runs on** — the pipeline gets a centred length right
-  while its range is a quarter short, because the same $n_w$ expands the scene transversely
-  by the same factor and the two divide out on axis. **(b)** And a very nearly constant
-  scale, converging on $100\,(1/n_w - 1) = -25.5\,\%$. Note the axis: it spans under 2 pp
-  of a 26 % error. **The curvature is not a range dependence.** The laser sits 11.7 cm off
-  the optical axis and runs parallel to it, so the dot's own field angle *shrinks* as the
-  range grows — the top axis gives it, 13.2° at 0.5 m falling to 1.2° at 5.5 — and a
-  near-field dot is an off-axis dot. Re-run with the laser nearly coaxial and the whole
-  sweep flattens to 0.06 pp, which is the blue curve: Snell's factor alone. The gap between
-  the two curves is therefore the same radial term Figure 9b maps across the frame, met
-  along the dot's own track through it rather than across. **The two figures agree**, and
-  read together they say the correction at the port is load-bearing in range as well as in
-  length.
+  housing's fitted standoff). The sweep starts at 0.30 m because the pool corpus reaches
+  0.28 — this is measured range, not extrapolation — and is sampled every 5 cm inside a
+  metre, where all of the structure is. **(a)** The reading against the truth: 0.21 m read
+  at 0.30, 4.10 m at 5.50. At the scale of the working range it is a straight line through
+  the origin, and that is the property the length result depends on. **(b)** The same thing
+  as an error, converging on $100\,(1/n_w - 1) = -25.5\,\%$ and reaching $-30.3\,\%$ at
+  0.30 m. The shaded first metre is where the entire departure lives; on (a)'s axis it is a
+  few parts in a hundred and invisible, which is why both panels are here. **This is the
+  term Figure 9's cancellation runs on** — the pipeline gets a centred length right while
+  its range is a quarter short, because the same $n_w$ expands the scene transversely by
+  the same factor and the two divide out on axis. **The near-field rise is not a range
+  dependence.** The laser sits 11.7 cm off the optical axis and runs parallel to it, so the
+  dot's own field angle shrinks as the range grows — the top axis gives it, 21.3° at 0.30 m
+  falling to 1.7° at 4 — and a near-field dot is an off-axis dot. The departure from the
+  dotted Snell limit is therefore the same radial term Figure 9b maps across the frame, met
+  along the dot's own track through it rather than across. **The two figures agree.**
+  Re-running with the laser nearly coaxial flattens the whole sweep to 0.06 pp, which is
+  the proof of that reading; it is in the notebook rather than drawn here. Read together
+  the two figures say the correction at the port is load-bearing in range as well as in
+  length, and worst where the fish fills the most frame.
 - **Figure 17** *(§4.3)* — Fitted laser baseline per camera unit, split by the calibration
   object each fit used and, unavoidably, by the epoch it was shot in. Pale dots are the
   individual fits, set off the row line so a unit with one fit under a standard does not
