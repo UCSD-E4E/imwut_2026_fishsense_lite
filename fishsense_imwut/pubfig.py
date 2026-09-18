@@ -1746,13 +1746,16 @@ def fig_flat_port_range(
     anyway because the same `n_water` that shortens the range expands the scene
     transversely by the same factor, so the two divide out on axis.
 
-    **The division of labour between the panels is deliberate.** At the scale of
-    the working range the reading IS a straight line through the origin -- that
-    is panel (a), and it is the property that lets the error cancel at all. All
-    of the departure from it lives inside the shaded first metre, where it is a
-    few parts in a hundred of a five-metre axis and invisible; panel (b) is that
-    metre magnified, on the error rather than the reading. A log axis would show
-    both at once and was tried, but it costs more in readability than it buys.
+    **The two panels must not be read as making the same claim.** Panel (a) is
+    a line and looks like a pure scale; panel (b) says it is not one, and (b) is
+    right -- a pure scale would plot flat there, and the error moves 4.8 pp over
+    the sweep. What is true is narrower and is what the shading marks: past a
+    metre the ratio is constant to 0.42 pp (0.7408 to 0.7450), which is a scale
+    for any purpose this paper has; inside a metre it is not, falling to 0.697
+    at 0.30 m. So (a) shows a line that is straight where it is used and bends
+    where the shading is, and (b) is the bend at a scale that can show it. A log
+    axis puts both in one panel and was tried, but it costs more in readability
+    than it buys.
 
     **The near-field rise is not a range dependence.** The laser sits 11.7 cm
     off the optical axis and runs parallel to it, so the dot's own field angle
@@ -1821,8 +1824,8 @@ def fig_flat_port_range(
     # have to be figure text: `set_title` on the right panel is lifted clear of
     # its secondary axis, so two equal pads render at two different heights.
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
-    for ax, label in ((left, "(a) a scale error, not an offset"),
-                      (right, "(b) the error, and where it lives")):
+    for ax, label in ((left, "(a) the reading, a near-constant fraction"),
+                      (right, "(b) the fraction, constant only past a metre")):
         fig.text(ax.get_position().x0, 0.995, label, fontsize=7,
                  color=INK_SECONDARY, ha="left", va="top")
     return fig

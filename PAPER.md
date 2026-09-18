@@ -910,11 +910,14 @@ caught any of this in the field.
   housing's fitted standoff). The sweep starts at 0.30 m because the pool corpus reaches
   0.28 — this is measured range, not extrapolation — and is sampled every 5 cm inside a
   metre, where all of the structure is. **(a)** The reading against the truth: 0.21 m read
-  at 0.30, 4.10 m at 5.50. At the scale of the working range it is a straight line through
-  the origin, and that is the property the length result depends on. **(b)** The same thing
-  as an error, converging on $100\,(1/n_w - 1) = -25.5\,\%$ and reaching $-30.3\,\%$ at
-  0.30 m. The shaded first metre is where the entire departure lives; on (a)'s axis it is a
-  few parts in a hundred and invisible, which is why both panels are here. **This is the
+  at 0.30, 4.10 m at 5.50. **(b)** The same thing as an error, converging on
+  $100\,(1/n_w - 1) = -25.5\,\%$ and reaching $-30.3\,\%$ at 0.30 m. **The two panels do
+  not make the same claim, and (b) is the one to believe.** A line that looked like a pure
+  scale would plot flat in (b), and this one moves 4.8 pp. What holds is narrower, and it
+  is what the shading marks: past a metre the ratio is constant to 0.42 pp — 0.7408 to
+  0.7450, a scale for any purpose here — while inside a metre it falls to 0.697 at 0.30 m.
+  So (a) is straight where the instrument is used and bends where the shading is, at a
+  scale too small to see, and (b) is that bend magnified. **This is the
   term Figure 9's cancellation runs on** — the pipeline gets a centred length right while
   its range is a quarter short, because the same $n_w$ expands the scene transversely by
   the same factor and the two divide out on axis. **The near-field rise is not a range

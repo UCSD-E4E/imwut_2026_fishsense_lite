@@ -623,3 +623,33 @@ def test_the_range_curvature_is_the_dot_going_off_axis_not_the_pane():
 
     # and the module constant is left exactly as it was found
     assert rf.LASER_POSITION_M.tolist() == [-0.04, -0.11, 0.0]
+
+
+def test_the_range_error_is_a_scale_only_past_a_metre():
+    """Figure 9c's two panels have to agree, and they did not.
+
+    Panel (a) is a line and read as a pure scale; panel (b) says it is not one,
+    and (b) is right -- a pure scale plots flat there, and the error moves
+    4.8 pp over the sweep. The claim that survives is the narrower one the
+    shading marks, and this pins both halves of it so a caption cannot quietly
+    widen it again.
+    """
+    from fishsense_imwut import refraction as rf
+
+    s = rf.flat_port_range_error()
+    z, pct = s["depth_m"], s["pct_error"]
+    ratio = s["measured_m"] / z
+
+    # NOT a scale over the whole sweep
+    assert pct.max() - pct.min() > 4.0
+
+    # a scale past a metre, to better than half a point
+    far = z >= 1.0
+    assert pct[far].max() - pct[far].min() < 0.5
+    assert ratio[far].min() == pytest.approx(0.7408, abs=0.001)
+    assert ratio[far].max() == pytest.approx(0.7450, abs=0.001)
+
+    # and emphatically not inside one
+    near = z <= 1.0
+    assert pct[near].max() - pct[near].min() > 4.0
+    assert ratio[near].min() == pytest.approx(0.697, abs=0.001)
