@@ -682,8 +682,11 @@ FIGURE_TITLES = {
         "Convergence of the $p_{90}$ estimate with frames per fish",
     "figA_all_dives_percent": "Percent length error for every session",
     "figD1_depth_correction": "The range correction, and why it is not applied",
+    # NOT "the slate carries the checkerboard's scale", which is what this said
+    # until the dates were checked. The rows are split by epoch as much as by
+    # object, so the title names both and claims neither.
     "fig17_checkerboard_vs_slate":
-        "The dive slate carries the checkerboard's scale, per camera unit",
+        "Laser baseline per unit, by calibration object and mount epoch",
     "figD2_p90_budget":
         "Reported length error against frames per fish, with the error budget marked",
 }
@@ -1708,6 +1711,18 @@ def fig_paired_vs_stereo(
     return fig
 
 
+def _short_span(first: str, last: str) -> str:
+    """"2023-08-14", "2023-08-18" -> "14-18 Aug". Dates as a figure can carry
+    them: a legend key has room for the range and none for the year twice."""
+    import datetime as _dt
+
+    a = _dt.date.fromisoformat(first)
+    b = _dt.date.fromisoformat(last)
+    if (a.year, a.month) == (b.year, b.month):
+        return f"{a.day}\u2013{b.day} {a:%b}"
+    return f"{a:%-d %b}\u2013{b:%-d %b}"
+
+
 # --- figure 17: do the two calibration objects carry the same scale? ------
 #
 # The one check available on the calibration object itself. Metric scale enters
@@ -1720,9 +1735,20 @@ def fig_calibration_objects(
     per_unit,
     summary,
     scatter=None,
+    epochs=None,
     figsize: tuple[float, float] = (COL_WIDTH, 2.9),
 ) -> plt.Figure:
-    """Per-unit laser baseline under each calibration object.
+    """Per-unit laser baseline under each calibration object -- and, because the
+    corpus gives no choice, under the epoch and the mount that went with it.
+
+    **It was built to compare calibration objects and it cannot.** The premise
+    was that the baseline belongs to the rig, so one unit measured against both
+    objects returns one baseline and any difference is the objects' scales. The
+    two objects turn out to occupy disjoint fortnights with a shipment between
+    them, and the mounts are printed PLA that had been splitting, with
+    replacements sent but no record of which units got one. So "the rig" may not
+    be the same rig on both sides, and the difference bounds the objects and the
+    gap together. What the rows show directly is a baseline moving.
 
     `per_unit` is `calibration.baseline_by_standard(...)`, which carries the
     individual fits behind each mean, and `summary` is
@@ -1740,6 +1766,12 @@ def fig_calibration_objects(
     Colour is identity here and nothing else: two calibration objects, the
     paper's two-hue pair, no ordering implied. The connector between a row's
     two means is grey because it is a distance, not a third category.
+
+    `epochs` is `calibration.calibration_epoch_is_confounded(...)`. Passing it
+    puts each object's date range in its own legend key, which is the only way
+    this figure can show what it is really split by. A reader who sees the dates
+    can ask what happened between them; a reader who does not will read the
+    difference as a property of the objects, which is what its author did.
 
     Dive 107 is not on the axis. It is the 12.95 cm lever-arm failure §4.3
     dissects, it is excluded from the comparison for that reason, and at four
@@ -1773,10 +1805,13 @@ def fig_calibration_objects(
         x = [v for c in units for v in per_unit[c]["fits"].get(standard, ())]
         y = [rows[c] + dy for c in units for _ in per_unit[c]["fits"].get(standard, ())]
         ax.scatter(x, y, s=13, color=colour, alpha=0.5, linewidths=0, zorder=3)
+        label = standard.capitalize()
+        if epochs is not None and standard in epochs:
+            e = epochs[standard]
+            label += f"  ({_short_span(e['first'], e['last'])})"
         ax.scatter([per_unit[c][standard] for c in units], list(rows.values()),
                    s=30, marker="D", color=colour, edgecolors=SURFACE,
-                   linewidths=1.0, zorder=4,
-                   label=standard.capitalize())
+                   linewidths=1.0, zorder=4, label=label)
 
     ax.set_yticks(list(rows.values()))
     ax.set_yticklabels([f"unit {c}" for c in units])
@@ -1788,7 +1823,10 @@ def fig_calibration_objects(
 
     note = (f"checkerboard $-$ slate  {summary['mean_pct']:+.2f} %,  "
             f"95 % CI [{summary['ci_lo']:+.2f}, {summary['ci_hi']:+.2f}]")
-    if scatter is not None:
+    if epochs is not None and not epochs.get("separable", True):
+        note += (f"\nbut the two are {epochs['gap_days']} days and a shipment apart:"
+                 " not an object comparison")
+    elif scatter is not None:
         note += f"\nagainst a {scatter['mean_sd_cm']:.3f} cm within-object noise floor"
     ax.annotate(note, xy=(0.015, 0.02), xycoords="axes fraction", fontsize=6,
                 color=INK_SECONDARY, ha="left", va="bottom", linespacing=1.5,

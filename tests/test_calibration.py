@@ -818,3 +818,55 @@ def test_session_offsets_by_standard_use_the_sections_own_references():
     o_raw = cal.session_offsets_by_standard(raw, cal.accuracy_cohort(df), fits)
     assert o_raw["checkerboard"]["median_pp"] == pytest.approx(1.35, abs=0.01)
     assert o_raw["slate"]["median_pp"] == pytest.approx(0.77, abs=0.01)
+
+
+def test_the_calibration_object_is_confounded_with_its_epoch():
+    """The caveat that decides what §4.3's +0.66 % is allowed to claim.
+
+    Every checkerboard fit in the comparison is 14–18 August 2023 and every
+    slate fit 29–31 August, with the cameras shipped in between. No unit
+    carries both objects within one deployment, so object and epoch are
+    collinear and the difference bounds the two together.
+
+    Pinned because the natural sentence to write is "the two objects carry the
+    same scale", the figure was titled that until the dates were checked, and
+    nothing else in the pipeline would catch its return. If a future corpus
+    calibrates one unit against both objects in a single session, this test
+    fails and the claim becomes available -- which is the intended signal.
+    """
+    from fishsense_imwut import calibration as cal
+
+    data = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    fits = cal.load_calibration_fits(data / "calibration_fits.csv")
+    pool = cal.to_frame(cal.load_rows(data / "all.csv"))
+    corpus = cal.to_frame(cal.load_rows(data / "corpus.csv"))
+    dives = (set(pool.calibration_dive_id) | set(pool.dive_id)
+             | set(corpus.calibration_dive_id) | set(corpus.dive_id))
+
+    e = cal.calibration_epoch_is_confounded(fits, dives)
+    assert e["checkerboard"] == {"first": "2023-08-14", "last": "2023-08-18", "n": 11}
+    assert e["slate"] == {"first": "2023-08-29", "last": "2023-08-31", "n": 8}
+    assert not e["epochs_overlap"]
+    assert not e["separable"], "object and epoch must not be claimed as separable"
+    assert e["gap_days"] == 11
+
+
+def test_the_noise_floor_splits_by_how_far_apart_the_fits_are():
+    """A between-epoch difference needs a between-epoch floor, and the two
+    differ by more than a factor of two.
+
+    The pooled 0.132 cm hides it: four groups inside one deployment scatter by
+    0.074 cm, six spanning months and a shipment by 0.171 cm. The second is
+    what §4.3 compares the objects' +0.66 % (0.069 cm) against, and quoting the
+    pooled figure there would have been the forgiving choice.
+    """
+    import pytest
+
+    from fishsense_imwut import calibration as cal
+
+    data = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    s = cal.within_standard_scatter(cal.load_calibration_fits(data / "calibration_fits.csv"))
+    assert (s["n_within_deployment"], s["n_across_shipments"]) == (4, 6)
+    assert s["within_deployment_sd_cm"] == pytest.approx(0.074, abs=0.001)
+    assert s["across_shipments_sd_cm"] == pytest.approx(0.171, abs=0.001)
+    assert s["across_shipments_sd_cm"] > s["within_deployment_sd_cm"]

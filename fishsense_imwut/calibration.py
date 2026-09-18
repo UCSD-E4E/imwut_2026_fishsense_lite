@@ -949,25 +949,54 @@ def checkerboard_slate_difference(per_unit, resamples: int = 20_000, seed: int =
     }
 
 
-def within_standard_scatter(fits, min_fits: int = 2, excluded=(107,)):
+def within_standard_scatter(fits, min_fits: int = 2, excluded=(107,),
+                            same_deployment_days: int = 5):
     """Mean baseline sd over units calibrated more than once under one object.
 
-    The noise floor §4.3 compares the checkerboard-slate difference against: if
-    two calibrations of one rig from one object already disagree by this much,
-    a difference between objects of the same size is not evidence of anything.
+    A noise floor for the checkerboard-slate difference: if two calibrations of
+    one rig from one object already disagree by this much, a difference between
+    objects of the same size is not evidence of anything.
+
+    **Split by how far apart the fits are, because a between-epoch difference
+    needs a between-epoch floor.** Four groups sit inside one deployment and six
+    span months and at least one shipment, and they do not agree: 0.074 cm
+    within a deployment against 0.171 cm across months. The second is the right
+    comparator for the checkerboard-slate difference, which is itself measured
+    across a shipment (see `calibration_epoch_is_confounded`), and it is the
+    larger -- 0.171 cm is 1.6 % of a 10.4 cm baseline against the objects'
+    +0.66 %.
+
+    The split is itself confounded: the short-span groups are all checkerboard
+    and the long-span ones all slate, because that is how the corpus was shot.
+    So read it as "one rig's own baseline moves this much between calibrations
+    this far apart", not as a comparison between the objects.
 
     Dive 107 is excluded by default for the reason it is excluded everywhere --
     it is the 12.95 cm lever-arm failure, and a failed fit measures the gate
     rather than the scatter.
     """
+    import pandas as pd
+
     keep = fits[~fits.dive_id.isin(excluded)]
-    groups = [g.baseline_cm.to_numpy(float)
-              for _, g in keep.groupby(["camera_id", "standard"])
-              if len(g) >= min_fits]
+    groups = []
+    for _, g in keep.groupby(["camera_id", "standard"]):
+        if len(g) < min_fits:
+            continue
+        d = pd.to_datetime(g.dive_date)
+        groups.append((float(g.baseline_cm.std(ddof=1)),
+                       int((d.max() - d.min()).days)))
+    sd = np.array([s for s, _ in groups])
+    span = np.array([d for _, d in groups])
+    within = sd[span <= same_deployment_days]
+    across = sd[span > same_deployment_days]
     return {
         "n_groups": len(groups),
-        "mean_sd_cm": float(np.mean([g.std(ddof=1) for g in groups])),
-        "median_sd_cm": float(np.median([g.std(ddof=1) for g in groups])),
+        "mean_sd_cm": float(sd.mean()),
+        "median_sd_cm": float(np.median(sd)),
+        "n_within_deployment": int(within.size),
+        "within_deployment_sd_cm": float(within.mean()) if within.size else float("nan"),
+        "n_across_shipments": int(across.size),
+        "across_shipments_sd_cm": float(across.mean()) if across.size else float("nan"),
     }
 
 
@@ -1001,3 +1030,49 @@ def session_offsets_by_standard(df, cohort, fits):
             "sd_pp": float(np.std(v, ddof=1)),
         }
     return out
+
+
+def calibration_epoch_is_confounded(fits, dives, excluded=BASELINE_COMPARISON_EXCLUDED):
+    """Is the calibration object separable from the epoch it was shot in?
+
+    In this corpus it is not, and that is the single most important caveat on
+    the checkerboard-slate comparison. Every checkerboard fit is 14-18 August
+    2023 and every slate fit 29-31 August; the cameras were shipped in between.
+    No unit carries both objects within one deployment, so the two factors are
+    collinear and no amount of resampling separates them.
+
+    The hardware is a further unknown inside the same gap. The laser mounts are
+    printed PLA, they had been splitting, and replacements were sent out, but
+    which units received one and when is not recorded. The designs are
+    near-identical, so a swap need not have moved the baseline much -- the point
+    is that "one unit, one baseline", the premise the whole check rests on,
+    cannot be verified here, not that it is known to fail.
+
+    What that costs: `checkerboard_slate_difference` is an upper bound on the
+    COMBINED effect of the objects' scales, the fortnight, the shipment and the
+    hardware. It cannot attribute any part of the difference to the object. It
+    is still worth reporting -- it is small, and smaller than what one rig's own
+    baseline does across a shipment under a single object -- but it is not the
+    claim "the two objects carry the same scale", and this function exists so
+    nobody restores that claim without the design changing first.
+
+    Returns the epoch each object occupies and whether they overlap at all.
+    """
+    import pandas as pd
+
+    # The same cohort `baseline_by_standard` averages, and only the units that
+    # carry both objects -- a caveat computed over a wider set than the estimate
+    # is not a caveat on the estimate.
+    keep = fits[fits.dive_id.isin(set(dives) - set(excluded))]
+    paired = [c for c, g in keep.groupby("camera_id") if g.standard.nunique() == 2]
+    keep = keep[keep.camera_id.isin(paired)].dropna(subset=["dive_date"])
+    spans = {}
+    for standard, g in keep.groupby("standard"):
+        d = pd.to_datetime(g.dive_date)
+        spans[standard] = {"first": str(d.min().date()), "last": str(d.max().date()),
+                           "n": int(len(g))}
+    cb, sl = spans["checkerboard"], spans["slate"]
+    overlap = not (cb["last"] < sl["first"] or sl["last"] < cb["first"])
+    gap_days = abs((pd.Timestamp(sl["first"]) - pd.Timestamp(cb["last"])).days)
+    return {**spans, "epochs_overlap": overlap, "gap_days": int(gap_days),
+            "separable": overlap}

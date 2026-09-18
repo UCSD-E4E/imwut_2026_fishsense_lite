@@ -386,39 +386,59 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
 
 #### 4.3 Calibration stability
 
-§4.2's numbers rest on two properties of the calibration, and only one of them holds. The
-object the calibration is fitted from is sound. The parameter it fits is not stable between
-uses, and it moves by more than the accuracy we report.
+§4.2's numbers rest on two properties of the calibration. The parameter it fits is not
+stable between uses, and it moves by more than the accuracy we report. Whether the object
+it is fitted from carries the right scale we set out to check and can only bound, because
+the check we designed cannot separate the object from everything else that changed
+alongside it.
 
-Take the object first. Substituting a dive slate for the checkerboard is safe only if the
-two carry the same scale, and that is checkable without any fish. Metric scale enters the
-pipeline through the calibration object rather than the targets, so an error in it would
-rescale every length without disturbing the reprojection residual (§3.3). The laser
-baseline gives us a handle, since it is a property of the rig: a unit calibrated against
-both objects must report the same baseline either way. Six units in the pool corpus carry
-both, over 19 calibration *fits*, 11 checkerboard and 8 slate. (That 19 is not the session
-count; the coincidence is unfortunate.) The mean checkerboard-minus-slate difference is
-**+0.66 % of baseline, 95 % CI −0.23 % to +1.69 %** (Figure 17). The interval spans zero,
-and its width
-is comparable to the scatter between two calibrations of one unit under a single standard
-(0.132 cm, the mean within-unit sd over the ten units calibrated more than once under one
-object). Most of the spread comes from one unit, whose slate side includes the
-fleet's shortest fit at 9.87 cm and which alone reads +2.9 %.
+The check was this. Metric scale enters the pipeline through the calibration object rather
+than the targets, so an error in it would rescale every length without disturbing the
+reprojection residual (§3.3). The laser baseline looked like the handle: it is a property
+of the rig, so a unit calibrated against both objects should report the same baseline
+either way, and any disagreement would be the two objects' scales disagreeing. Over the six
+units that carry both, the mean checkerboard-minus-slate difference is **+0.66 % of
+baseline, 95 % bootstrap CI over units −0.23 % to +1.69 %** (Figure 17), with one unit at
++2.94 % carrying most of the spread.
 
-That figure changed sign when we corrected the grid pitch. Before the correction the
-checkerboard read **−0.27 %** against the slate; refitting the twelve checkerboard
-calibrations at the tape-measured pitch raised each by +0.39 % to +0.79 %, and the
-comparison crossed zero. The two objects agreed within the scatter before the correction
-and agree within it after, on opposite sides of it.
+**The design cannot attribute that to the object.** Every checkerboard fit in this corpus
+was shot on 14–18 August 2023 and every slate fit on 29–31 August, and the cameras were
+shipped in between. No unit carries both objects within one deployment, so the object is
+collinear with the epoch, and whatever the shipment did to the rigs is inside the same
+difference. We also cannot certify that the rig was unchanged: the laser mounts are printed
+PLA, they had been splitting, and replacements were sent out, but which units received one
+and when is not recorded. The designs are near-identical, so a swap need not have moved the
+baseline much — the point is that the premise the check rests on, one unit one baseline, is
+not verifiable here rather than that it is known to fail. +0.66 % is an upper bound on the
+objects, the fortnight, the shipment and the hardware together.
 
-The session calibration offsets agree to about half a point: a median **+1.28 pp** over the
-cohort's fourteen checkerboard sessions against **+0.83 pp** over its five slate sessions.
-The offset is the median-polish dive effect, so it is the part of a session's error common
-to every target it shot, which is what a calibration contributes. The deployable object
-reproduces the standard one to roughly a percent. That is what licenses the substitution, and it puts the
-dominant uncertainty in §4.2 on the target lengths rather than on the calibration chain.
+Two things make that bound worth reporting anyway. It is small: 0.069 cm on a 10.4 cm
+baseline, with an interval spanning zero. And the rig's own baseline moves further than
+that on its own. Over the ten units calibrated more than once under a *single* object, the
+four groups shot inside one deployment scatter by 0.074 cm, while the six spanning 76 to
+469 days and at least one shipment scatter by **0.171 cm** — 1.6 % of baseline. Whatever
+the two objects contribute is smaller than what one object contributes across a shipment,
+which is the ordering a deployment needs even though it is not the attribution we wanted.
+(That split is itself confounded: the short-span groups are all checkerboard and the
+long-span ones all slate. Read it as how far one rig's baseline moves between calibrations
+that far apart.)
 
-Two limits go with that. Only five of the nineteen cohort sessions are slate-calibrated, so
+The comparison the substitution actually needs is between what the two objects *deliver*,
+and that one does not assume a constant baseline, because each session is calibrated from
+whatever object it has and the mount is re-fitted either way. The session offsets agree to
+about half a point: a median **+1.28 pp** over the cohort's fourteen checkerboard sessions
+against **+0.83 pp** over its five slate sessions. The offset is the median-polish dive
+effect, so it is the part of a session's error common to every target it shot, which is
+what a calibration contributes. It carries the same epoch confound — the two groups are
+different fortnights, different water, possibly different mounts — so the claim it licenses
+is narrower than we wanted: over these nineteen sessions the deployable object produced
+length errors indistinguishable from the printed one, and the dominant uncertainty in §4.2
+sits on the target lengths rather than on the calibration chain. Separating object from
+epoch would take one unit calibrated against both objects in a single session, which costs
+one dive and which we did not think to shoot.
+
+Two smaller limits go with that. Only five of the nineteen cohort sessions are
+slate-calibrated, so
 the deployable path carries the smaller share of the accuracy evidence, and its offset
 spread (sd 2.11 pp, against the checkerboard's 1.81) rests on five points. And neither
 check can see an error common to both objects, or one in the camera intrinsics, which
@@ -885,22 +905,21 @@ caught any of this in the field.
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
-- **Figure 17** *(§4.3)* — Fitted laser baseline per camera unit under each calibration
-  object, for the six units calibrated both ways. Pale dots are the individual fits, set off
-  the row line so that a unit with one fit under a standard does not hide it beneath its own
-  mean; diamonds are the per-unit means, and the grey rule between them is the difference
-  the comparison averages. The baseline belongs to the rig rather than the dive, so
-  agreement here is the two objects agreeing on scale — the only check available, since
-  metric scale enters through the calibration object and reprojection residual cannot see
-  it. Mean checkerboard-minus-slate **+0.66 % of baseline**, 95 % bootstrap CI over the six
-  units **−0.23 % to +1.69 %**, against a 0.132 cm within-object noise floor; +0.66 % of a
-  10.40 cm baseline is 0.069 cm, so the difference and the floor are the same size. Camera 4
-  carries most of the spread and the figure shows why: its two slate fits are 9.87 and
-  10.44 cm, and the mean of those sits 2.94 % below its checkerboard. **Two fits are not on
-  the axis**, and neither is in the estimate either — dive 107, the 12.95 cm lever-arm
-  failure this section dissects, and dive 436, a field dive that reaches the pool exports
-  only as a borrow. Nothing is drawn that the estimate ignores, and nothing is estimated
-  that is not drawn.
+- **Figure 17** *(§4.3)* — Fitted laser baseline per camera unit, split by the calibration
+  object each fit used and, unavoidably, by the epoch it was shot in. Pale dots are the
+  individual fits, set off the row line so a unit with one fit under a standard does not
+  hide it beneath its own mean; diamonds are the per-unit means and the grey rule between
+  them is the difference. **Read the dates first.** Every checkerboard fit is 14–18 August
+  2023 and every slate fit 29–31 August, with the cameras shipped in between, so no row
+  compares two objects within one deployment. The +0.66 % of baseline (95 % bootstrap CI
+  over the six units −0.23 % to +1.69 %) bounds the objects, the fortnight and the shipment
+  together; the text says why it cannot be split. What the figure does show directly is the
+  baseline moving under a single object: camera 4's two slate fits are 9.87 and 10.44 cm,
+  5.6 % apart on one unit two days apart, and across the fleet a baseline moves 0.171 cm
+  between calibrations months and a shipment apart against 0.074 cm within one deployment.
+  **Two fits are not on the axis**, and neither is in the estimate — dive 107, the 12.95 cm
+  lever-arm failure this section dissects, and dive 436, a field dive that reaches the pool
+  exports only as a borrow.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
   Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
   holding ≥ 30, take the $p_{90}$ of percent length error, and compare it with that cell's

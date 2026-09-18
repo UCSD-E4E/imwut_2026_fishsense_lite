@@ -1753,3 +1753,55 @@ mean signed difference of +0.8 % and per-fish differences from −13.8 % to
 Neither number licenses "reproduces the stereo measurement" at $n = 7$. The
 supportable sentence is the one §12 already reached: two instruments agreeing to
 about ±10 % per individual with no detectable systematic offset.
+
+## 14. The checkerboard-vs-slate check measures more than the objects (2026-09-17)
+
+§4.3 wanted to show that a dive slate carries the checkerboard's scale. The route was the
+laser baseline: it belongs to the rig rather than the dive, so one unit calibrated against
+both objects should return one baseline, and any difference would be the objects
+disagreeing. Over the six units carrying both, the mean checkerboard-minus-slate difference
+is **+0.66 % of baseline, 95 % bootstrap CI over units −0.23 % to +1.69 %**, one unit at
++2.94 % carrying most of the spread. Reproduced in the notebook from
+`data/calibration_fits.csv`; `sql/extract_calibration_fits.sql` pulls it.
+
+**The design does not support the claim, and the dates are how you see it.**
+
+| object | dates | fits |
+|---|---|---|
+| checkerboard | 2023-08-14 … 2023-08-18 | 11 |
+| slate | 2023-08-29 … 2023-08-31 | 8 |
+
+Perfectly disjoint, eleven days apart, no unit carrying both within one deployment. The
+calibration object is collinear with the epoch, so nothing separates them.
+
+Two facts from the field that no table records, and they came from the PI rather than from
+the database. The cameras were **shipped** between the two epochs. And the laser mounts are
+printed **PLA which had been splitting**; replacements were sent out, but which units
+received one and when is not recorded. The designs are near-identical, so a swap need not
+have moved a baseline much — what it means is that "one unit, one baseline", the premise
+the whole check rests on, is **unverifiable here**, not that it is known to fail.
+
+So +0.66 % is an upper bound on the objects, the fortnight, the shipment and the hardware
+together. `calibration.calibration_epoch_is_confounded` returns the epochs and a
+`separable` flag, and a test asserts it is False, so the claim cannot be restored silently.
+If a future corpus calibrates one unit against both objects in one session on one mount,
+that test fails — which is the signal that the claim has become available.
+
+**What survives.** Two things, and they are enough for §4.2's purposes.
+
+The bound is small and is beaten by the rig's own variation. Over the ten units calibrated
+more than once under a *single* object, the four groups inside one deployment scatter by
+**0.074 cm** and the six spanning 76–469 days and at least one shipment by **0.171 cm**
+(1.6 % of a 10.4 cm baseline). The objects' 0.069 cm sits inside what one object does
+across a shipment. (That split is itself confounded — short-span groups are all
+checkerboard, long-span all slate — so read it as one rig's baseline over time.)
+
+The comparison the substitution actually needs does not assume a constant baseline at all,
+because every session is calibrated from whatever object it has and the mount is re-fitted
+either way. Session offsets (median-polish dive effects) are **+1.28 pp** over fourteen
+checkerboard sessions against **+0.83 pp** over five slate. Same epoch confound, weaker
+claim: over these nineteen sessions the deployable object produced length errors
+indistinguishable from the printed one.
+
+**What would settle it:** one unit calibrated against both objects in a single session on
+one mount. One dive.
