@@ -905,6 +905,20 @@ caught any of this in the field.
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
+- **Figure 9c** *(§4.5)* — Laser range under a flat port with no refraction correction,
+  against the true range, from the same model as Figures 9 and 9b (Pinax geometry, salt
+  water $n_w = 1.342$, the housing's fitted standoff). **(a)** The error is a scale, not an
+  offset: a straight line through the origin at slope $1/n_w$, 0.36 m read at 0.50 and
+  4.10 m at 5.50. **(b)** And a very nearly constant one, converging on
+  $100\,(1/n_w - 1) = -25.5\,\%$; note the axis, which spans 1.7 pp of a 26 % error. The
+  extra 1.7 pp inside 1 m is the pane's own thickness still mattering against a small
+  standoff, and past 2 m the standoff dominates. **This is the term Figure 9's cancellation
+  runs on.** The pipeline gets a centred length right while its range is a quarter short,
+  because the same $n_w$ that shortens the range expands the scene transversely by the same
+  factor and the two divide out on axis; Figure 9 is what is left off axis, where the
+  angular compression stops being a pure scale. Quoting the length error without this panel
+  would leave a reader unable to see how much is cancelling, or how completely the
+  correction at the port is load-bearing rather than a refinement.
 - **Figure 17** *(§4.3)* — Fitted laser baseline per camera unit, split by the calibration
   object each fit used and, unavoidably, by the epoch it was shot in. Pale dots are the
   individual fits, set off the row line so a unit with one fit under a standard does not

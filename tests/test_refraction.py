@@ -552,3 +552,39 @@ def test_removing_the_index_step_removes_the_error():
 
     uncorrected = flat_port_error_field(cell_px=16.0)
     assert np.nanmax(uncorrected["error_pct"]) > 25.0
+
+
+# --- the range error the length figure cancels against -----------------------
+
+
+def test_the_flat_port_range_error_is_the_snell_factor():
+    """§4.5's Figure 9c: an uncorrected flat port reads a quarter short in
+    range, and the error is a scale rather than a range-dependent term.
+
+    Pinned because Figure 9's length result depends on it entirely -- the
+    transverse expansion cancels this shortening on axis -- so if this stopped
+    converging on 1/n_w, the cancellation argument would be wrong and the
+    length figure would still look fine.
+    """
+    from fishsense_imwut import refraction as rf
+
+    s = rf.flat_port_range_error()
+    assert s["asymptote_pct"] == pytest.approx(100 * (1 / rf.SALTY_WATER - 1), abs=1e-9)
+    # converging on the Snell factor from below, i.e. worse near the port
+    assert s["pct_error"][0] < s["pct_error"][-1] < 0
+    assert s["pct_error"][-1] == pytest.approx(s["asymptote_pct"], abs=0.05)
+    # and it is a scale: the whole 0.5-5.5 m sweep moves under 2 pp
+    assert s["pct_error"].max() - s["pct_error"].min() < 2.0
+    # a straight line through the origin at that slope
+    ratio = s["measured_m"] / s["depth_m"]
+    assert ratio[1:].std() < 0.002
+
+
+def test_the_range_error_matches_flat_port_cost_at_the_same_depth():
+    """One model, two entry points: the sweep must not drift from the figure
+    that reports a single depth."""
+    from fishsense_imwut import refraction as rf
+
+    s = rf.flat_port_range_error(depths_m=[rf.MEASUREMENT_DEPTH_M])
+    one = rf.flat_port_cost(depth_m=rf.MEASUREMENT_DEPTH_M, n_points=3)
+    assert s["pct_error"][0] == pytest.approx(one["range_pct_error"], abs=1e-9)

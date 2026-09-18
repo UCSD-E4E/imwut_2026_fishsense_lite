@@ -685,6 +685,10 @@ FIGURE_TITLES = {
     # NOT "the slate carries the checkerboard's scale", which is what this said
     # until the dates were checked. The rows are split by epoch as much as by
     # object, so the title names both and claims neither.
+    # NOT "...and what the correction buys": this figure shows only the cost of
+    # ignoring refraction. The correction itself is the WUWNet paper's.
+    "fig9c_flat_port_range":
+        "Laser range under an uncorrected flat port",
     "fig17_checkerboard_vs_slate":
         "Laser baseline per unit, by calibration object and mount epoch",
     "figD2_p90_budget":
@@ -1721,6 +1725,84 @@ def _short_span(first: str, last: str) -> str:
     if (a.year, a.month) == (b.year, b.month):
         return f"{a.day}\u2013{b.day} {a:%b}"
     return f"{a:%-d %b}\u2013{b:%-d %b}"
+
+
+# --- figure 9c: the range error the length error cancels against ----------
+
+
+def fig_flat_port_range(
+    sweep,
+    figsize: tuple[float, float] = (FULL_WIDTH, 2.6),
+) -> plt.Figure:
+    """Laser range under a flat port with no refraction correction, against the
+    true range, and the same thing as a percentage.
+
+    `sweep` is `refraction.flat_port_range_error(...)`.
+
+    **This is the term Figure 9's cancellation runs on, and it is enormous.** An
+    uncorrected flat port shortens a triangulated range by a quarter: 0.36 m
+    read at 0.50, 4.10 m read at 5.50. The pipeline gets a centred length right
+    anyway because the same `n_water` that shortens the range expands the scene
+    transversely by the same factor, so the two errors divide out on axis -- and
+    Figure 9 is what happens off it, where the angular compression stops being a
+    pure scale and the cancellation stops being exact. A reader who has not seen
+    this panel has no way to know how much is cancelling.
+
+    Two panels because they answer different questions with the same numbers.
+    Left: is it a scale error or an offset? A straight line through the origin
+    says scale, which is the fact that lets it cancel at all; an offset would
+    not cancel and would show here as a line missing the origin. Right: how
+    constant is that scale? Near enough, and the dotted limit is where it is
+    heading -- $100(1/n_w - 1)$, the pure Snell factor. The 1.7 pp of extra
+    error inside 1 m is the pane's own thickness still mattering against a small
+    standoff; past 2 m the standoff dominates and the curve flattens onto the
+    limit.
+    """
+    z = np.asarray(sweep["depth_m"], dtype=float)
+    measured = np.asarray(sweep["measured_m"], dtype=float)
+    pct = np.asarray(sweep["pct_error"], dtype=float)
+
+    fig, (left, right) = plt.subplots(1, 2, figsize=figsize)
+
+    _grid(left, axis="both")
+    span = np.array([0.0, z.max() * 1.05])
+    left.plot(span, span, color=INK_MUTED, linewidth=0.8, linestyle=(0, (4, 3)),
+              zorder=2, label="No refraction (true range)")
+    left.plot(z, measured, color=SERIES_1, linewidth=1.6, marker="o",
+              markersize=3.4, markeredgewidth=0, zorder=3,
+              label="Uncorrected flat port")
+    left.set_xlim(*span)
+    left.set_ylim(*span)
+    left.set_aspect("equal", adjustable="box")
+    left.set_xlabel("True laser range (m)")
+    left.set_ylabel("Triangulated range (m)")
+    left.set_title("(a) a scale error, not an offset", fontsize=7,
+                   color=INK_SECONDARY, loc="left", pad=4)
+    left.legend(loc="upper left", handletextpad=0.5, borderaxespad=0.2)
+
+    _grid(right, axis="both")
+    right.axhline(sweep["asymptote_pct"], color=INK_MUTED, linestyle=":",
+                  linewidth=1.0, zorder=2)
+    right.annotate(f"$100(1/n_w - 1) = {sweep['asymptote_pct']:.1f}$ %",
+                   xy=(z.max(), sweep["asymptote_pct"]), xytext=(-2, 4),
+                   textcoords="offset points", fontsize=6,
+                   color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
+    right.plot(z, pct, color=SERIES_1, linewidth=1.6, marker="o",
+               markersize=3.4, markeredgewidth=0, zorder=3)
+    right.set_xlabel("True laser range (m)")
+    right.set_ylabel("Range error (%)")
+    right.set_title("(b) and very nearly a constant one", fontsize=7,
+                    color=INK_SECONDARY, loc="left", pad=4)
+    # Say what the zoom is doing. This axis spans under 2 pp of a 25 % error,
+    # so without the note the curve reads as a large range dependence when the
+    # figure's point is that there is almost none.
+    right.annotate(f"axis spans {pct.max() - pct.min():.1f} pp"
+                   f" of a {abs(pct.mean()):.0f} % error",
+                   xy=(0.98, 0.04), xycoords="axes fraction", fontsize=6,
+                   color=INK_SECONDARY, ha="right", va="bottom", zorder=5)
+
+    fig.tight_layout()
+    return fig
 
 
 # --- figure 17: do the two calibration objects carry the same scale? ------

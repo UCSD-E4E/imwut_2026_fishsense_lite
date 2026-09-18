@@ -462,3 +462,42 @@ def flat_port_error_field(
         budget_crossing_px=crossing,
         image_size_px=(W, H),
     )
+
+
+def flat_port_range_error(
+    depths_m=np.linspace(0.5, 5.5, 11),
+    n_water: float = SALTY_WATER,
+    glass_thickness_m: float = GLASS_THICKNESS_M,
+    n_glass: float = N_GLASS,
+) -> dict:
+    """Laser range error against true range, with no refraction correction.
+
+    `flat_port_cost` reports this at one depth because that is where its length
+    figure lives; swept over depth it is the term that makes the length figure
+    work, and it is worth seeing on its own.
+
+    The error is very nearly a pure scale: ignoring refraction shortens a
+    triangulated range by `1 / n_water`, so the curve is a straight line through
+    the origin at that slope, and the only departure is close to the port, where
+    the pane's own thickness still matters relative to the standoff. That is why
+    a centred length comes out right despite a range this wrong -- the same
+    `n_water` that shortens the range expands the scene transversely, and on
+    axis the two cancel exactly (see `flat_port_cost`).
+
+    Returns `depth_m`, `measured_m`, `pct_error` and `asymptote_pct`, the last
+    being `100 (1/n_water - 1)`, the limit the error approaches once the
+    standoff dominates the pane.
+    """
+    depths = np.asarray(depths_m, dtype=float)
+    pct = np.array([
+        flat_port_cost(n_water=n_water, glass_thickness_m=glass_thickness_m,
+                       n_glass=n_glass, depth_m=float(z), n_points=3)["range_pct_error"]
+        for z in depths
+    ])
+    return {
+        "depth_m": depths,
+        "measured_m": depths * (1.0 + pct / 100.0),
+        "pct_error": pct,
+        "asymptote_pct": float(100.0 * (1.0 / n_water - 1.0)),
+        "n_water": float(n_water),
+    }
