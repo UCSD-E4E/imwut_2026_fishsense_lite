@@ -838,14 +838,14 @@ caught any of this in the field.
   on one colour scale. Each panel **is** the 4014 × 3016 image, so "where in the picture"
   needs no translation into degrees and cannot be misread as the fish's pose. White contour:
   the 15 % budget. Grey: a 300 mm target centred there would not fit in frame.
-  **The left field is not radially symmetric, and that is the argument.** The port is
+  **Panel (a) is not radially symmetric, and that is the argument.** The port is
   rotationally symmetric but the target is not a point — held horizontal it lies *along* a
   radius at the left and right edges and *across* one at the top and bottom, and radial and
   tangential magnification differ. The same fish at the same distance from the centre reads
   **+23 % at the side and +6 % at the top**, +0.1 % at the centre, and **+29.5 %** in the
   corner. No single scale factor is right at all three, which is why a calibration cannot
   absorb this.
-  **What the right panel is, and is not.** It is the same model with the index step removed
+  **What panel (b) is, and is not.** It is the same model with the index step removed
   — the air path the M52 lens restores at the port — and *not* a refraction correction; the
   Pinax model and the in-water single-viewpoint calibration are the companion paper's
   contribution and appear nowhere here. So it is close to tautological: take the water

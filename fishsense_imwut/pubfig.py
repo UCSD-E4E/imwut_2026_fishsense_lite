@@ -2269,8 +2269,8 @@ def fig_flat_port_before_after(
 
     fig, axes = plt.subplots(1, 2, figsize=figsize)
     for ax, err, title in (
-        (axes[0], left, "Flat port, no corrective optic"),
-        (axes[1], right, "Air path restored by the optic"),
+        (axes[0], left, "(a) Flat port, no corrective optic"),
+        (axes[1], right, "(b) Air path restored by the optic"),
     ):
         im = ax.imshow(err, extent=uncorrected["extent"], origin="upper",
                        aspect="equal", cmap=_PORT_ERROR_RAMP, vmin=0.0, vmax=vmax,
