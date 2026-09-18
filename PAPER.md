@@ -398,7 +398,8 @@ baseline gives us a handle, since it is a property of the rig: a unit calibrated
 both objects must report the same baseline either way. Six units in the pool corpus carry
 both, over 19 calibration *fits*, 11 checkerboard and 8 slate. (That 19 is not the session
 count; the coincidence is unfortunate.) The mean checkerboard-minus-slate difference is
-**+0.66 % of baseline, 95 % CI −0.23 % to +1.69 %**. The interval spans zero, and its width
+**+0.66 % of baseline, 95 % CI −0.23 % to +1.69 %** (Figure 17). The interval spans zero,
+and its width
 is comparable to the scatter between two calibrations of one unit under a single standard
 (0.132 cm, the mean within-unit sd over the ten units calibrated more than once under one
 object). Most of the spread comes from one unit, whose slate side includes the
@@ -884,6 +885,22 @@ caught any of this in the field.
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
   directions, which is the landmark-convention point the text makes.
+- **Figure 17** *(§4.3)* — Fitted laser baseline per camera unit under each calibration
+  object, for the six units calibrated both ways. Pale dots are the individual fits, set off
+  the row line so that a unit with one fit under a standard does not hide it beneath its own
+  mean; diamonds are the per-unit means, and the grey rule between them is the difference
+  the comparison averages. The baseline belongs to the rig rather than the dive, so
+  agreement here is the two objects agreeing on scale — the only check available, since
+  metric scale enters through the calibration object and reprojection residual cannot see
+  it. Mean checkerboard-minus-slate **+0.66 % of baseline**, 95 % bootstrap CI over the six
+  units **−0.23 % to +1.69 %**, against a 0.132 cm within-object noise floor; +0.66 % of a
+  10.40 cm baseline is 0.069 cm, so the difference and the floor are the same size. Camera 4
+  carries most of the spread and the figure shows why: its two slate fits are 9.87 and
+  10.44 cm, and the mean of those sits 2.94 % below its checkerboard. **Two fits are not on
+  the axis**, and neither is in the estimate either — dive 107, the 12.95 cm lever-arm
+  failure this section dissects, and dive 436, a field dive that reaches the pool exports
+  only as a borrow. Nothing is drawn that the estimate ignores, and nothing is estimated
+  that is not drawn.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
   Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
   holding ≥ 30, take the $p_{90}$ of percent length error, and compare it with that cell's

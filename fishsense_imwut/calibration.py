@@ -916,6 +916,11 @@ def baseline_by_standard(fits, dives, excluded=BASELINE_COMPARISON_EXCLUDED):
                 "n_slate": int(by["slate"].size),
                 "diff_pct": float(100.0 * (np.mean(by["checkerboard"])
                                            - np.mean(by["slate"])) / np.mean(by["slate"])),
+                # The fits each mean was taken over, so a figure can draw
+                # exactly the observations behind the mark and never a fit the
+                # comparison excluded.
+                "fits": {s: sub.baseline_cm.to_numpy(float).tolist()
+                         for s, sub in g.groupby("standard")},
             }
     return out
 

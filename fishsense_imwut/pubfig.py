@@ -682,6 +682,8 @@ FIGURE_TITLES = {
         "Convergence of the $p_{90}$ estimate with frames per fish",
     "figA_all_dives_percent": "Percent length error for every session",
     "figD1_depth_correction": "The range correction, and why it is not applied",
+    "fig17_checkerboard_vs_slate":
+        "The dive slate carries the checkerboard's scale, per camera unit",
     "figD2_p90_budget":
         "Reported length error against frames per fish, with the error budget marked",
 }
@@ -1702,6 +1704,99 @@ def fig_paired_vs_stereo(
     ax.set_ylabel("FishSense Lite length (cm)")
     ax.legend(loc="upper left", handletextpad=0.4, borderaxespad=0.2)
     _r2_annotation(ax, r2, r2_basis)
+    fig.tight_layout()
+    return fig
+
+
+# --- figure 17: do the two calibration objects carry the same scale? ------
+#
+# The one check available on the calibration object itself. Metric scale enters
+# through it and reprojection residual provably cannot see scale, so the only
+# handle is the laser baseline: it belongs to the rig, not the dive, so a unit
+# calibrated against both objects must report the same one either way.
+
+
+def fig_calibration_objects(
+    per_unit,
+    summary,
+    scatter=None,
+    figsize: tuple[float, float] = (COL_WIDTH, 2.9),
+) -> plt.Figure:
+    """Per-unit laser baseline under each calibration object.
+
+    `per_unit` is `calibration.baseline_by_standard(...)`, which carries the
+    individual fits behind each mean, and `summary` is
+    `checkerboard_slate_difference(...)`; `scatter` is the optional
+    `within_standard_scatter(...)` behind the noise-floor note.
+
+    **One row per unit, with every fit drawn.** The claim is that the two
+    objects agree, and a claim of agreement is only worth as much as the
+    scatter it is measured against -- so the individual fits are on the axis
+    rather than summarised away. What the reader should be able to see is that
+    the two hues interleave within a row instead of separating, and that the
+    one visible gap, camera 4's, is a single short slate fit rather than a
+    systematic offset.
+
+    Colour is identity here and nothing else: two calibration objects, the
+    paper's two-hue pair, no ordering implied. The connector between a row's
+    two means is grey because it is a distance, not a third category.
+
+    Dive 107 is not on the axis. It is the 12.95 cm lever-arm failure §4.3
+    dissects, it is excluded from the comparison for that reason, and at four
+    times the fleet's spread it would flatten every other row into a point. The
+    caption says so; nothing else is left out.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="x")
+
+    units = sorted(per_unit)
+    rows = {c: i for i, c in enumerate(units)}
+
+    for cam, u in per_unit.items():
+        y = rows[cam]
+        # No legend entry: a grey rule between two labelled marks reads as the
+        # distance between them without being told, and a third legend key on a
+        # column-width panel costs more than it explains.
+        ax.plot([u["checkerboard"], u["slate"]], [y, y], color=INK_MUTED,
+                linewidth=0.8, alpha=0.5, zorder=2)
+
+    for standard, colour, dy in (("checkerboard", SERIES_1, -0.17),
+                                 ("slate", SERIES_2, 0.17)):
+        # Straight off `per_unit`, never re-filtered from `fits`: the dots have
+        # to be the observations the diamond averages, and drawing the fits the
+        # comparison excluded would put marks on the axis the estimate ignores.
+        #
+        # Off the row line by `dy`, because a unit with one fit under a standard
+        # would otherwise hide that fit exactly under its own mean -- and a unit
+        # whose two fits straddle the mean (camera 4: 9.87 and 10.45) would show
+        # one of them and not the other. The means keep the line.
+        x = [v for c in units for v in per_unit[c]["fits"].get(standard, ())]
+        y = [rows[c] + dy for c in units for _ in per_unit[c]["fits"].get(standard, ())]
+        ax.scatter(x, y, s=13, color=colour, alpha=0.5, linewidths=0, zorder=3)
+        ax.scatter([per_unit[c][standard] for c in units], list(rows.values()),
+                   s=30, marker="D", color=colour, edgecolors=SURFACE,
+                   linewidths=1.0, zorder=4,
+                   label=standard.capitalize())
+
+    ax.set_yticks(list(rows.values()))
+    ax.set_yticklabels([f"unit {c}" for c in units])
+    # A strip below the last row, so the summary has somewhere to sit that is
+    # not on top of a unit. Six rows of data and one row of arithmetic.
+    ax.set_ylim(-0.7, len(units) + 0.5)
+    ax.invert_yaxis()
+    ax.set_xlabel("Fitted laser baseline (cm)")
+
+    note = (f"checkerboard $-$ slate  {summary['mean_pct']:+.2f} %,  "
+            f"95 % CI [{summary['ci_lo']:+.2f}, {summary['ci_hi']:+.2f}]")
+    if scatter is not None:
+        note += f"\nagainst a {scatter['mean_sd_cm']:.3f} cm within-object noise floor"
+    ax.annotate(note, xy=(0.015, 0.02), xycoords="axes fraction", fontsize=6,
+                color=INK_SECONDARY, ha="left", va="bottom", linespacing=1.5,
+                zorder=5)
+
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.01), ncols=2,
+              handletextpad=0.3, columnspacing=0.8, borderaxespad=0.0,
+              fontsize=6)
     fig.tight_layout()
     return fig
 
