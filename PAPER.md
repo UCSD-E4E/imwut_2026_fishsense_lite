@@ -162,7 +162,7 @@ summarising a one-sided error at its centre.
 
 One property of nearest rank has to be stated here rather than left for a reader
 to find. $p_{90}$ is the $\lceil 0.9n \rceil$-th of $n$ frames, which is $n$
-itself for every $n \le 10$, and these fish carry 3 to 11 frames each. For five
+itself for every $n \le 9$, and these fish carry 3 to 11 frames each. For five
 of the seven, $p_{90}$ is therefore that animal's longest frame, and only the two
 best-sampled separate the two at all. It is a high-order statistic on this day,
 not a tail estimate. The same is true throughout §4.1: no wild animal here has
@@ -275,7 +275,7 @@ the pool targets here, and in §4.1 each wild animal, in Figures 13, 14 and 15 a
 consequence of nearest rank is worth stating once, because the two settings differ. A pool
 cell holds 26 frames at the median, where $\lceil 0.9n \rceil$ is a genuine high quantile;
 a wild animal here holds at most eight, and $\lceil 0.9n \rceil$ is $n$ for every
-$n \le 10$, so **every field $p_{90}$ is that animal's longest frame**. With a one-sided
+$n \le 9$, so **every field $p_{90}$ is that animal's longest frame**. With a one-sided
 error that is the intended reading — the longest frame is the one least corrupted by
 pose — but the field estimates should not be credited with the precision the pool
 estimates carry. Where a *population* is summarised rather than a measurement, §4.1 takes
@@ -306,7 +306,7 @@ because it is the estimator's one failure mode. Its six frames were all shot wit
 board 14.7–20.0° off square — a flat rigid plate foreshortens by $\cos\theta$ exactly as a
 fish does — and that pose is unremarkable, the trout's median being worse. What
 disqualifies it is that nearest rank is $\lceil 0.9n \rceil$, which is $n$ itself for
-$n \le 10$, so over six frames $p_{90}$ is the single best frame, and the best frame is
+$n \le 9$, so over six frames $p_{90}$ is the single best frame, and the best frame is
 still 14.7° off. Its residual −3.3 % is $\cos 14.7° - 1$ and nothing else. Every reported
 target carries 66 to 407 frames and its $p_{90}$ lands on a pose between 0.0 and 8.7°. The
 board is the only target in the corpus with fewer than ten frames, so this bites once.
@@ -549,7 +549,26 @@ animal: a diver can choose *when* to release the shutter, which is what the guid
 asks, but cannot ask the fish to hold a pose. It is also one target in five sessions,
 carrying their calibrations with it. Treat it as a floor — what remains when pose is
 removed entirely — and §4.2's cohort, with the pose real divers achieved, as the
-expectation. And the guidance that follows is stated with margin rather than at the
+expectation.
+
+**What that residue is, and what it is not.** It is not pose. The obvious suspect is a
+misaligned protractor card, and it is the one model the data rejects: fitting all 1,428
+frames to $\cos(\theta + \delta) - 1$ is the *worst* of the candidates (RSS 2.12 against
+1.74 for a scale error), and it cannot be otherwise, because at 0° a pose error of $\delta$
+costs only $\cos\delta - 1$. Reproducing −3.8 % that way needs the card 15.9° out, which
+would then put 15° at −14.2 % instead of the −5.8 % observed. A multiplicative scale error
+fits best, $k = -2.7\,\%$ pooled — and scale here is a property of the *session*: fitted
+separately the five give $k = -6.5, -3.3, -3.0, -2.3$ and $+0.2\,\%$, a 6.7-point spread
+whose bootstrap intervals are mutually disjoint. That spread is what rules out the
+common-mode explanations: a wrong reference length for the Snook model, or a systematic
+snout/fork clicking convention, would be shared by all five sessions and could not produce
+it. The 0° offset is therefore the between-session calibration-scale term of §4.3, sampled
+five times, and not a floor on foreshortening. This is worth stating because it changes how
+Figure 8 is read: of the −5.8 % the pooled median shows at 15°, $\cos 15° - 1 = -3.4$
+points is pose and the remainder is scale, so the figure's vertical offset should not be
+charged to the approximation it is drawn to test.
+
+And the guidance that follows is stated with margin rather than at the
 boundary, and is about shutter timing rather than about arranging the animal: **release
 the shutter when the fish is within 15° of broadside.** Over the 542 frames inside that
 limit the median error is −4.7 %, the $p_{90}$ is −0.8 %, and not one frame falls short of
@@ -841,10 +860,20 @@ caught any of this in the field.
   **Panel (a) is not radially symmetric, and that is the argument.** The port is
   rotationally symmetric but the target is not a point — held horizontal it lies *along* a
   radius at the left and right edges and *across* one at the top and bottom, and radial and
-  tangential magnification differ. The same fish at the same distance from the centre reads
-  **+23 % at the side and +6 % at the top**, +0.1 % at the centre, and **+29.5 %** in the
-  corner. No single scale factor is right at all three, which is why a calibration cannot
-  absorb this.
+  tangential magnification differ. The same fish reads **+23 % at the side and +6 % at the top**, each at the furthest
+  point on its own axis where the target still fits (1631 px and 1500 px from centre); at
+  *equal* radius the gap is still more than threefold, +19 % against +6 % at 1500 px. It
+  reads +0.1 % at the centre and **+29.5 %** in the corner, which is the worst the port
+  does anywhere a 300 mm target fits — at 2177 px, 37.4° off axis. No single scale factor
+  is right at all of these, which is why a calibration cannot absorb this.
+  **All of these are free-field bounds for a 300 mm target held horizontal at 2 m**,
+  evaluated wherever that target still fits in frame, and they are not what a diver meets:
+  the laser dot has to land on the fish, which pins the target far closer to the axis. That
+  qualifier matters once the companion paper is public, because it reports two further
+  bounds on the same effect over different domains — **+55.6 %** (radial, at 2500 px,
+  against its in-water calibration, and explicitly *not* reachable) and **1.2 %** (median
+  over its reachable envelope of production lengths and ranges). Three numbers, three
+  domains, no contradiction — but only if each is labelled with what it bounds.
   **What panel (b) is, and is not.** It is the same model with the index step removed
   — the air path the M52 lens restores at the port — and *not* a refraction correction; the
   Pinax model and the in-water single-viewpoint calibration are the companion paper's
@@ -900,7 +929,7 @@ caught any of this in the field.
   the stereo at $p_{90}$, by 3.5 to 11.2 %, and pose loss cannot produce a positive; the
   median difference is +3.5 % and the mean +0.8 %. One caution about
   the estimator at these sample sizes: nearest rank is `ceil(0.9n)`, which is $n$ itself for
-  $n \le 10$, so with 3 to 11 frames per fish $p_{90}$ selects the top sample for five of
+  $n \le 9$, so with 3 to 11 frames per fish $p_{90}$ selects the top sample for five of
   the seven. It is a high-order statistic here rather than a tail estimate, and only the
   two best-sampled fish separate it from a per-fish maximum at all. The two hogfish near
   32 cm are worth following: nearly the same stereo length, disagreeing in opposite
@@ -967,7 +996,7 @@ caught any of this in the field.
   the summary is a **median** — the same choice §4.1 makes across animals — because sampling
   error is not one-sided and has no tail that needs rejecting. Band: central 80 % of draws,
   kept signed because the bias changes sign. **The step at $n = 10$ is arithmetic, not
-  noise**: nearest rank is $\lceil 0.9n \rceil$, which equals $n$ for every $n \le 10$, so
+  noise**: nearest rank is $\lceil 0.9n \rceil$, which equals $n$ for every $n \le 9$, so
   below ten frames $p_{90}$ is the sample maximum — the noisiest order statistic there is.
   Crossing that boundary narrows the 80 % interval from 2.08 % at $n = 9$ to 1.35 at
   $n = 10$ on no extra information, purely because the estimator stops taking the extreme.
@@ -986,7 +1015,12 @@ caught any of this in the field.
 - **Figure 8** — Percent length error against fish angle to the image plane, from five
   sessions of one target stepped through 0–45°. Thin lines: per-session binned medians;
   black: pooled median and interquartile range; dashed: $\cos\theta - 1$; dotted: the 15 %
-  budget. No frame within 20° of broadside breaches it; the pooled median crosses at 30°.
+  budget. No frame within 20° of broadside breaches it; the pooled median crosses at 30°,
+  against the $\cos^{-1}(1 - \epsilon) = 31.8°$ that pure foreshortening predicts at
+  $\epsilon = 0.15$; the 1.8° difference is the scale offset below, not a failure of the
+  model. **The curve's vertical offset is not pose** — it is per-session calibration scale,
+  derived in §4.4 — so the dashed $\cos\theta - 1$ should be read as the *shape* this
+  figure tests, not as a line the data ought to sit on.
   The guidance in the text is 15°.
 - **Figure A (appendix)** — Percent length error for every session with ≥ 8 frames,
   ordered by median, held-out targets included. The held-out and rejected sessions are the

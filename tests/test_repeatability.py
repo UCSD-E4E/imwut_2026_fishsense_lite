@@ -13,6 +13,7 @@ The two headline numbers are pinned against committed extractions
 than from whatever a notebook last held in memory.
 """
 
+import math
 from pathlib import Path
 
 import numpy as np
@@ -390,3 +391,33 @@ def test_level_traces_never_draw_a_cell_beyond_its_frames(cohort_cells):
     assert 200 not in worst
     assert all(200 not in t for t in traces.values())
     assert all(len(cohort_cells[k]) >= 40 for k, t in traces.items() if 40 in t)
+
+
+def test_nearest_rank_equals_n_below_ten_and_not_at_ten():
+    """The boundary PAPER.md states in five places, pinned as arithmetic.
+
+    `ceil(0.9 * 10) == 9`, so `p90` stops being the sample maximum *at* ten
+    frames, not after them. The paper said `n <= 10` while every conclusion
+    drawn from it assumed `n <= 9` -- most visibly the paired-stereo claim that
+    `p90` is the longest frame for "five of the seven" fish, which holds only
+    under the correct bound: the two exceptions carry 10 and 11 frames, and the
+    stated bound would have made it six.
+    """
+    assert all(math.ceil(0.9 * n) == n for n in range(1, 10))
+    assert math.ceil(0.9 * 10) == 9
+
+    paper = (Path(__file__).resolve().parents[1] / "PAPER.md").read_text()
+    assert "\\le 10" not in paper, "nearest-rank bound regressed to n <= 10"
+
+
+def test_the_paired_stereo_five_of_seven_follows_from_the_bound():
+    """Guards the dependent claim rather than restating the arithmetic."""
+    sp = pytest.importorskip("fishsense_imwut.stereo_pairs")
+    root = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    pairs = sp.build_pairs(sp.load_ours(root / "stereo_pairs.csv"),
+                           sp.load_stereo(root / "stereo_reference.csv"))
+    assert len(pairs) == 7
+    assert sum(p.n_frames for p in pairs) == 39
+    is_max = [math.ceil(0.9 * p.n_frames) == p.n_frames for p in pairs]
+    assert sum(is_max) == 5
+    assert sorted(p.n_frames for p in pairs if not is_max[pairs.index(p)]) == [10, 11]
