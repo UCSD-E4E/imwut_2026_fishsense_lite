@@ -216,7 +216,13 @@ is limited by between-unit scatter on 2–10 fish per unit; the paired compariso
 is limited by seven individuals at $\pm 8$ points. Field accuracy remains
 unmeasured. What the paired day supports is narrower and worth stating exactly:
 on one day, seven wild fish measured by two independent instruments agreed to
-within about 10 % per individual with no detectable systematic offset. It is also
+within $-13.8$ to $+11.2\,\%$ per individual with no detectable systematic offset.
+"About 10 %" would be the wrong shorthand: it is a min/max over seven fish, not an
+interval, and it understates the negative tail. Nor does the choice between the
+$+3.5\,\%$ median and the $+0.8\,\%$ mean carry any weight — their 95 % intervals are
+$-8.1$ to $+10.7$ and $-8.6$ to $+10.2$, so at $n = 7$ the two are indistinguishable
+from each other and from zero ($p = 0.84$ by $t$, 0.81 by Wilcoxon, 1.00 by sign
+test). The interval is the result; neither point estimate should be quoted bare. It is also
 a template — the same-individual design, and a slate burst shot at two clearly
 different standoffs, is what would make a future deployment answer the question
 this corpus cannot.
