@@ -421,3 +421,18 @@ def test_the_paired_stereo_five_of_seven_follows_from_the_bound():
     is_max = [math.ceil(0.9 * p.n_frames) == p.n_frames for p in pairs]
     assert sum(is_max) == 5
     assert sorted(p.n_frames for p in pairs if not is_max[pairs.index(p)]) == [10, 11]
+
+
+def test_the_paired_day_is_disjoint_from_the_field_deployments():
+    """Both are "seven", and the text now says so explicitly -- pin that they
+    really are disjoint, because the whole point of saying it is that a reader
+    who conflates them reads the paired day as part of the 162 measurements."""
+    root = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    field = rep.load_field(root / "field.csv")
+    assert len(field) == 162 and field.fish_id.nunique() == 73
+    assert field.dive_id.nunique() == 7
+
+    sp = pytest.importorskip("fishsense_imwut.stereo_pairs")
+    pairs = sp.build_pairs(sp.load_ours(root / "stereo_pairs.csv"),
+                           sp.load_stereo(root / "stereo_reference.csv"))
+    assert not set(field.dive_id) & {p.dive_id for p in pairs}

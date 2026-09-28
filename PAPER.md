@@ -131,8 +131,11 @@ unexpectedly permits.** On 2023-08-03 at two sites, each of our dive folders
 holds one fish and the archive numbers the same fish the same way — both sides'
 hogfish numbering at one site runs 1–12 and both skip 10, so it is a shared
 registry rather than two independent counts. Seven individuals were measured by
-both instruments. This is a separate day from the seven deployments above and is
-not part of the 162 measurements; its lengths rest on a calibration fitted from
+both instruments. **Two sevens, and they are not the same seven**: this is one day,
+2023-08-03, disjoint from the seven open-water deployments above — those are dives
+279, 341, 347, 349, 383, 465 and 471, this day's fish come from dives 5, 16, 20, 25,
+28, 35 and 39, and no dive appears in both. Its seven are *individuals*, not
+deployments, and none of its 39 frames is part of the 162 measurements; its lengths rest on a calibration fitted from
 that morning's slate burst (10.55 cm, inside the 9.87–10.55 cm band 30 of the
 fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time a
 borrowed calibration has produced field lengths checked against anything
