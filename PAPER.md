@@ -237,7 +237,7 @@ stylised rainbow trout (313 mm), a grouper (360 mm) and a snook (455 mm) — and
 Each target's reference length is the snout-to-tail-fork distance a labeler is asked to
 click, measured with a tape.
 
-Targets were photographed in two pools over 31 sessions spanning seventeen days in August
+Targets were photographed in three pools over 31 sessions spanning seventeen days in August
 2023, at laser ranges of 0.25–5.47 m (median 2.0 m), by several divers on several
 camera+laser units, at ranges and poses of the diver's choosing rather than on a fixture.
 Every frame passed through the same pipeline as a field image: a labeler marks the laser
@@ -245,7 +245,7 @@ dot and the snout and tail-fork, the laser dot fixes the range (Eq. 5), and the 
 follows from Eqs. 6–8. In total 2,799 measurements were made.
 
 Calibration was per unit and per session throughout, but the calibration *object* changed
-partway through, and the direction of that change is the point. The first twenty sessions
+partway through, and the direction of that change is the point. The first nineteen sessions
 (14–18 August) used a planar checkerboard photographed in the same session — the standard
 tool, and one that has to be kept flat, dry and undamaged. The remaining twelve (29–31
 August) used the duct-tape dive slate of §3.3, photographed in a companion session. We
@@ -256,7 +256,7 @@ substitution costs.
 
 Spreading the corpus over many sessions, sites and weather is only useful if no single
 unit dominates it, so we check that directly. Seven camera+laser units contributed, six of
-them at both pools, and Figure 10 plots each session's calibration offset grouped
+them in both calibration epochs, and Figure 10 plots each session's calibration offset grouped
 by unit — the session term of the polish below, which is comparable across units that
 photographed different targets in a way a raw per-unit mean is not. The five
 angle-experiment sessions of §4.4 are left out: a single target at deliberately oblique

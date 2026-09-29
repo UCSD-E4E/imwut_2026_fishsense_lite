@@ -693,7 +693,7 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
 #: Yellow Anthias model held by a diver at Alligator Reef on 2024-10-16 (EXIF)
 #: -- a real known-length measurement, not a mislabel, but fourteen months after
 #: every other session and in the ocean rather than a pool. Keeping it makes
-#: Section 4.1's "two pools over seventeen days in August 2023" false twice for
+#: Section 4.1's "three pools over seventeen days in August 2023" false twice for
 #: no analytical gain: one frame cannot enter any reported statistic, because
 #: the median polish and the cohort rule both need five frames in a cell, so it
 #: reaches only the raw session and frame counts that it corrupts.
