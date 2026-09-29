@@ -86,11 +86,15 @@ def test_every_committed_extraction_has_its_cached_output():
         assert (DATA / csv).exists(), f"{sql} has no cached output"
 
 
-def test_nothing_on_the_reproduction_path_imports_a_database_client():
-    """`fishsense-meta` is in the `db` dependency group precisely so a plain
-    `uv sync` does not install it. If any analysis module reached for it, that
-    separation would be a lie and an outside reader's install would break at
-    import rather than at the point they tried to re-export."""
+def test_nothing_on_the_reproduction_path_needs_the_compiled_extension():
+    """`fishsense-meta` -> `fishsense-core` is a maturin/pyo3 Rust extension and
+    the only dependency here needing a compiler. It sits in the `sim` group so a
+    plain `uv sync` skips it; the simulation notebooks use it, the paper does
+    not. If an analysis module reached for it, that separation would be a lie
+    and an outside reader's install would fail at import.
+
+    The database is checked here too, but only for completeness: this repository
+    never speaks to it from Python. The cache is re-exported with `psql`."""
     for mod in ("calibration", "pubfig", "refraction", "repeatability",
                 "stereo_pairs", "camera", "rig"):
         m = importlib.import_module(f"fishsense_imwut.{mod}")

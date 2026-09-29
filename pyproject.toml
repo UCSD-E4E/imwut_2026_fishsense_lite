@@ -23,18 +23,21 @@ dev = [
     "black>=25.12.0",
     "pytest>=9.1.1",
 ]
-# Database access. NOT a runtime dependency of anything this paper reports:
-# `fishsense_imwut` never imports it, and every number comes from the committed
-# CSVs in `fish_model_analysis/data/` (see that directory's MANIFEST.md).
-# It is needed only to RE-EXPORT those CSVs from the production database with
-# `fish_model_analysis/sql/*.sql`, which requires credentials an outside reader
-# does not have and does not need.
+# The simulation notebooks' dependency, and the ONLY thing here that needs a
+# compiler. `fishsense-meta` pulls `fishsense-core`, a maturin/pyo3 Rust
+# extension providing `fishsense_core.laser.calibrate_laser` -- the production
+# laser fit that `calibration_analysis/` and
+# `reconstruction_analysis/calculated_calibration.ipynb` compare estimators
+# against. It is NOT a database client: nothing in this repository speaks to the
+# database from Python at all, and the cache is re-exported with `psql` against
+# the .sql files in `fish_model_analysis/sql/`.
 #
-# Deliberately NOT in `dev`: uv installs the `dev` group by default, so putting
-# it there would still pull the maturin/pyo3 `fishsense-core` sdist -- and with
-# it the C/Rust toolchain requirement -- on a plain `uv sync`. Kept out so that
-# reproducing the paper needs neither.
-db = [
+# Kept out of the default install because the paper does not need it. Every
+# number in PAPER.md comes from the committed CSVs (see
+# `fish_model_analysis/data/MANIFEST.md`), so a reader reproducing the results
+# needs neither this group nor a toolchain. Deliberately not `dev` either, which
+# uv installs by default.
+sim = [
     "fishsense-meta",
 ]
 

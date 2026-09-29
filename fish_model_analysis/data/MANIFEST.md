@@ -12,9 +12,10 @@ uv run pytest -q tests        # 156 tests, all against these files
 uv run jupyter lab            # fish_model_analysis/fish_model_measurements.ipynb
 ```
 
-`uv sync` deliberately does **not** install the `db` group. That group exists only to
-re-export these files (see *Refreshing the cache* below) and needs credentials an outside
-reader does not have and does not need.
+`uv sync` deliberately does **not** install the `sim` group; nothing needed to reproduce
+the paper's numbers is in it. Re-exporting these files (see *Refreshing the cache* below)
+needs database credentials an outside reader does not have and does not need, but it goes
+through `psql` rather than through any Python client — this repository has none.
 
 ## What each file is
 
@@ -56,7 +57,6 @@ targets come out separately. The rule is in `calibration.py` and pinned in
 Only needed when prod changes. Requires credentials.
 
 ```bash
-uv sync --group db            # pulls fishsense-meta -> fishsense-core (needs cc/rustc)
 psql "$FISHSENSE_DSN" -A -F'|' -f sql/extract_corpus.sql -o data/corpus.csv
 ```
 

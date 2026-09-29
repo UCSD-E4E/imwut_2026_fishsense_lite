@@ -25,17 +25,21 @@ uv run pytest -q tests          # 156 tests; pins the cohort, the polish, the he
 uv run jupyter lab              # fish_model_analysis/fish_model_measurements.ipynb
 ```
 
-The database client lives in the `db` dependency group and is **not** installed by
-default. It is needed only to re-export the cache from production with
-`fish_model_analysis/sql/*.sql`; `fishsense_imwut` never imports it, and
-`tests/test_data_cache.py` fails if that ever stops being true.
+Nothing here reaches the database from Python at all — the cache is re-exported with
+`psql` against `fish_model_analysis/sql/*.sql`, and that is the only path needing
+credentials.
+
+The one optional dependency is the **simulation** group, which pulls the maturin/pyo3
+`fishsense-core` Rust extension for `fishsense_core.laser.calibrate_laser`. Only
+`calibration_analysis/` and `reconstruction_analysis/calculated_calibration.ipynb` use it,
+to compare estimators against the production laser fit. It is the one path that needs a
+compiler (`linker 'cc' not found` without one):
 
 ```bash
-uv sync --group db              # re-export only: pulls fishsense-meta -> fishsense-core
+uv sync --group sim             # simulation notebooks only
 ```
 
-That group pulls the maturin/pyo3 `fishsense-core` sdist, so it is the one path that needs
-a compiler (`linker 'cc' not found` without one). The flake supplies it:
+The flake supplies the toolchain:
 
 ```bash
 nix run .#default -- -c 'uv run jupyter lab'
