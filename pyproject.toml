@@ -5,7 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fishsense-meta",
     "ipykernel>=7.1.0",
     "ipympl>=0.9.8",
     "matplotlib>=3.10.7",
@@ -23,6 +22,20 @@ fishsense-meta = { git = "https://github.com/UCSD-E4E/fishsense-core.git" }
 dev = [
     "black>=25.12.0",
     "pytest>=9.1.1",
+]
+# Database access. NOT a runtime dependency of anything this paper reports:
+# `fishsense_imwut` never imports it, and every number comes from the committed
+# CSVs in `fish_model_analysis/data/` (see that directory's MANIFEST.md).
+# It is needed only to RE-EXPORT those CSVs from the production database with
+# `fish_model_analysis/sql/*.sql`, which requires credentials an outside reader
+# does not have and does not need.
+#
+# Deliberately NOT in `dev`: uv installs the `dev` group by default, so putting
+# it there would still pull the maturin/pyo3 `fishsense-core` sdist -- and with
+# it the C/Rust toolchain requirement -- on a plain `uv sync`. Kept out so that
+# reproducing the paper needs neither.
+db = [
+    "fishsense-meta",
 ]
 
 [build-system]
