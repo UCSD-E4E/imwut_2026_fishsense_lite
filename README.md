@@ -1,7 +1,12 @@
 # imwut_2026_fishsense_lite
 
-Length-measurement accuracy for FishSense Lite — the system-characterization paper
-(IMWUT / *Journal of Ocean Engineering*).
+**Companion repository for** *FishSense Lite: A Camera-Based, Single Laser Hardware
+Framework with Software System for In Situ Fish Length Measurement* (IMWUT / *Journal of
+Ocean Engineering*; preprint [10.5281/zenodo.22882398](https://doi.org/10.5281/zenodo.22882398)).
+
+Everything a reader of the paper might want to check or rerun is here: the measurement
+corpus and every number and figure in the Results, the estimator comparison the System
+section refers to, and the simulations behind the length-recovery method.
 
 A commercial dive camera with one rigidly mounted laser recovers metric depth from a
 single image; head and tail are back-projected at that depth to give a length. This repo

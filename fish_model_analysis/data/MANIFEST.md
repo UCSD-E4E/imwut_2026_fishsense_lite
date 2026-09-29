@@ -38,7 +38,6 @@ header, a trailing psql `(n rows)` footer, or rows the loader drops.
 | `ruler.csv` | 28 | no committed SQL | the printed measuring board, read by `measure_ruler_scale.py`. |
 | `corpus_20260912.csv` | 2927 | `sql/extract_corpus.sql` | frozen 2026-09-12 export. Kept **only** because the reference-sensitivity result is reproducible against it and nothing else. |
 | `corpus_20260916.csv` | 2927 | `sql/extract_corpus.sql` | frozen export at the corrected 0.04217 m grid pitch; `corpus.csv` is its working copy. |
-| `models.csv` | 437 | no committed SQL | **unused.** No code in this repo reads it. Kept for provenance; delete if it is still unreferenced at submission. |
 
 ## The two things a reader should know before trusting a number
 

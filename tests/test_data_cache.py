@@ -32,7 +32,6 @@ LOADERS = {
     "corpus_20260916.csv": lambda p: len(cal.load_rows(p)),
     "corpus_20260912.csv": lambda p: len(cal.load_rows(p)),
     "all.csv": lambda p: len(cal.load_rows(p)),
-    "models.csv": lambda p: len(cal.load_rows(p)),
     "angles.csv": lambda p: len(cal.load_angles(p)),
     "field.csv": lambda p: len(rep.load_field(p)),
     "calibration_fits.csv": lambda p: len(cal.load_calibration_fits(p)),
