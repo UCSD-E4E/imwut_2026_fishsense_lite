@@ -443,3 +443,23 @@ def test_the_paired_day_is_disjoint_from_the_field_deployments():
     pairs = sp.build_pairs(sp.load_ours(root / "stereo_pairs.csv"),
                            sp.load_stereo(root / "stereo_reference.csv"))
     assert not set(field.dive_id) & {p.dive_id for p in pairs}
+
+
+def test_section_4_1s_deployment_facts():
+    """What divers did, and what the field calibrations rest on -- the numbers
+    4.1 now states as facts of the deployment."""
+    from fishsense_imwut import calibration as cal
+
+    root = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    field = rep.load_field(root / "field.csv")
+    per_animal = field.groupby("fish_id").size()
+    assert per_animal.median() == 2 and per_animal.max() == 8
+    assert round(per_animal.mean(), 1) == 2.2
+    assert int((per_animal == 1).sum()) == 31
+
+    fits = cal.load_calibration_fits(root / "calibration_fits.csv").set_index("dive_id")
+    by_dive = field.groupby("dive_id").agg(n=("fish_id", "size"), animals=("fish_id", "nunique"))
+    thin = by_dive[[fits.loc[d, "n_frames"] < 10 for d in by_dive.index]]
+    assert (len(thin), int(thin.n.sum()), int(thin.animals.sum())) == (4, 62, 38)
+    assert int(fits.loc[thin.index, "n_frames"].max()) == 3
+    assert int(fits.loc[32, "n_frames"]) == 2          # the stereo day's calibration

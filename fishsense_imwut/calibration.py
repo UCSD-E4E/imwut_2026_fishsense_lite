@@ -1103,8 +1103,12 @@ def calibration_epoch_is_confounded(fits, dives, excluded=BASELINE_COMPARISON_EX
 # change) where it did not, which is why the two directions are now kept apart.
 
 #: A laser fit on fewer frames than this is drawn hollow and never used as a
-#: unit's reference. Two or three frames fix a line barely at all; the thinnest
-#: accepted fits in production rest on two.
+#: unit's reference. Not because few frames cannot fix a line -- section 4.3's
+#: point is that the spread along the ray matters more than the count, and a
+#: two-frame fit with a long lever arm passes its conditioning check -- but
+#: because a line through two or three points leaves almost nothing over to
+#: check it with: a mislabelled dot, or a mount that moved between the frames,
+#: is invisible to it. The thinnest accepted fits in production rest on two.
 LASER_DRIFT_MIN_FRAMES = 10
 
 #: The range the in-plane change is evaluated at: the pool corpus's median.

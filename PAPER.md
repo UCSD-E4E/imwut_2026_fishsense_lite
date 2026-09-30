@@ -70,7 +70,13 @@ and baselines of 10.10 and 10.52 cm. Thirty of the fleet's thirty-one fitted bas
 in 9.87–10.55 cm and both repairs land inside that band; the single exception is a pool
 session whose observations span 2.8 cm along the ray, which the conditioning criterion of
 §4.3 rejects without reference to its baseline at all. All seven deployments therefore carry
-calibrations that pass every check in §4.3 and Appendix A. Laser range spans
+calibrations that pass every check in §4.3 and Appendix A. Passing is not the same as being
+well supported, though. Four of the seven calibrations — carrying 62 of the 162 measurements
+and 38 of the 73 animals — rest on two or three slate frames each. A lever arm long enough to
+pass §4.3 fixes the beam's direction, but a line through two or three points leaves almost
+nothing over to check it with: it cannot reveal a mislabelled dot, or a mount that moved
+between those frames, which §4.3 shows can happen within minutes. The field calibrations are
+the thinnest in the corpus, and the field numbers carry that. Laser range spans
 0.46–3.90 m with a median
 of 1.49 m — closer than the pool median — and 90 % of the frames fall between 0.72 and
 3.16 m.
@@ -136,7 +142,7 @@ both instruments. **Two sevens, and they are not the same seven**: this is one d
 279, 341, 347, 349, 383, 465 and 471, this day's fish come from dives 5, 16, 20, 25,
 28, 35 and 39, and no dive appears in both. Its seven are *individuals*, not
 deployments, and none of its 39 frames is part of the 162 measurements; its lengths rest on a calibration fitted from
-that morning's slate burst (10.55 cm, inside the 9.87–10.55 cm band 30 of the
+that morning's slate burst — two frames, so it shares the limitation above — (10.55 cm, inside the 9.87–10.55 cm band 30 of the
 fleet's 31 fits occupy) and borrowed by each fish dive, which is the first time a
 borrowed calibration has produced field lengths checked against anything
 external.
@@ -169,7 +175,11 @@ itself for every $n \le 9$, and these fish carry 3 to 11 frames each. For five
 of the seven, $p_{90}$ is therefore that animal's longest frame, and only the two
 best-sampled separate the two at all. It is a high-order statistic on this day,
 not a tail estimate. The same is true throughout §4.1: no wild animal here has
-more than eight frames, so every field $p_{90}$ is a longest frame. This is
+more than eight frames, so every field $p_{90}$ is a longest frame. That is what divers did
+when shooting as they judged best: a median of two frames per animal (mean 2.2), with 31 of
+the 73 animals photographed once and none more than eight times — short of the ten at which
+$p_{90}$ becomes a quantile at all, and of the thirteen at which it settles within 1 %
+(Figure 16). This is
 intended rather than tolerated — with a one-sided error the longest frame is the
 one least corrupted by pose — but it is why the field figures should not be read
 as carrying the same estimator precision the pool figures do, where a cell holds
@@ -488,7 +498,11 @@ lens that is almost entirely within the camera–laser plane, so it changes the 
 directly. The mount turns in the housing's cold shoe, which pans the beam horizontally,
 mostly out of the plane: it moves the dot off the line a calibration expects, with far less
 effect on range. And the pointer can turn in its own clamp. No diode is exactly coaxial
-with its body, so a turn swings the beam around a small cone and moves it both ways. Each
+with its body, so a turn swings the beam around a small cone and moves it both ways. Behind
+the first two sit the mount failures seen over the deployments — creep and cracking of the
+printed PLA, water uptake, screws pulling through the print, and play in the cold shoe. None
+was logged by unit or by date, which is why their effect can only be read back from the
+calibrations, as below. Each
 pointer carries a mark to be lined up with the mount, but nothing recorded whether it was
 lined up at each dive, and we do not assume it was. The steps between calibrations hold
 both kinds of motion in similar amounts — a median of 0.53° vertically and 0.54°
@@ -1035,7 +1049,8 @@ caught any of this in the field.
   that unit's earliest calibration resting on at least ten frames: in-plane change (top, with
   the 2 m budget band) and out-of-plane change (bottom). Colour is the calibration object,
   because every unit swings positive exactly when the object changed and the cameras
-  shipped; hollow points rest on two or three frames. It is the fleet-wide version of
+  shipped; hollow points rest on two or three frames, which leaves the fit nothing to check
+itself against. It is the fleet-wide version of
   Figure 4, and the source of §4.3's 0.65° median step and its 3° change across the months
   to the 2024 deployments.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
