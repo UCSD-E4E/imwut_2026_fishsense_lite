@@ -1195,6 +1195,37 @@ def laser_drift(fits, z: float = LASER_DRIFT_RANGE_M,
     return pd.DataFrame(out)
 
 
+def laser_step_directions(fits, min_frames: int = LASER_DRIFT_MIN_FRAMES, excluded=(107,)):
+    """Each step between successive well-conditioned calibrations of a unit,
+    split into vertical and horizontal beam motion, in degrees.
+
+    Vertical is rotation about the camera's x axis and horizontal about its y.
+    The split is by mechanism rather than by consequence: PLA flex tilts the
+    beam vertically, rotation in the cold shoe pans it horizontally, and a
+    pointer turning in its clamp moves it both ways. With the laser above the
+    lens, vertical is close to in plane (range-setting) and horizontal close to
+    out of plane, but the two splits are not identical. Only fits on at least
+    `min_frames` frames are used, at both ends of each step.
+    """
+    import pandas as pd
+
+    keep = fits[~fits.dive_id.isin(excluded) & (fits.n_frames >= min_frames)].copy()
+    keep["when"] = pd.to_datetime(keep.dive_datetime, utc=True)
+    out = []
+    for cam, g in keep.sort_values("when").groupby("camera_id"):
+        g = list(g.itertuples())
+        for a, b in zip(g, g[1:]):
+            out.append({
+                "camera_id": int(cam), "from_dive": int(a.dive_id), "to_dive": int(b.dive_id),
+                "days": (b.when - a.when).total_seconds() / 86400,
+                "vertical_deg": float(np.degrees(np.arctan2(b.axis_y, b.axis_z)
+                                                 - np.arctan2(a.axis_y, a.axis_z))),
+                "horizontal_deg": float(np.degrees(np.arctan2(b.axis_x, b.axis_z)
+                                                   - np.arctan2(a.axis_x, a.axis_z))),
+            })
+    return pd.DataFrame(out)
+
+
 def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(107,),
                                 min_frames: int = LASER_DRIFT_MIN_FRAMES):
     """What a pool session's KNOWN lengths say about reusing another calibration.

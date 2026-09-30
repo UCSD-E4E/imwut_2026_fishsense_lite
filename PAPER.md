@@ -480,9 +480,26 @@ units; 0.57° within the pool month alone). A 2 m length stays inside the 15 % b
 while that swing stays between −0.53° and +0.39°, and 13 of the 18 swings exceed it. The
 months between the pool corpus and the 2024 deployments moved three of the four units that
 can be checked by about 3° — units 1 and 2 almost entirely in plane, unit 6 mostly out of
-it — and the fourth by 0.9° over fourteen months. The directions differ from unit to unit,
-which argues against a common cause such as the water or the housing, and is consistent
-with handling and with the unrecorded mount replacements above.
+it — and the fourth by 0.9° over fourteen months.
+
+Three mechanisms were seen in use, and they move the beam in different directions. The
+printed PLA mount flexes, which tilts the beam vertically; with the laser mounted above the
+lens that is almost entirely within the camera–laser plane, so it changes the range
+directly. The mount turns in the housing's cold shoe, which pans the beam horizontally,
+mostly out of the plane: it moves the dot off the line a calibration expects, with far less
+effect on range. And the pointer can turn in its own clamp. No diode is exactly coaxial
+with its body, so a turn swings the beam around a small cone and moves it both ways. Each
+pointer carries a mark to be lined up with the mount, but nothing recorded whether it was
+lined up at each dive, and we do not assume it was. The steps between calibrations hold
+both kinds of motion in similar amounts — a median of 0.53° vertically and 0.54°
+horizontally — and some are close to one kind alone: four days turned one unit 1.61°
+horizontally and 0.00° vertically, and eight minutes tilted another 0.77° vertically and
+0.30° horizontally. No single mechanism accounts for the drift, and the calibrations cannot
+apportion it among the three, or the unrecorded mount replacements above: with three to
+six fits per unit, and origin and angle trading off inside each fit, the attribution is
+underdetermined. This paper does not need it. All three act between dives and within them,
+which is why the pipeline calibrates at every dive; measuring each on the bench belongs
+with the deployability study [??].
 
 That stored calibrations differ because the laser moved, rather than because each fit is
 noisy, can be checked against the known lengths without fitting anything to them.

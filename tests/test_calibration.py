@@ -933,3 +933,17 @@ def test_section_4_3s_fleet_drift_numbers():
     assert both.step_in_plane_deg.abs().median() == pytest.approx(0.65, abs=0.01)
     lo, hi = cal.pointing_budget_deg(float(_fits().baseline_m.median()))
     assert int(((both.step_in_plane_deg < lo) | (both.step_in_plane_deg > hi)).sum()) == 13
+
+
+def test_section_4_3s_mechanism_split():
+    """Vertical and horizontal motion in similar amounts, with a near-pure case
+    of each -- the evidence 4.3 gives that no single mechanism explains the
+    drift."""
+    s = cal.laser_step_directions(_fits()).set_index(["from_dive", "to_dive"])
+    assert len(s) == 18
+    assert s.vertical_deg.abs().median() == pytest.approx(0.53, abs=0.01)
+    assert s.horizontal_deg.abs().median() == pytest.approx(0.54, abs=0.01)
+    assert s.loc[(496, 509), "horizontal_deg"] == pytest.approx(1.61, abs=0.01)
+    assert s.loc[(496, 509), "vertical_deg"] == pytest.approx(0.00, abs=0.01)
+    assert s.loc[(489, 490), "vertical_deg"] == pytest.approx(0.77, abs=0.01)
+    assert s.loc[(489, 490), "horizontal_deg"] == pytest.approx(0.30, abs=0.01)
