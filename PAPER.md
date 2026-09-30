@@ -501,6 +501,12 @@ underdetermined. This paper does not need it. All three act between dives and wi
 which is why the pipeline calibrates at every dive; measuring each on the bench belongs
 with the deployability study [??].
 
+That has a consequence for the protocol. Restoring a mount state cannot protect the
+measurement: the alignment mark addresses one of the three mechanisms at best, and flex and
+the cold shoe act whether or not it is lined up. The step that protects against all three is
+calibrating at the dive, from frames shot on that dive, and it is the only one the
+pipeline relies on.
+
 That stored calibrations differ because the laser moved, rather than because each fit is
 noisy, can be checked against the known lengths without fitting anything to them.
 Re-measure each pool session with a neighbouring calibration of the same unit in place of
