@@ -915,10 +915,21 @@ def test_calibration_differences_are_the_laser_moving_not_fit_noise():
     data = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
     rows = [r for r in cal.load_rows(data / "corpus.csv")
             if int(r["dive_id"]) not in cal.NON_POOL_DIVES and r["model"] not in cal.HELD_OUT_MODELS]
-    for which, own, other, better, n in (("previous", 5.13, 13.24, 15, 18),
-                                         ("next", 3.24, 26.20, 27, 28)):
+    for which, own, other, better, n in (("previous", 5.47, 13.73, 14, 17),
+                                         ("next", 3.24, 27.61, 25, 26)):
         r = cal.reuse_cost_on_known_lengths(rows, _fits(), which)
         assert len(r) == n
         assert r.own_abs_pct.median() == pytest.approx(own, abs=0.05)
         assert r.other_abs_pct.median() == pytest.approx(other, abs=0.05)
         assert int((r.own_abs_pct < r.other_abs_pct).sum()) == better
+
+
+def test_section_4_3s_fleet_drift_numbers():
+    """The figures section 4.3 quotes, over fits resting on >= 10 frames only."""
+    d = cal.laser_drift(_fits()).sort_values(["camera_id", "when"])
+    prev_ok = d.groupby("camera_id").well_conditioned.shift(1)
+    both = d[d.well_conditioned & (prev_ok == True)].dropna(subset=["step_in_plane_deg"])  # noqa: E712
+    assert len(both) == 18
+    assert both.step_in_plane_deg.abs().median() == pytest.approx(0.65, abs=0.01)
+    lo, hi = cal.pointing_budget_deg(float(_fits().baseline_m.median()))
+    assert int(((both.step_in_plane_deg < lo) | (both.step_in_plane_deg > hi)).sum()) == 13

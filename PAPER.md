@@ -471,6 +471,30 @@ minutes apart, differ by 0.82°; the target frames shot between them agree with 
 fit, while frames from 25 minutes before agree with neither, putting the mount in a third
 state.
 
+Figure 4 is one unit over seventeen days, and the rest of the fleet behaves the same way,
+over longer spans too. Every stored calibration keeps its fitted beam, so successive
+calibrations of one unit can be compared directly. Taking only fits that rest on at least
+ten frames, and folding the change in baseline into the in-plane angle at 2 m, the beam
+moves by a median **0.65°** between successive calibrations of a unit (18 pairs over seven
+units; 0.57° within the pool month alone). A 2 m length stays inside the 15 % budget only
+while that swing stays between −0.53° and +0.39°, and 13 of the 18 swings exceed it. The
+months between the pool corpus and the 2024 deployments moved three of the four units that
+can be checked by about 3° — units 1 and 2 almost entirely in plane, unit 6 mostly out of
+it — and the fourth by 0.9° over fourteen months. The directions differ from unit to unit,
+which argues against a common cause such as the water or the housing, and is consistent
+with handling and with the unrecorded mount replacements above.
+
+That stored calibrations differ because the laser moved, rather than because each fit is
+noisy, can be checked against the known lengths without fitting anything to them.
+Re-measure each pool session with a neighbouring calibration of the same unit in place of
+its own. If the calibrations were noisy estimates of one unchanged beam, a session's own
+would fit its targets no better than its neighbour's. It fits them far better: against the
+unit's next calibration the median |error| rises from **3.2 % to 27.6 %**, worse in 25 of 26
+sessions, and against the previous one from **5.5 % to 13.7 %**, worse in 14 of 17. Only
+neighbours resting on at least ten frames are used, so a thin fit cannot be the reason a
+neighbour does badly. A calibration describes the mount at the moment it was shot and for
+no longer, which is the whole case for calibrating at every dive.
+
 One field deployment shows the same thing without needing a second calibration to compare
 against. The dive holds two bursts of calibration frames 52 minutes apart, and 71 laser
 dots on its measurement frames. Those 71 define a line to 0.64 px; the first burst's dots
@@ -983,29 +1007,14 @@ caught any of this in the field.
   **Two fits are not on the axis**, and neither is in the estimate — dive 107, the 12.95 cm
   lever-arm failure this section dissects, and dive 436, a field dive that reaches the pool
   exports only as a borrow.
-- **Figure 18** *(§4.3, proposed)* — How far each unit's laser moved between calibrations,
-  August 2023 to December 2024: every accepted calibration, placed against that unit's
-  earliest calibration resting on at least ten frames. **Two rows because the beam moves two
-  ways.** In plane (top) is the swing that slides the dot along the line the calibration
-  expects it on, which sets the range; the baseline change is folded in at 2 m, and the grey
-  band is the swing that keeps a 2 m length within the 15 % budget (−0.53° to +0.39°,
-  asymmetric because range goes as the reciprocal of the dot's angle). Out of plane
-  (bottom) moves the dot off that line. The median step between successive calibrations is
-  0.69° in plane — larger than the band — and one rig moved 0.85° in eight minutes (dives
-  489 → 490). **That this is the laser moving and not fit noise is checked against known
-  lengths:** re-measuring each pool session with a neighbouring calibration of the same unit
-  instead of its own raises the median |error| from 3.2 % to 26.2 % (27 of 28 sessions
-  worse) against the next calibration and from 5.1 % to 13.2 % (15 of 18) against the
-  previous one. If the calibrations were noisy estimates of one unchanged beam, a session's
-  own would fit no better than its neighbour's. **Read the colours before the August
-  swing.** Every unit moves positive in plane between 14–18 August (checkerboard, blue) and
-  29–31 August (slate, orange), with a shipment between; the object, the fortnight and the
-  shipment are collinear, as in Figure 17, and the figure cannot say which moved the beam.
-  **Hollow points rest on two or three frames** and should be read as indicative only; they
-  include every field calibration of units 3 and 5 and unit 4's last, and the 4.6° of unit 3
-  in December 2024 is one of them. Unit 10 was never calibrated in the field, so it appears
-  only in the pool panel. The case the figure makes is the one the per-dive calibration
-  exists for: no calibration of this rig can be carried forward to another dive.
+- **Figure 18** *(repository only — the paper keeps Figure 4 and carries this in §4.3's
+  text)* — Every accepted calibration of every unit, August 2023 to December 2024, against
+  that unit's earliest calibration resting on at least ten frames: in-plane change (top, with
+  the 2 m budget band) and out-of-plane change (bottom). Colour is the calibration object,
+  because every unit swings positive exactly when the object changed and the cameras
+  shipped; hollow points rest on two or three frames. It is the fleet-wide version of
+  Figure 4, and the source of §4.3's 0.65° median step and its 3° change across the months
+  to the 2024 deployments.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
   Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
   holding ≥ 30, take the $p_{90}$ of percent length error, and compare it with that cell's

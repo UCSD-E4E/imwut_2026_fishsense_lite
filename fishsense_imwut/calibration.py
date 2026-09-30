@@ -1195,7 +1195,8 @@ def laser_drift(fits, z: float = LASER_DRIFT_RANGE_M,
     return pd.DataFrame(out)
 
 
-def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(107,)):
+def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(107,),
+                                min_frames: int = LASER_DRIFT_MIN_FRAMES):
     """What a pool session's KNOWN lengths say about reusing another calibration.
 
     For each session with a neighbouring calibration of the same unit, every
@@ -1209,15 +1210,20 @@ def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(1
     its neighbour's. Known lengths are used here as VALIDATION -- nothing is
     fitted to them.
 
+    The neighbour is drawn only from fits resting on at least `min_frames`
+    frames. A thin neighbour fitting a session badly would prove nothing -- it
+    could be its own noise -- so it is skipped over, not compared against.
+
     Returns one row per session: its own and the neighbour's median |error|.
     """
     import pandas as pd
 
     keep = fits[~fits.dive_id.isin(excluded)].copy()
     keep["when"] = pd.to_datetime(keep.dive_datetime, utc=True)
+    by_dive = {int(r.dive_id): r for r in keep.itertuples()}
+    keep = keep[keep.n_frames >= min_frames]
     order = {int(c): list(g.sort_values("when").itertuples())
              for c, g in keep.groupby("camera_id")}
-    by_dive = {int(r.dive_id): r for r in keep.itertuples()}
     step = -1 if which == "previous" else 1
     sessions = {}
     for r in rows:
@@ -1226,8 +1232,11 @@ def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(1
     for (dive, cal_dive), frames in sorted(sessions.items()):
         if cal_dive not in by_dive:
             continue
-        seq = order[int(by_dive[cal_dive].camera_id)]
-        i = [int(s.dive_id) for s in seq].index(cal_dive) + step
+        seq = order.get(int(by_dive[cal_dive].camera_id), [])
+        ids = [int(s.dive_id) for s in seq]
+        if cal_dive not in ids:
+            continue
+        i = ids.index(cal_dive) + step
         if not 0 <= i < len(seq):
             continue
         other = _beam(seq[i])

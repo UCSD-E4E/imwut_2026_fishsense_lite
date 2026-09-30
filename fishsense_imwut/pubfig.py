@@ -692,7 +692,7 @@ FIGURE_TITLES = {
     "fig17_checkerboard_vs_slate":
         "Laser baseline per unit, by calibration object and mount epoch",
     "fig18_laser_drift":
-        "Laser beam change since each unit's reference calibration, August 2023 to December 2024",
+        "Laser beam change per unit, August 2023 to December 2024 (repository only)",
     "figD2_p90_budget":
         "Reported length error against frames per fish, with the error budget marked",
 }
