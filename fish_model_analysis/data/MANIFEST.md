@@ -28,7 +28,7 @@ header, a trailing psql `(n rows)` footer, or rows the loader drops.
 | `corpus.csv` | 2927 | `sql/extract_corpus.sql` | **the corpus.** Every rigid-target measurement in prod, 31 pool dives. Backs §4.1–§4.3: the cohort rule, the median polish, every accuracy number and Figures 1–3. |
 | `angles.csv` | 1428 | `sql/extract_angles.sql` | §4.4, the designed foreshortening experiment — one Snook stepped 0–45° over dives 87/94/103/107/114. |
 | `field.csv` | 162 | `sql/extract_field.sql` | §4.1's wild fish: 162 measurements of 73 individuals over seven Florida-reef deployments. |
-| `calibration_fits.csv` | 31 | `sql/extract_calibration_fits.sql` | §4.3's checkerboard-vs-slate baseline comparison. The calibration **object** per fit is recorded nowhere else, which is why this is its own pull. |
+| `calibration_fits.csv` | 31 | `sql/extract_calibration_fits.sql` | every accepted laser calibration. Backs §4.3's checkerboard-vs-slate baseline comparison (the calibration **object** per fit is recorded nowhere else) and the laser-drift figure, which needs the full fitted beam (`laser_*`, `axis_*`), the timestamp, and `n_frames` — how many frames the fit rests on. |
 | `stereo_pairs.csv` | 41 | `sql/extract_stereo_pairs.sql` | our side of the paired stereo day (2023-08-03): 41 frames of the individuals the archive also measured. |
 | `head_tail.csv` | 1051 | `sql/extract_head_tail.sql` | per-frame head/tail label pixels. **No header row.** |
 | `stereo_reference.csv` | 8 | derived, no SQL | the stereo side of the paired day, lifted from `stereo_archive.csv`. Eight references; seven match one of ours, so `build_pairs` yields seven. |

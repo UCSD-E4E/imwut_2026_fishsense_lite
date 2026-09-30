@@ -691,6 +691,8 @@ FIGURE_TITLES = {
         "Laser range under an uncorrected flat port",
     "fig17_checkerboard_vs_slate":
         "Laser baseline per unit, by calibration object and mount epoch",
+    "fig18_laser_drift":
+        "Laser beam change since each unit's reference calibration, August 2023 to December 2024",
     "figD2_p90_budget":
         "Reported length error against frames per fish, with the error budget marked",
 }
@@ -2392,4 +2394,121 @@ def fig_depth_correction(
     bx.set_title(f"Paired day: {closer} of {len(paired)} moved closer",
                  fontsize=7, pad=4)
     fig.tight_layout()
+    return fig
+
+
+# --- figure 18: laser drift over time ----------------------------------------
+#
+# Two rows because the beam moves in two directions that cost different things:
+# in plane, along the line the calibration expects the dot on, which sets the
+# range and is what the length budget bounds; and out of plane, off that line.
+# One number cannot carry both -- an earlier version that tried reported a
+# 3.4 deg change as -20.9 deg.
+#
+# Two columns because the calibrations are not evenly spaced: twenty-three in
+# the seventeen pool days, eight across the following sixteen months. One date
+# axis would crush the pool month into a sliver.
+#
+# Colour is the calibration OBJECT, matching Figure 17, because the object
+# changes exactly when every unit swings positive in plane (14-18 Aug to 29 Aug,
+# with a shipment between) and a reader has to be able to see that the two are
+# confounded. Units are identified by a label at their last point rather than by
+# colour: seven categorical hues would be unreadable, and identity is secondary
+# to the claim that every unit moves.
+
+_DRIFT_ERAS = (
+    ("Pool, 2023", pd.Timestamp("2023-07-30", tz="UTC"), pd.Timestamp("2023-09-04", tz="UTC")),
+    ("Field deployments", pd.Timestamp("2023-10-01", tz="UTC"), pd.Timestamp("2025-01-15", tz="UTC")),
+)
+
+
+def _dodge_labels(ax, items, min_gap):
+    """Place `(x, y, text)` labels right of their points, nudged apart in y."""
+    placed = []
+    for x, y, px, text in sorted(items, key=lambda t: t[1]):
+        y_lab = max([y] + [q + min_gap for q in placed[-1:]])
+        placed.append(y_lab)
+        # a leader only when the label had to move, so an unmoved label is not
+        # mistaken for pointing somewhere else
+        arrow = (dict(arrowstyle="-", color=INK_MUTED, linewidth=0.5, shrinkA=0, shrinkB=3)
+                 if abs(y_lab - y) > 0.05 else None)
+        ax.annotate(text, xy=(px, y), xytext=(x, y_lab), textcoords="data",
+                    fontsize=6, color=INK_SECONDARY, va="center", ha="left",
+                    annotation_clip=False, arrowprops=arrow)
+
+
+def fig_laser_drift(drift, budget_deg, figsize=(FULL_WIDTH, 4.2)) -> plt.Figure:
+    """In-plane and out-of-plane beam change per unit against time.
+
+    `drift` is `calibration.laser_drift(...)`; `budget_deg` is
+    `calibration.pointing_budget_deg(...)` for the fleet's median baseline.
+    """
+    import matplotlib.dates as mdates
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    fig, axes = plt.subplots(2, 2, figsize=figsize, sharey="row", sharex="col",
+                             gridspec_kw={"width_ratios": [1.0, 2.1], "hspace": 0.12,
+                                          "wspace": 0.05})
+    rows = (("in_plane_deg", "In-plane change (°)\nsets the range"),
+            ("out_of_plane_deg", "Out-of-plane change (°)\nmoves the dot off its line"))
+    colour = {"checkerboard": SERIES_1, "slate": SERIES_2}
+    marker = {"checkerboard": "s", "slate": "o"}
+
+    for r, (col, ylabel) in enumerate(rows):
+        for c, (era, t0, t1) in enumerate(_DRIFT_ERAS):
+            ax = axes[r, c]
+            _grid(ax, axis="y")
+            _zero_line(ax)
+            if r == 0:
+                ax.axhspan(*budget_deg, color=GRIDLINE, alpha=0.9, linewidth=0, zorder=0.5)
+            ends = []
+            for cam, g in drift.sort_values("when").groupby("camera_id"):
+                g = g[(g.when >= t0) & (g.when <= t1)]
+                if g.empty:
+                    continue
+                ax.plot(g.when, g[col], color=INK_MUTED, linewidth=0.8, zorder=2)
+                for row in g.itertuples():
+                    fc = colour[row.standard] if row.well_conditioned else SURFACE
+                    ax.scatter(row.when, getattr(row, col), s=26, marker=marker[row.standard],
+                               facecolors=fc, edgecolors=colour[row.standard],
+                               linewidths=1.1, zorder=4)
+                # Label only in the field column. The pool month is too dense
+                # to label without covering markers, and every unit but 10 is
+                # labelled on the right; unit 10 was never field-calibrated,
+                # which the caption says.
+                if c == 1:
+                    ends.append((g.when.iloc[-1] + pd.Timedelta(days=(t1 - t0).days * 0.025),
+                                 g[col].iloc[-1], g.when.iloc[-1], f"unit {cam}"))
+            _dodge_labels(ax, ends, min_gap=0.42)
+            ax.set_xlim(t0, t1)
+            if r == 0:
+                ax.set_title(era, fontsize=7.5, color=INK_SECONDARY, loc="left")
+            if c == 0:
+                ax.set_ylabel(ylabel)
+                ax.xaxis.set_major_locator(mdates.DayLocator(bymonthday=(1, 15)))
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b"))
+            else:
+                # start at January so no tick sits against the pool panel's
+                # "1 Sep"; the two panels meet with nothing to collide
+                ax.set_xticks([pd.Timestamp(t, tz="UTC") for t in
+                               ("2024-01-01", "2024-04-01", "2024-07-01", "2024-10-01", "2025-01-01")])
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+                ax.tick_params(axis="y", left=False)
+            ax.spines["right"].set_visible(False)
+            ax.spines["top"].set_visible(False)
+
+    handles = [
+        Line2D([], [], marker="s", linestyle="none", markersize=5, markerfacecolor=SERIES_1,
+               markeredgecolor=SERIES_1, label="Checkerboard calibration"),
+        Line2D([], [], marker="o", linestyle="none", markersize=5, markerfacecolor=SERIES_2,
+               markeredgecolor=SERIES_2, label="Slate calibration"),
+        Line2D([], [], marker="o", linestyle="none", markersize=5, markerfacecolor=SURFACE,
+               markeredgecolor=INK_SECONDARY, label="Fit on fewer than 10 frames"),
+        Patch(facecolor=GRIDLINE, label="A 2 m length stays within 15 %"),
+    ]
+    axes[0, 0].legend(handles=handles, loc="lower left", bbox_to_anchor=(0.0, 1.12),
+                      ncols=4, frameon=False, handletextpad=0.4, columnspacing=1.2,
+                      borderaxespad=0.0)
+    fig.align_ylabels(axes[:, 0])
     return fig

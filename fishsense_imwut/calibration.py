@@ -1076,3 +1076,171 @@ def calibration_epoch_is_confounded(fits, dives, excluded=BASELINE_COMPARISON_EX
     gap_days = abs((pd.Timestamp(sl["first"]) - pd.Timestamp(cb["last"])).days)
     return {**spans, "epochs_overlap": overlap, "gap_days": int(gap_days),
             "separable": overlap}
+
+
+# --- laser drift over time ------------------------------------------------
+#
+# How far a unit's laser moves between calibrations. The fitted beam is an
+# origin and an axis, and they trade off inside a fit -- a long baseline paired
+# with a compensating angle reads the same range at mid-distance -- so neither
+# is the drift on its own.
+#
+# The change is split into the two directions that matter, both measured in the
+# plane that contains the optical axis and the REFERENCE beam's origin:
+#
+#   * in plane  -- the swing that moves the dot ALONG the line a calibration
+#     expects it on, i.e. that sets the range. The baseline change is folded in
+#     at the evaluation range: a dot's angle is B/z - tan(theta), so a beam
+#     reads the same range at z after tan(theta) changes by d(tan theta) and B
+#     by dB when d(tan theta) - dB/z = 0. This is the component the 15 % length
+#     budget applies to, in the units section 4.3 already uses (0.15 deg costs
+#     4.5 % at 2 m).
+#   * out of plane -- the swing that moves the dot OFF that line.
+#
+# Both are linear and bounded. An earlier version triangulated one calibration's
+# dot with the other and reported the result as an angle; it agreed with this
+# where the beam stayed in its plane, and blew up (-20.9 deg for a 3.4 deg
+# change) where it did not, which is why the two directions are now kept apart.
+
+#: A laser fit on fewer frames than this is drawn hollow and never used as a
+#: unit's reference. Two or three frames fix a line barely at all; the thinnest
+#: accepted fits in production rest on two.
+LASER_DRIFT_MIN_FRAMES = 10
+
+#: The range the in-plane change is evaluated at: the pool corpus's median.
+LASER_DRIFT_RANGE_M = 2.0
+
+
+def _beam(row) -> tuple[np.ndarray, np.ndarray]:
+    return (np.array([row.laser_x, row.laser_y, row.laser_z], float),
+            np.array([row.axis_x, row.axis_y, row.axis_z], float))
+
+
+def laser_beam_change_deg(new, reference, z: float = LASER_DRIFT_RANGE_M) -> tuple[float, float]:
+    """`(in_plane, out_of_plane)` change of beam `new` against `reference`, in degrees.
+
+    Beams are `(origin, axis)` pairs in the camera frame. The plane is fixed by
+    the reference: the optical axis and the direction of the reference origin.
+    `in_plane` includes the baseline change at range `z` and is positive when
+    reusing `reference` would read a fish LONG.
+    """
+    u = np.array([reference[0][0], reference[0][1], 0.0])
+    u /= np.linalg.norm(u)
+    w = np.cross([0.0, 0.0, 1.0], u)
+
+    def parts(beam):
+        origin, axis = beam
+        a = axis / np.linalg.norm(axis)
+        return float(origin @ u), float(-(a @ u) / a[2]), float((a @ w) / a[2])
+
+    b_new, t_new, o_new = parts(new)
+    b_ref, t_ref, o_ref = parts(reference)
+    in_plane = np.degrees((t_new - t_ref) - (b_new - b_ref) / z)
+    return float(in_plane), float(np.degrees(np.arctan(o_new) - np.arctan(o_ref)))
+
+
+def pointing_budget_deg(baseline_m: float, z: float = LASER_DRIFT_RANGE_M,
+                        budget: float = 0.15) -> tuple[float, float]:
+    """The in-plane change that moves a length at range `z` by `budget`.
+
+    Asymmetric, because range goes as the reciprocal of the dot's angle: a beam
+    can swing further before reading a fish short than before reading it long.
+    """
+    s = baseline_m / z
+    return (float(np.degrees(s * (1 - 1 / (1 - budget)))),
+            float(np.degrees(s * (1 - 1 / (1 + budget)))))
+
+
+def laser_drift(fits, z: float = LASER_DRIFT_RANGE_M,
+                min_frames: int = LASER_DRIFT_MIN_FRAMES, excluded=(107,)):
+    """Every accepted calibration, placed against its unit's reference.
+
+    The reference is the unit's EARLIEST fit resting on at least `min_frames`
+    frames -- earliest so the series reads as drift since the rig was first
+    characterised, well-conditioned so the series is not measured from a
+    two-frame line. `in_plane_deg` and `out_of_plane_deg` are against that
+    reference; the `step_*` columns are against the unit's previous
+    calibration, with the days between them. Dive 107 is excluded as
+    everywhere else: its fit is the lever-arm failure, 12.95 cm against a fleet
+    of 9.87-10.55.
+    """
+    import pandas as pd
+
+    keep = fits[~fits.dive_id.isin(excluded)].copy()
+    keep["when"] = pd.to_datetime(keep.dive_datetime, utc=True)
+    keep["well_conditioned"] = keep.n_frames >= min_frames
+    out = []
+    for cam, g in keep.sort_values("when").groupby("camera_id"):
+        good = g[g.well_conditioned]
+        if good.empty:
+            continue
+        ref = _beam(good.iloc[0])
+        prev = None
+        for row in g.itertuples():
+            beam = _beam(row)
+            inp, oop = laser_beam_change_deg(beam, ref, z)
+            rec = {"dive_id": int(row.dive_id), "camera_id": int(cam), "when": row.when,
+                   "standard": row.standard, "n_frames": int(row.n_frames),
+                   "well_conditioned": bool(row.well_conditioned),
+                   "reference_dive": int(good.iloc[0].dive_id),
+                   "in_plane_deg": inp, "out_of_plane_deg": oop,
+                   "step_in_plane_deg": np.nan, "step_out_of_plane_deg": np.nan,
+                   "days_since_previous": np.nan}
+            if prev is not None:
+                sip, sop = laser_beam_change_deg(beam, _beam(prev), z)
+                rec.update(step_in_plane_deg=sip, step_out_of_plane_deg=sop,
+                           days_since_previous=(row.when - prev.when).total_seconds() / 86400)
+            out.append(rec)
+            prev = row
+    return pd.DataFrame(out)
+
+
+def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(107,)):
+    """What a pool session's KNOWN lengths say about reusing another calibration.
+
+    For each session with a neighbouring calibration of the same unit, every
+    frame is re-measured with that neighbour instead of its own calibration.
+    Single-depth back-projection scales both endpoints by the range, so the
+    re-measured length is `length * z_other / z_own` at the same dot pixel.
+
+    This is the check that the differences between calibrations are the laser
+    moving and not fit noise. If two calibrations were noisy estimates of one
+    unchanged beam, a session's own would fit its known lengths no better than
+    its neighbour's. Known lengths are used here as VALIDATION -- nothing is
+    fitted to them.
+
+    Returns one row per session: its own and the neighbour's median |error|.
+    """
+    import pandas as pd
+
+    keep = fits[~fits.dive_id.isin(excluded)].copy()
+    keep["when"] = pd.to_datetime(keep.dive_datetime, utc=True)
+    order = {int(c): list(g.sort_values("when").itertuples())
+             for c, g in keep.groupby("camera_id")}
+    by_dive = {int(r.dive_id): r for r in keep.itertuples()}
+    step = -1 if which == "previous" else 1
+    sessions = {}
+    for r in rows:
+        sessions.setdefault((int(r["dive_id"]), int(r["calibration_dive_id"])), []).append(r)
+    out = []
+    for (dive, cal_dive), frames in sorted(sessions.items()):
+        if cal_dive not in by_dive:
+            continue
+        seq = order[int(by_dive[cal_dive].camera_id)]
+        i = [int(s.dive_id) for s in seq].index(cal_dive) + step
+        if not 0 <= i < len(seq):
+            continue
+        other = _beam(seq[i])
+        own_err, other_err = [], []
+        for f in frames:
+            inv_k = np.linalg.inv(np.array(json.loads(f["km"])))
+            dot = [float(v) for v in f["dot"].split(";")[:2]]
+            z_own, length, known = float(f["depth_m"]), float(f["length_m"]), float(f["known_length_m"])
+            z_other = triangulate_depth(dot, other[0], other[1], inv_k)
+            own_err.append(100 * (length / known - 1))
+            other_err.append(100 * (length * z_other / z_own / known - 1))
+        out.append({"dive_id": dive, "calibration_dive_id": cal_dive,
+                    "other_dive_id": int(seq[i].dive_id), "n": len(frames),
+                    "own_abs_pct": float(np.median(np.abs(own_err))),
+                    "other_abs_pct": float(np.median(np.abs(other_err)))})
+    return pd.DataFrame(out)

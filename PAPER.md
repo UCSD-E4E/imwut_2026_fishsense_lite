@@ -983,6 +983,29 @@ caught any of this in the field.
   **Two fits are not on the axis**, and neither is in the estimate — dive 107, the 12.95 cm
   lever-arm failure this section dissects, and dive 436, a field dive that reaches the pool
   exports only as a borrow.
+- **Figure 18** *(§4.3, proposed)* — How far each unit's laser moved between calibrations,
+  August 2023 to December 2024: every accepted calibration, placed against that unit's
+  earliest calibration resting on at least ten frames. **Two rows because the beam moves two
+  ways.** In plane (top) is the swing that slides the dot along the line the calibration
+  expects it on, which sets the range; the baseline change is folded in at 2 m, and the grey
+  band is the swing that keeps a 2 m length within the 15 % budget (−0.53° to +0.39°,
+  asymmetric because range goes as the reciprocal of the dot's angle). Out of plane
+  (bottom) moves the dot off that line. The median step between successive calibrations is
+  0.69° in plane — larger than the band — and one rig moved 0.85° in eight minutes (dives
+  489 → 490). **That this is the laser moving and not fit noise is checked against known
+  lengths:** re-measuring each pool session with a neighbouring calibration of the same unit
+  instead of its own raises the median |error| from 3.2 % to 26.2 % (27 of 28 sessions
+  worse) against the next calibration and from 5.1 % to 13.2 % (15 of 18) against the
+  previous one. If the calibrations were noisy estimates of one unchanged beam, a session's
+  own would fit no better than its neighbour's. **Read the colours before the August
+  swing.** Every unit moves positive in plane between 14–18 August (checkerboard, blue) and
+  29–31 August (slate, orange), with a shipment between; the object, the fortnight and the
+  shipment are collinear, as in Figure 17, and the figure cannot say which moved the beam.
+  **Hollow points rest on two or three frames** and should be read as indicative only; they
+  include every field calibration of units 3 and 5 and unit 4's last, and the 4.6° of unit 3
+  in December 2024 is one of them. Unit 10 was never calibrated in the field, so it appears
+  only in the pool panel. The case the figure makes is the one the per-dive calibration
+  exists for: no calibration of this rig can be carried forward to another dive.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
   Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
   holding ≥ 30, take the $p_{90}$ of percent length error, and compare it with that cell's

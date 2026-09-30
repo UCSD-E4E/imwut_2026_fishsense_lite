@@ -870,3 +870,55 @@ def test_the_noise_floor_splits_by_how_far_apart_the_fits_are():
     assert s["within_deployment_sd_cm"] == pytest.approx(0.074, abs=0.001)
     assert s["across_shipments_sd_cm"] == pytest.approx(0.171, abs=0.001)
     assert s["across_shipments_sd_cm"] > s["within_deployment_sd_cm"]
+
+
+# --- laser drift ---------------------------------------------------------------
+
+def _fits():
+    return cal.load_calibration_fits(
+        Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data" / "calibration_fits.csv")
+
+
+def test_a_beam_has_not_moved_against_itself():
+    beam = (np.array([-0.031, -0.100, 0.0]), np.array([0.01, 0.03, 1.0]))
+    assert cal.laser_beam_change_deg(beam, beam) == pytest.approx((0.0, 0.0), abs=1e-12)
+
+
+def test_the_in_plane_budget_matches_section_4_3s_sensitivity():
+    """0.15 deg costs about 4.5 % at 2 m, per section 4.3; the band is the same
+    relation run out to 15 %, asymmetric because range is reciprocal in angle."""
+    lo, hi = cal.pointing_budget_deg(0.104, 2.0)
+    assert (lo, hi) == pytest.approx((-0.526, +0.389), abs=0.002)
+    assert 100 * (1 / (1 - np.radians(0.15) * 2.0 / 0.104) - 1) == pytest.approx(5.3, abs=0.3)
+
+
+def test_the_reference_is_the_earliest_well_conditioned_fit():
+    """Unit 1's first calibration (dive 32, the stereo day) rests on two frames
+    and must not anchor the series."""
+    d = cal.laser_drift(_fits())
+    assert set(d[d.camera_id == 1].reference_dive) == {77}
+    assert d.set_index("dive_id").loc[32, "well_conditioned"] == False  # noqa: E712
+
+
+def test_the_laser_moves_in_eight_minutes():
+    """Dives 489 and 490, one rig, eight minutes apart: the section 4.3 claim."""
+    d = cal.laser_drift(_fits()).set_index("dive_id")
+    assert d.loc[490, "days_since_previous"] * 24 * 60 == pytest.approx(8.2, abs=0.5)
+    assert d.loc[490, "step_in_plane_deg"] == pytest.approx(0.85, abs=0.02)
+
+
+def test_calibration_differences_are_the_laser_moving_not_fit_noise():
+    """The claim Figure 18's caption rests on, pinned. A pool session measured
+    with its own calibration fits its known lengths far better than measured
+    with a neighbouring calibration of the same unit -- which would not happen
+    if the calibrations were noisy estimates of one unchanged beam."""
+    data = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    rows = [r for r in cal.load_rows(data / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES and r["model"] not in cal.HELD_OUT_MODELS]
+    for which, own, other, better, n in (("previous", 5.13, 13.24, 15, 18),
+                                         ("next", 3.24, 26.20, 27, 28)):
+        r = cal.reuse_cost_on_known_lengths(rows, _fits(), which)
+        assert len(r) == n
+        assert r.own_abs_pct.median() == pytest.approx(own, abs=0.05)
+        assert r.other_abs_pct.median() == pytest.approx(other, abs=0.05)
+        assert int((r.own_abs_pct < r.other_abs_pct).sum()) == better
