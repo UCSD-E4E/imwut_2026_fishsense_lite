@@ -213,7 +213,7 @@ def test_every_field_p90_is_that_animals_longest_frame(field):
     """§4.3's caveat, pinned on the data it is about.
 
     The paper reports p90 by nearest rank wherever frames become a length, the
-    field included. `ceil(0.9n)` is n itself for every n <= 10, and no wild
+    field included. `ceil(0.9n)` is n itself for every n <= 9, and no wild
     animal here carries more than eight frames, so a field p90 is always that
     animal's maximum. That is intended -- with a one-sided error the longest
     frame is the least pose-corrupted -- but the claim is stated in §4.3, §4.6
@@ -298,7 +298,7 @@ def test_the_two_statistics_are_not_interchangeable(cohort_cells):
 def test_p90_is_the_maximum_below_ten_frames_and_that_is_the_step(cohort_cells):
     """The figure's whole claim, and it is arithmetic before it is empirical.
 
-    ceil(0.9n) == n for every n <= 10, so below ten frames p90 takes the sample
+    ceil(0.9n) == n for every n <= 9, so below ten frames p90 takes the sample
     maximum -- the noisiest order statistic. Crossing the boundary drops the
     reported error with no extra information.
     """
@@ -408,6 +408,13 @@ def test_nearest_rank_equals_n_below_ten_and_not_at_ten():
 
     paper = (Path(__file__).resolve().parents[1] / "PAPER.md").read_text()
     assert "\\le 10" not in paper, "nearest-rank bound regressed to n <= 10"
+
+    # and in the code's own prose, where six copies survived the first fix
+    root = Path(__file__).resolve().parents[1]
+    for f in [*(root / "fishsense_imwut").glob("*.py"), *(root / "tests").glob("*.py"),
+              *(root / "fish_model_analysis").glob("*.py")]:
+        stale = "every n <= " + "10"  # split, or this file matches itself
+        assert stale not in f.read_text(), f"nearest-rank bound in {f.name}"
 
 
 def test_the_paired_stereo_five_of_seven_follows_from_the_bound():

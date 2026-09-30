@@ -147,7 +147,7 @@ def load_field(path):
 #
 # The ruler forced this question (HELD_OUT_MODELS): six frames, and its p90 was
 # simply the largest of the six. Nearest rank is ceil(0.9n), which equals n for
-# every n <= 10, so below ten frames "p90" is not a quantile at all -- it is the
+# every n <= 9, so below ten frames "p90" is not a quantile at all -- it is the
 # maximum, the noisiest order statistic there is. This measures what that costs.
 
 

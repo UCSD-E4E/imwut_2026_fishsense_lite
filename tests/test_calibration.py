@@ -293,7 +293,7 @@ def test_the_ruler_is_held_out_because_p90_cannot_see_past_its_pose():
     """Six frames, all 14.7-20.0 deg off square, and nearest rank cannot help.
 
     The board's median pose is ordinary -- the trout's is worse. What
-    disqualifies it is that ceil(0.9n) is n for every n <= 10, so with six
+    disqualifies it is that ceil(0.9n) is n for every n <= 9, so with six
     frames the ruler's p90 is its single best frame, and that frame is still
     14.7 deg off. cos(14.7 deg) - 1 = -3.3 %, which is the whole of its residual
     error. Every other target's p90 lands on a frame at 0.0-8.7 deg.

@@ -22,7 +22,7 @@ All three are computed because the spread between them is worth seeing, but only
 p90 is reported; the other two are context, not results.
 
 Note what nearest rank does at these sample sizes. p90 is the ceil(0.9n)-th of
-n, which is n itself for every n <= 10, and these fish carry 3 to 11 frames. For
+n, which is n itself for every n <= 9, and these fish carry 3 to 11 frames. For
 five of the seven p90 IS that animal's longest frame, and only the two
 best-sampled separate them. It is a high-order statistic here, not a tail
 estimate -- intended, since with a one-sided error the longest frame is the one

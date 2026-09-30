@@ -163,7 +163,7 @@ def test_p90_is_the_reported_estimator_between_the_other_two(pairs):
 def test_nearest_rank_selects_the_top_sample_for_five_of_seven(pairs):
     """Why p90 lands close to the maximum here, stated so it cannot surprise.
 
-    `ceil(0.9n)` is n itself for every n <= 10, and five of the seven fish have
+    `ceil(0.9n)` is n itself for every n <= 9, and five of the seven fish have
     3 to 6 frames. p90 on this day is therefore a high-order statistic and not
     a tail estimate, and it is only the two best-sampled fish -- 11 and 10
     frames -- that separate it from the maximum at all.

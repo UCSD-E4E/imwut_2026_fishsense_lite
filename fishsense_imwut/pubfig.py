@@ -1479,7 +1479,7 @@ def fig_field_by_camera(
     An animal's frames reduce through `nearest_rank_p90`, the one estimator the
     paper reports anywhere a set of frames becomes a length -- Figures 1, 14 and
     15 included. Read what nearest rank does at this sample size: no field
-    animal has more than 8 frames and `ceil(0.9n)` is n for every n <= 10, so a
+    animal has more than 8 frames and `ceil(0.9n)` is n for every n <= 9, so a
     field p90 IS that animal's longest frame. That is the intended behaviour and
     not an accident of the sample. The single-depth back-projection can only
     read short, so the longest frame is the one least corrupted by pose; it is
@@ -1950,7 +1950,7 @@ def fig_calibration_objects(
 # --- figure 16: how many frames p90 needs --------------------------------
 #
 # The estimator's own sampling behaviour, which the ruler exposed. Nearest rank
-# is ceil(0.9n) and that equals n for every n <= 10, so below ten frames p90 is
+# is ceil(0.9n) and that equals n for every n <= 9, so below ten frames p90 is
 # the sample maximum rather than a quantile. The step at n = 10 is that fact,
 # not noise, and it is the figure's whole point.
 

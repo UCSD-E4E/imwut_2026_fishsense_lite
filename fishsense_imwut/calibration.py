@@ -649,7 +649,7 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
 #:
 #: That median pose is ORDINARY -- the trout's is 16.7 deg. What disqualifies
 #: the ruler is that p90 cannot see past it. Nearest rank is ceil(0.9n), which
-#: is n itself for every n <= 10, so with six frames the ruler's p90 IS its best
+#: is n itself for every n <= 9, so with six frames the ruler's p90 IS its best
 #: frame, and its best frame is still 14.7 deg off. Every other target carries
 #: 66 to 407 frames and its p90 lands on a frame at 0.0 to 8.7 deg. The residual
 #: -3.3 % is therefore cos(14.7 deg) - 1 and nothing else: a pose measurement
