@@ -947,3 +947,60 @@ def test_section_4_3s_mechanism_split():
     assert s.loc[(496, 509), "vertical_deg"] == pytest.approx(0.00, abs=0.01)
     assert s.loc[(489, 490), "vertical_deg"] == pytest.approx(0.77, abs=0.01)
     assert s.loc[(489, 490), "horizontal_deg"] == pytest.approx(0.30, abs=0.01)
+
+
+# --- laser colour by cohort ------------------------------------------------------
+
+def _data():
+    return Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+
+
+def test_laser_colour_by_cohort():
+    """The colour split the manuscript's limitation sentence rests on. Every
+    measured frame carries a colour tag; none is unknown and none is tagged both
+    ways."""
+    from fishsense_imwut import repeatability as rep
+
+    c = cal.load_laser_colour(_data() / "laser_colour.csv")
+    assert len(c) == 3130 and (c.colour == "unknown").sum() == 0 and (c.n_colours > 1).sum() == 0
+
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    cohort = set(cal.accuracy_cohort(df))
+    coh = c[c.dive_id.isin(cohort) & ~c.model_name.isin(cal.HELD_OUT_MODELS)]
+    expected = df[df.dive_id.isin(cohort) & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+    assert len(coh) == len(expected) == 995           # same frames as the paper's cohort
+    assert coh.colour.value_counts().to_dict() == {"Red": 994, "Green": 1}
+
+    pool = c[c.dive_id.isin({int(r["dive_id"]) for r in rows})]
+    assert pool.colour.value_counts().to_dict() == {"Red": 2924, "Green": 2}
+
+    field = rep.load_field(_data() / "field.csv")
+    f = c[c.measurement_id.isin(field.measurement_id)]
+    assert f.colour.value_counts().to_dict() == {"Green": 120, "Red": 42}
+    per_dive = f.groupby("dive_id").colour.agg(lambda s: "/".join(sorted(set(s)))).to_dict()
+    assert per_dive == {279: "Red", 341: "Red", 347: "Green", 349: "Green",
+                        383: "Red", 465: "Green", 471: "Green"}  # each deployment one colour
+    animals = f.merge(field[["measurement_id", "fish_id"]]).groupby("fish_id").colour.first()
+    assert animals.value_counts().to_dict() == {"Green": 53, "Red": 20}
+
+    stereo = pd.read_csv(_data() / "stereo_pairs.csv", sep="|")
+    assert set(c[c.image_id.isin(stereo.image_id)].colour) == {"Red"}
+
+    angles = cal.load_angles(_data() / "angles.csv")
+    pose = c[c.image_id.isin(angles.image_id)]
+    assert len(pose) == 1428 and set(pose.colour) == {"Red"}  # colour cannot explain the 0-deg spread
+
+
+def test_dot_label_scatter_shows_no_colour_effect_in_the_field():
+    labels = pd.read_csv(Path(__file__).resolve().parents[1]
+                         / "laser_labeling_analysis" / "laser_labels_cleaned.csv")
+    s = {}
+    for dive in (279, 341, 347, 349, 383, 465, 471):
+        g = labels[labels.dive_id == dive]
+        s[dive] = (g.label.iloc[0], cal.dot_line_scatter(g[["label_x", "label_y"]])["sigma_px"])
+    green = [v for c, v in s.values() if c == "Green Laser"]
+    red = [v for c, v in s.values() if c == "Red Laser"]
+    assert np.median(green) == pytest.approx(2.76, abs=0.01)
+    assert np.median(red) == pytest.approx(3.68, abs=0.01)

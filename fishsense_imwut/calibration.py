@@ -1288,3 +1288,49 @@ def reuse_cost_on_known_lengths(rows, fits, which: str = "previous", excluded=(1
                     "own_abs_pct": float(np.median(np.abs(own_err))),
                     "other_abs_pct": float(np.median(np.abs(other_err)))})
     return pd.DataFrame(out)
+
+
+# --- laser colour and human dot-label scatter ---------------------------------
+
+def load_laser_colour(path):
+    """`data/laser_colour.csv`: the colour tag on the dot each measurement used.
+
+    Colour is shortened to ``"Red"``/``"Green"``; an untagged dot stays
+    ``"unknown"`` and is never assigned a colour.
+    """
+    import pandas as pd
+
+    df = pd.read_csv(path, keep_default_na=False)
+    df["colour"] = df.colour.str.replace(" Laser", "", regex=False).replace("", "unknown")
+    df["model_name"] = df.subject.map(lambda s: DISPLAY_NAMES.get(s, s))
+    return df
+
+
+def dot_line_scatter(xy, k: float = 3.0, iterations: int = 5) -> dict:
+    """Robust scatter of one dive's human dot labels ACROSS their common line.
+
+    With the beam fixed, every dot of a dive lies on one image line, so the
+    perpendicular spread of the labels bounds how precisely a person places the
+    dot. It is an UPPER bound -- beam motion within the dive and lens curvature
+    over the dot track add to it -- and it is blind to error ALONG the line,
+    which is the component that moves the range: a streak or bloom elongated
+    along the beam would not show here. Assuming isotropic placement error, the
+    along-line component is the same size.
+
+    Returns `sigma_px` (1.4826 MAD of the perpendicular residual after a
+    k-sigma trim), the frames kept and the track's length in pixels.
+    """
+    xy = np.asarray(xy, float)
+    keep = np.ones(len(xy), bool)
+    for _ in range(iterations):
+        centre = xy[keep].mean(0)
+        u = np.linalg.svd(xy[keep] - centre)[2][0]
+        r = (xy - centre) @ np.array([-u[1], u[0]])
+        mid = np.median(r[keep])
+        sigma = 1.4826 * np.median(np.abs(r[keep] - mid))
+        new = np.abs(r - mid) <= k * max(sigma, 0.5)
+        if (new == keep).all():
+            break
+        keep = new
+    return {"sigma_px": float(sigma), "n": int(len(xy)), "kept": int(keep.sum()),
+            "span_px": float(np.ptp((xy[keep] - centre) @ u))}

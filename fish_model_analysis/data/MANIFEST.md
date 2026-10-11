@@ -29,6 +29,7 @@ header, a trailing psql `(n rows)` footer, or rows the loader drops.
 | `angles.csv` | 1428 | `sql/extract_angles.sql` | §4.4, the designed foreshortening experiment — one Snook stepped 0–45° over dives 87/94/103/107/114. |
 | `field.csv` | 162 | `sql/extract_field.sql` | §4.1's wild fish: 162 measurements of 73 individuals over seven Florida-reef deployments. |
 | `calibration_fits.csv` | 31 | `sql/extract_calibration_fits.sql` | every accepted laser calibration. Backs §4.3's checkerboard-vs-slate baseline comparison (the calibration **object** per fit is recorded nowhere else) and the laser-drift figure, which needs the full fitted beam (`laser_*`, `axis_*`), the timestamp, and `n_frames` — how many frames the fit rests on. |
+| `laser_colour.csv` | 3130 | `sql/extract_laser_colour.sql` | the colour tag (red/green) on the dot every measurement used, one row per measurement. Backs the colour split of each cohort; read only through `calibration.load_laser_colour`. |
 | `stereo_pairs.csv` | 41 | `sql/extract_stereo_pairs.sql` | our side of the paired stereo day (2023-08-03): 41 frames of the individuals the archive also measured. |
 | `head_tail.csv` | 1051 | `sql/extract_head_tail.sql` | per-frame head/tail label pixels. **No header row.** |
 | `stereo_reference.csv` | 8 | derived, no SQL | the stereo side of the paired day, lifted from `stereo_archive.csv`. Eight references; seven match one of ours, so `build_pairs` yields seven. |

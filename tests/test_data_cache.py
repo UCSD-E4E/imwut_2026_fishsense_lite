@@ -35,6 +35,7 @@ LOADERS = {
     "angles.csv": lambda p: len(cal.load_angles(p)),
     "field.csv": lambda p: len(rep.load_field(p)),
     "calibration_fits.csv": lambda p: len(cal.load_calibration_fits(p)),
+    "laser_colour.csv": lambda p: len(cal.load_laser_colour(p)),
     "stereo_pairs.csv": lambda p: len(sp.load_ours(p)),
     "stereo_reference.csv": lambda p: len(sp.load_stereo(p)),
     "stereo_archive.csv": lambda p: len(pd.read_csv(p)),
@@ -79,6 +80,7 @@ def test_every_committed_extraction_has_its_cached_output():
         "extract_calibration_fits.sql": "calibration_fits.csv",
         "extract_stereo_pairs.sql": "stereo_pairs.csv",
         "extract_head_tail.sql": "head_tail.csv",
+        "extract_laser_colour.sql": "laser_colour.csv",
     }
     assert {p.name for p in SQL.glob("*.sql")} == set(produced)
     for sql, csv in produced.items():
