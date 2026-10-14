@@ -1004,3 +1004,39 @@ def test_dot_label_scatter_shows_no_colour_effect_in_the_field():
     red = [v for c, v in s.values() if c == "Red Laser"]
     assert np.median(green) == pytest.approx(2.76, abs=0.01)
     assert np.median(red) == pytest.approx(3.68, abs=0.01)
+
+
+def test_the_zero_angle_offset_is_scale_not_pose():
+    """Section 4.4's attribution, pinned: a misaligned protractor fits worst,
+    a multiplicative scale best, and the scale differs by session. Nine of the
+    ten pairs of session intervals are disjoint; 87 and 114 overlap, so the
+    claim is "at least four distinct scales", not "all disjoint"."""
+    import itertools
+
+    r = cal.angle_offset_models(cal.load_angles(_data() / "angles.csv"))
+    rss = {k: v["rss"] for k, v in r["models"].items()}
+    assert rss["angle"] == pytest.approx(2.12, abs=0.01)
+    assert rss["scale"] == pytest.approx(1.74, abs=0.01)
+    assert rss["angle"] == max(rss.values())
+    assert 100 * r["k_pooled"] == pytest.approx(-2.70, abs=0.01)
+    s = r["sessions"]
+    assert {d: round(100 * v["k"], 1) for d, v in s.items()} == \
+        {87: -3.0, 94: 0.2, 103: -6.5, 107: -2.3, 114: -3.3}
+    overlapping = [(a, b) for a, b in itertools.combinations(sorted(s), 2)
+                   if not (s[a]["hi"] < s[b]["lo"] or s[b]["hi"] < s[a]["lo"])]
+    assert overlapping == [(87, 114)]
+
+
+def test_substitution_check_is_not_driven_by_months_apart_neighbours():
+    """The 'next' set includes four neighbours from 2024; without them the
+    result stands."""
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES and r["model"] not in cal.HELD_OUT_MODELS]
+    fits = _fits()
+    when = dict(zip(fits.dive_id, pd.to_datetime(fits.dive_datetime)))
+    r = cal.reuse_cost_on_known_lengths(rows, fits, "next")
+    gap = [(when[o] - when[c]).days for c, o in zip(r.calibration_dive_id, r.other_dive_id)]
+    near = r[[abs(g) < 60 for g in gap]]
+    assert len(near) == 22 and int((near.other_abs_pct > near.own_abs_pct).sum()) == 21
+    assert near.own_abs_pct.median() == pytest.approx(3.06, abs=0.01)
+    assert near.other_abs_pct.median() == pytest.approx(25.16, abs=0.01)

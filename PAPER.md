@@ -629,7 +629,9 @@ costs only $\cos\delta - 1$. Reproducing −3.8 % that way needs the card 15.9°
 would then put 15° at −14.2 % instead of the −5.8 % observed. A multiplicative scale error
 fits best, $k = -2.7\,\%$ pooled — and scale here is a property of the *session*: fitted
 separately the five give $k = -6.5, -3.3, -3.0, -2.3$ and $+0.2\,\%$, a 6.7-point spread
-whose bootstrap intervals are mutually disjoint. That spread is what rules out the
+in which nine of the ten pairs of bootstrap intervals are disjoint — only the −3.3 % and
+−3.0 % sessions overlap — so at least four distinct scales are present. That spread is
+what rules out the
 common-mode explanations: a wrong reference length for the Snook model, or a systematic
 snout/fork clicking convention, would be shared by all five sessions and could not produce
 it. The 0° offset is therefore the between-session calibration-scale term of §4.3, sampled

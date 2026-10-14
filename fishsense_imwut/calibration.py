@@ -1334,3 +1334,50 @@ def dot_line_scatter(xy, k: float = 3.0, iterations: int = 5) -> dict:
         keep = new
     return {"sigma_px": float(sigma), "n": int(len(xy)), "kept": int(keep.sum()),
             "span_px": float(np.ptp((xy[keep] - centre) @ u))}
+
+
+# --- the zero-angle offset in the pose experiment --------------------------------
+
+def angle_offset_models(angles, resamples: int = 400, seed: int = 0) -> dict:
+    """Which model explains the pose experiment's offset from cos(theta) - 1.
+
+    Fits four one- or two-parameter models to every frame's fractional length
+    error against its designed angle, and reports each one's residual sum of
+    squares:
+
+      additive      cos(t) - 1 + c          a fixed loss, the same at every angle
+      scale         (1 + k) cos(t) - 1      a multiplicative calibration scale
+      angle         cos(t + d) - 1          a misaligned protractor card
+      scale+angle   (1 + k) cos(t + d) - 1
+
+    Then fits the scale model per session, with a percentile bootstrap over
+    frames, so a reader can check whether the sessions share one scale.
+    """
+    from scipy.optimize import least_squares as lsq
+
+    t = np.radians(angles.fish_angle_degrees.to_numpy(float))
+    y = angles.pct_error.to_numpy(float) / 100.0
+    models = {
+        "additive": (lambda p, t: np.cos(t) - 1 + p[0], [-0.03]),
+        "scale": (lambda p, t: (1 + p[0]) * np.cos(t) - 1, [-0.03]),
+        "angle": (lambda p, t: np.cos(t + p[0]) - 1, [0.2]),
+        "scale+angle": (lambda p, t: (1 + p[0]) * np.cos(t + p[1]) - 1, [-0.03, 0.1]),
+    }
+    fits = {}
+    for name, (f, p0) in models.items():
+        r = lsq(lambda p: f(p, t) - y, p0)
+        fits[name] = {"params": r.x.tolist(), "rss": float(np.sum(r.fun ** 2))}
+
+    def k_of(tt, yy):
+        return float(lsq(lambda p: (1 + p[0]) * np.cos(tt) - 1 - yy, [-0.03]).x[0])
+
+    rng = np.random.default_rng(seed)
+    sessions = {}
+    for dive, g in angles.groupby("dive_id"):
+        tt = np.radians(g.fish_angle_degrees.to_numpy(float))
+        yy = g.pct_error.to_numpy(float) / 100.0
+        boot = [k_of(tt[i], yy[i]) for i in (rng.integers(0, len(tt), len(tt))
+                                              for _ in range(resamples))]
+        lo, hi = np.percentile(boot, [2.5, 97.5])
+        sessions[int(dive)] = {"k": k_of(tt, yy), "lo": float(lo), "hi": float(hi), "n": int(len(tt))}
+    return {"models": fits, "k_pooled": fits["scale"]["params"][0], "sessions": sessions}
