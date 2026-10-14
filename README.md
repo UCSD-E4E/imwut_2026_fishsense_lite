@@ -62,6 +62,7 @@ nix develop                     # or drop into the FHS shell
 | `reconstruction_analysis/` | simulation: reconstruction under known and fitted calibration — ODR, least squares, 2D/3D corrections, `pixel_sensitivity.ipynb`, and `known_calibration_bundle_adjustment.ipynb` (issue #2) |
 | `calibration_analysis/` | simulation: which estimator recovers the laser calibration — PCA, weighted PCA, RANSAC, least squares, 2D corrections |
 | `laser_labeling_analysis/` | `laser_labels_cleaned.csv`, 37,811 laser-dot labels over 262 dives |
+| `mount/` | the 3D-printed laser mount as deployed (3MF): mount body, cap, taper |
 | `tests/` | pins the cohort so a change to the paper's numbers is a diff; `test_data_cache.py` pins the offline-reproduction contract |
 
 Start with `post_labeling_analysis/HANDOFF.md` §0 and §7 — §0 is the ground rules learned
