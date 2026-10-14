@@ -1381,3 +1381,30 @@ def angle_offset_models(angles, resamples: int = 400, seed: int = 0) -> dict:
         lo, hi = np.percentile(boot, [2.5, 97.5])
         sessions[int(dive)] = {"k": k_of(tt, yy), "lo": float(lo), "hi": float(hi), "n": int(len(tt))}
     return {"models": fits, "k_pooled": fits["scale"]["params"][0], "sessions": sessions}
+
+
+def range_bins(df, depth_column: str = "depth_m", n_bins: int = 8):
+    """Equal-count range bins of per-frame percent error, as Figure 3 draws them,
+    with the binned p90 alongside the median it plots.
+
+    The p90 column is here to show why the figure does NOT use it. The error
+    that grows with range is two-sided dot-placement noise, and a high quantile
+    of two-sided noise moves with the noise's width: binned p90 climbs across
+    range while the binned median stays flat. p90 is the per-animal estimator
+    because within one animal the error is one-sided (pose can only shorten);
+    pooled across targets at a range, it would read widening noise as bias.
+    """
+    import pandas as pd
+    from .pubfig import nearest_rank_p90
+
+    x = df[depth_column].to_numpy(float)
+    y = df["pct_error"].to_numpy(float)
+    edges = np.unique(np.quantile(x, np.linspace(0, 1, n_bins + 1)))
+    out = []
+    for lo, hi in zip(edges[:-1], edges[1:]):
+        m = (x >= lo) & ((x <= hi) if hi == edges[-1] else (x < hi))
+        q1, q3 = np.percentile(y[m], [25, 75])
+        out.append({"lo_m": float(lo), "hi_m": float(hi), "n": int(m.sum()),
+                    "median": float(np.median(y[m])), "iqr": float(q3 - q1),
+                    "p90": float(nearest_rank_p90(y[m]))})
+    return pd.DataFrame(out)

@@ -1040,3 +1040,18 @@ def test_substitution_check_is_not_driven_by_months_apart_neighbours():
     assert len(near) == 22 and int((near.other_abs_pct > near.own_abs_pct).sum()) == 21
     assert near.own_abs_pct.median() == pytest.approx(3.06, abs=0.01)
     assert near.other_abs_pct.median() == pytest.approx(25.16, abs=0.01)
+
+
+def test_why_the_range_figure_bins_by_median():
+    """Beyond 1 m the binned median is flat while a binned p90 climbs: the climb
+    is widening two-sided noise, which a high quantile reads as bias."""
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    a = df[df.dive_id.isin(cal.accuracy_cohort(df)) & ~df.model_name.isin(cal.HELD_OUT_MODELS)]
+    b = cal.range_bins(a)
+    beyond = b[b.lo_m >= 1.2]
+    assert len(beyond) == 6 and beyond["median"].between(-1.95, -1.45).all()
+    assert round(b["median"].iloc[1], 1) == -2.5          # 0.81-1.21 m
+    assert round(b.p90.iloc[0], 1) == -1.2 and round(b.p90.iloc[-1], 1) == 2.0
+    assert round(b["median"].iloc[0], 1) == -5.3          # the near bin, below 0.81 m

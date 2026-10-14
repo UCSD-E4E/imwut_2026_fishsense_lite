@@ -894,7 +894,15 @@ caught any of this in the field.
   models, is the whole reason the reported estimator is a high quantile rather than a mean,
   so a narrower axis would have hidden the figure's own argument.
 - **Figure 3** — Percent length error against laser range, accuracy cohort. Binned median
-  and interquartile band over the per-frame cloud. The band does not widen with range.
+  and interquartile band over the per-frame cloud, in eight equal-count bins. The band does
+  not widen with range. **Why the median here when every other result is $p_{90}$:** $p_{90}$
+  is the per-animal estimator because within one animal the error is one-sided — pose can
+  only shorten a length — and a high quantile rejects that tail. The error range adds is
+  different: dot-placement noise, two-sided, and a high quantile of two-sided noise moves with
+  its width. Beyond 1.2 m the binned median holds between −1.9 % and −1.5 %, while a binned
+  $p_{90}$ would climb from −1.2 % in the nearest bin to +2.0 % in the farthest — a range trend
+  manufactured from spread, which is why it is not drawn. The two nearest bins read −5.3 %
+  (below 0.81 m, trout and box only) and −2.5 % (0.81–1.21 m).
 - **Figure 4** — Fitted in-plane laser angle for seven sessions of one unit, the parameter
   that sets metric scale and that no reprojection check can observe. The 0.27° spread is
   worth −4.5 % in length at 2 m, so the mount moves between uses by more than the accuracy
