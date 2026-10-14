@@ -299,3 +299,54 @@ def p90_level_traces(groups, sizes=range(2, 41), draws: int = 1000, seed: int = 
             e = np.array(extremes)
             worst[int(n)] = float(e[np.argmax(np.abs(e))])
     return {k: v for k, v in traces.items() if v}, worst
+
+
+# --- the field cohort, per animal ---------------------------------------------
+
+#: Scientific names exactly as production records them (the species label reads
+#: "Common (Scientific)"); `data/field.csv` keeps the common name only. Pinned
+#: against the recorded strings in tests, so a relabel cannot drift from this.
+SPECIES_SCIENTIFIC = {
+    "Black Grouper": "Mycteroperca bonaci",
+    "Blue Parrotfish": "Scarus coeruleus",
+    "Goliath Grouper": "Epinephelus itajara",
+    "Hogfish": "Lachnolaimus maximus",
+    "Midnight Parrotfish": "Scarus coelestinus",
+    "Mutton Snapper": "Lutjanus analis",
+    "Nassau Grouper": "Epinephelus striatus",
+    "Rainbow Parrotfish": "Scarus guacamaia",
+    "Stoplight Parrotfish": "Sparisoma viride",
+    "Other": None,  # recorded as "Other (Identifiable but Nontarget)"
+}
+
+
+def field_per_animal(field):
+    """One row per (animal, species label): frames, per-animal p90 length.
+
+    Grouped by species label as well as animal because two animals in the
+    deployment carry two species labels each (animals 305 and 323). Grouping
+    on the animal alone would put each under one arbitrary name; this keeps
+    both labels visible and flags the animal, and `conflicting_label` lets a
+    figure draw them differently. Every animal here has at most eight frames,
+    so p90 is each group's longest frame (nearest rank, n <= 9).
+    """
+    from .pubfig import nearest_rank_p90
+
+    labels_per_animal = field.groupby("fish_id").species.nunique()
+    out = (field.groupby(["fish_id", "species"])
+           .agg(dive_id=("dive_id", "first"), n_frames=("length_m", "size"),
+                p90_m=("length_m", nearest_rank_p90))
+           .reset_index())
+    out["conflicting_label"] = out.fish_id.map(labels_per_animal) > 1
+    return out
+
+
+def field_length_summary(field) -> dict:
+    """Per-animal p90 length over the animals AS RECORDED (one per `fish_id`),
+    in metres: the distribution section 5 reports."""
+    from .pubfig import nearest_rank_p90
+
+    p90 = field.groupby("fish_id").length_m.apply(nearest_rank_p90).to_numpy()
+    q1, med, q3 = np.percentile(p90, [25, 50, 75])
+    return {"n_animals": int(p90.size), "min": float(p90.min()), "q1": float(q1),
+            "median": float(med), "q3": float(q3), "max": float(p90.max())}

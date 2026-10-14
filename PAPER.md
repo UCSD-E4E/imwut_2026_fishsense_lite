@@ -958,11 +958,18 @@ caught any of this in the field.
   figure that measures the system rather than the sample — a calibration error is common to
   every frame of one animal and cancels in a relative spread — and the intervals overlap at
   the margin, which the figure shows rather than hides.
-- **Figure 12** — Measured fork length by species over the seven deployments, one point per
-  measurement, bar at the median. **Descriptive only.** The species is a labeler's
-  judgement that nothing in the field data can check, so a genuine per-species offset and a
-  systematic misidentification would look identical here. Species with a single individual
-  are pooled.
+- **Figure 12** — Length per animal by species over the seven deployments: **one point per
+  animal** at its $p_{90}$, the paper's per-animal estimate, which for every animal here is
+  its longest frame (no animal has more than eight). Bar at the median for species with
+  three or more animals. **No species is pooled**: four are represented by one animal, and a
+  sparse tail is what a real deployment yields. **Descriptive only.** The species is a
+  labeller's judgement that nothing in the field data can check, so a per-species offset and
+  a systematic misidentification would look identical. Hollow points are the two animals
+  whose frames carry two species labels (animals 305 and 323), drawn under each label;
+  animal 323's two frames read 48.5 cm as a Nassau Grouper and 22.4 cm as a Hogfish, which
+  is almost certainly two animals grouped as one. The axis says length, not fork length:
+  groupers have a rounded to squared-off tail with no fork, so for them the labelled tail
+  point is the end of the tail at the midline and the length is closer to a total length.
 - **Figure 13** — Hogfish fork length by camera unit, **one point per animal** at
   $p_{90}$, with the between-fish interquartile range shaded behind. Drawn to show that a
   unit effect is not resolvable on this sample, not that there is none: 2 to 10 fish per

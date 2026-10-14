@@ -672,7 +672,7 @@ FIGURE_TITLES = {
     "fig10b_error_by_camera": "Percent length error by camera unit (repository only)",
     "fig11_field_repeatability":
         "Within-individual repeatability, wild fish against posed models",
-    "fig12_field_species": "Measured fork length by species, seven deployments",
+    "fig12_field_species": "Length per animal by species, seven deployments",
     "fig13_field_by_camera": "Hogfish fork length by camera unit",
     "fig14_field_vs_stereo":
         "FishSense Lite against underwater stereo video, per-species medians",
@@ -1426,44 +1426,67 @@ def fig_field_repeatability(
 
 def fig_field_species(
     field,
-    figsize: tuple[float, float] = (COL_WIDTH, 3.0),
-    min_fish: int = 2,
+    figsize: tuple[float, float] = (COL_WIDTH, 3.4),
 ) -> plt.Figure:
-    """Measured length by species, one point per measurement.
+    """Per-animal length by species: one point per animal at its p90.
 
     Descriptive only, and the caption must say so: the species is a labeler's
-    judgement that nothing in the field data can check (§4.5), so a per-species
-    offset and a systematic misidentification are the same picture here. Species
-    with fewer than `min_fish` individuals are pooled into "other", because a
-    row that is one animal invites a comparison the sample cannot support.
+    judgement that nothing in the field data can check, so a per-species offset
+    and a systematic misidentification are the same picture here.
+
+    **One point per animal, not per frame**, because the animal is the unit a
+    stock assessment counts and the paper's per-animal estimate is p90.
+    **No species is pooled**: a species seen once is drawn as one point, because
+    a sparse tail is a true property of a real deployment and an "other" bucket
+    would hide which species it was. The median bar is drawn only for species
+    with three or more animals, where a centre means something.
+
+    Animals carrying two species labels (see `field_per_animal`) are drawn
+    hollow under each label, so the labelling problem is visible rather than
+    resolved by an arbitrary choice.
     """
-    # NB the corpus already has a species literally called "Other" (identifiable
-    # but nontarget), so the pooled bucket must not be called that too.
-    keep = [s for s, g in field.groupby("species") if g.fish_id.nunique() >= min_fish]
-    f = field.assign(sp=np.where(field.species.isin(keep), field.species,
-                                 "Species with one individual"))
-    order = (f.groupby("sp").length_m.median().sort_values().index.tolist())
+    from .repeatability import field_per_animal
+
+    per = field_per_animal(field)
+    order = per.groupby("species").p90_m.median().sort_values().index.tolist()
     rng = np.random.default_rng(1)
 
     fig, ax = plt.subplots(figsize=figsize)
     _grid(ax, axis="x")
     for i, sp in enumerate(order):
-        v = f.loc[f.sp == sp, "length_m"].to_numpy() * 100
-        ax.scatter(v, i + rng.uniform(-0.15, 0.15, v.size), s=10,
-                   facecolor=SERIES_1, edgecolor="none", alpha=0.55, zorder=3)
-        ax.plot([np.median(v)] * 2, [i - 0.26, i + 0.26], color=SERIES_2,
-                linewidth=2.0, solid_capstyle="butt", zorder=5)
+        g = per[per.species == sp]
+        v = g.p90_m.to_numpy() * 100
+        y = i + rng.uniform(-0.26, 0.26, v.size)
+        solid = ~g.conflicting_label.to_numpy()
+        # no outline on the solid points: a white rim makes overlapping solid
+        # points read as hollow, and hollow has a meaning here
+        ax.scatter(v[solid], y[solid], s=14, facecolor=SERIES_1, edgecolor="none",
+                   alpha=0.85, zorder=3)
+        ax.scatter(v[~solid], y[~solid], s=22, facecolor=SURFACE, edgecolor=SERIES_1,
+                   linewidths=1.2, zorder=4)
+        if v.size >= 3:
+            ax.plot([np.median(v)] * 2, [i - 0.3, i + 0.3], color=SERIES_2,
+                    linewidth=2.0, solid_capstyle="butt", zorder=5)
+    name = {"Other": "Other (nontarget)"}
     ax.set_yticks(range(len(order)))
-    ax.set_yticklabels([f"{sp}\n{f.loc[f.sp == sp].fish_id.nunique()} fish, "
-                        f"{int((f.sp == sp).sum())} meas." for sp in order])
+    ax.set_yticklabels([f"{name.get(sp, sp)}  ({(per.species == sp).sum()})" for sp in order])
     ax.set_ylim(len(order) - 0.5, -0.5)
-    ax.set_xlabel("Measured fork length (cm)")
+    ax.set_xlabel("Length per animal, $p_{90}$ (cm)")
     ax.set_xlim(left=0)
-    for s in ("top", "right", "left"):
-        ax.spines[s].set_visible(False)
+    from matplotlib.lines import Line2D
+    ax.legend(handles=[
+        Line2D([], [], marker="o", linestyle="none", markersize=4.5, markerfacecolor=SURFACE,
+               markeredgecolor=SERIES_1, markeredgewidth=1.2, label="Two species labels"),
+        Line2D([], [], marker="|", linestyle="none", markersize=9, markeredgewidth=2.0,
+               color=SERIES_2, label="Median (3+ animals)")],
+        # above the axes, as the other figures do it, so no row is covered
+        loc="lower left", bbox_to_anchor=(0.0, 1.0), ncols=2, frameon=False, fontsize=6,
+        handletextpad=0.3, columnspacing=1.2, borderaxespad=0.2)
+    for side in ("top", "right", "left"):
+        ax.spines[side].set_visible(False)
+    ax.tick_params(axis="y", length=0)
     fig.tight_layout()
     return fig
-
 
 def fig_field_by_camera(
     field,

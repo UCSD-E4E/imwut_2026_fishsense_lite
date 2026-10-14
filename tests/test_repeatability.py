@@ -463,3 +463,34 @@ def test_section_4_1s_deployment_facts():
     assert (len(thin), int(thin.n.sum()), int(thin.animals.sum())) == (4, 62, 38)
     assert int(fits.loc[thin.index, "n_frames"].max()) == 3
     assert int(fits.loc[32, "n_frames"]) == 2          # the stereo day's calibration
+
+
+def test_field_cohort_per_animal_description():
+    """Section 5's descriptive field result: species, per-animal p90 lengths,
+    and the two animals whose frames carry two species labels."""
+    from fishsense_imwut import calibration as cal
+
+    root = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    field = rep.load_field(root / "field.csv")
+
+    s = rep.field_length_summary(field)
+    assert s["n_animals"] == 73
+    assert [round(100 * s[k], 1) for k in ("min", "q1", "median", "q3", "max")] == \
+        [13.0, 19.3, 25.5, 32.4, 84.7]
+
+    per = rep.field_per_animal(field)
+    assert len(per) == 75
+    assert set(per[per.conflicting_label].fish_id) == {305, 323}
+    counts = per.groupby("species").size().to_dict()
+    assert counts == {"Hogfish": 33, "Stoplight Parrotfish": 16, "Nassau Grouper": 7,
+                      "Black Grouper": 6, "Rainbow Parrotfish": 5, "Other": 4,
+                      "Midnight Parrotfish": 1, "Blue Parrotfish": 1,
+                      "Goliath Grouper": 1, "Mutton Snapper": 1}
+    assert field.groupby("species").size().sum() == 162
+
+    # the scientific names are the ones production recorded, not retyped
+    recorded = cal.load_laser_colour(root / "laser_colour.csv")
+    recorded = set(recorded[recorded.measurement_id.isin(field.measurement_id)].subject)
+    expected = {f"{c} ({n})" if n else "Other (Identifiable but Nontarget)"
+                for c, n in rep.SPECIES_SCIENTIFIC.items()}
+    assert recorded == expected
