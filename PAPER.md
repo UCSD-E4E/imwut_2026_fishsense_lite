@@ -492,34 +492,41 @@ months between the pool corpus and the 2024 deployments moved three of the four 
 can be checked by about 3° — units 1 and 2 almost entirely in plane, unit 6 mostly out of
 it — and the fourth by 0.9° over fourteen months.
 
-Three mechanisms were seen in use, and they move the beam in different directions. The
-printed PLA mount flexes, which tilts the beam vertically; with the laser mounted above the
-lens that is almost entirely within the camera–laser plane, so it changes the range
-directly. The mount turns in the housing's cold shoe, which pans the beam horizontally,
-mostly out of the plane: it moves the dot off the line a calibration expects, with far less
-effect on range. And the pointer can turn in its own clamp. No diode is exactly coaxial
-with its body, so a turn swings the beam around a small cone and moves it both ways. Behind
-the first two sit the mount failures seen over the deployments — creep and cracking of the
-printed PLA, water uptake, screws pulling through the print, and play in the cold shoe. None
-was logged by unit or by date, which is why their effect can only be read back from the
-calibrations, as below. Each
-pointer carries a mark to be lined up with the mount, but nothing recorded whether it was
-lined up at each dive, and we do not assume it was. The steps between calibrations hold
-both kinds of motion in similar amounts — a median of 0.53° vertically and 0.54°
-horizontally — and some are close to one kind alone: four days turned one unit 1.61°
-horizontally and 0.00° vertically, and eight minutes tilted another 0.77° vertically and
-0.30° horizontally. No single mechanism accounts for the drift, and the calibrations cannot
-apportion it among the three, or the unrecorded mount replacements above: with three to
-six fits per unit, and origin and angle trading off inside each fit, the attribution is
-underdetermined. This paper does not need it. All three act between dives and within them,
-which is why the pipeline calibrates at every dive; measuring each on the bench belongs
-with the deployability study [??].
+The stack the laser sits on was built to be rigid. From the housing up it runs cold shoe,
+taper, mount, cap, pointer (§3). The taper is a wedge that seats into the shoe's channel and
+into a recess in the mount at once; a screw down through the mount into a nut captured in the
+taper drives it into both and forces the mount flat against the shoe, taking up the slack a
+cold shoe has natively. The cap closes over the pointer onto the mount's cradle with two
+screws, and the two together are the clamp. The motion measured below is therefore what
+remains *after* that preload, and it can arise at each interface and in the parts
+themselves: the taper in the shoe, despite the wedge; the mount on the taper, at its screwed
+joint; the pointer in the clamp; and flex of the printed PLA, seen in use, which is not an
+interface at all. They move the beam differently. Flex of a mount carrying the laser above
+the lens tilts the beam vertically, almost entirely within the camera–laser plane, so it
+changes the range directly. A turn at the shoe or at the taper joint pans the beam
+horizontally, mostly out of the plane: it moves the dot off the line a calibration expects,
+with far less effect on range. And a pointer turning in the clamp swings the beam around a
+small cone, because no diode is exactly coaxial with its body, and moves it both ways.
+Behind these sit the mount failures seen over the deployments — creep and cracking of the
+printed PLA, water uptake, screws pulling through the print, and play at the shoe despite
+the taper. None was logged by unit or by date, which is why their effect can only be read
+back from the calibrations, as below. Each pointer carries a mark to be lined up with the
+mount, but nothing recorded whether it was lined up at each dive, and we do not assume it
+was. The steps between calibrations hold both kinds of motion in similar amounts — a median
+of 0.53° vertically and 0.54° horizontally — and some are close to one kind alone: four days
+turned one unit 1.61° horizontally and 0.00° vertically, and eight minutes tilted another
+0.77° vertically and 0.30° horizontally. No single source accounts for the drift, and the
+calibrations cannot apportion it among them, or the unrecorded mount replacements above:
+with three to six fits per unit, and origin and angle trading off inside each fit, the
+attribution is underdetermined. This paper does not need it. Every source acts between dives
+and within them, which is why the pipeline calibrates at every dive; measuring each on the
+bench belongs with the deployability study [??].
 
 That has a consequence for the protocol. Restoring a mount state cannot protect the
-measurement: the alignment mark addresses one of the three mechanisms at best, and flex and
-the cold shoe act whether or not it is lined up. The step that protects against all three is
-calibrating at the dive, from frames shot on that dive, and it is the only one the
-pipeline relies on.
+measurement: the alignment mark addresses one source at best, the pointer in its clamp,
+and the shoe, the taper joint and flex act whether or not it is lined up. The step that
+protects against all of them is calibrating at the dive, from frames shot on that dive, and
+it is the only one the pipeline relies on.
 
 That stored calibrations differ because the laser moved, rather than because each fit is
 noisy, can be checked against the known lengths without fitting anything to them.
@@ -856,6 +863,18 @@ caught any of this in the field.
   15 %. Consider stating the broadside figure directly: "median −2.1 %, $p_{90}$ +0.36 %
   over 995 measurements of five targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
+- **§3, the mount — the mechanical chain §4.3 refers to.** Three printed PLA parts, two
+  screwed joints and a clamp. From the housing up: the housing's **cold shoe**; the
+  **taper**, a wedge that seats into the shoe's channel and into a recess in the mount body;
+  the **mount** body, whose half-round cradle takes the pointer; the **cap**, which closes
+  over the pointer onto the cradle; and the **pointer**. One screw runs down through the
+  mount into a nut captured in the taper: tightening it drives the wedge into the shoe and
+  the mount and forces the mount flat against the shoe, taking up the slack a cold shoe has
+  natively. Two screws through the cap and mount ears, nutted underneath, close the clamp on
+  the pointer (cradle radius 12.75 mm, a pointer about 25.5 mm across). The parts are
+  `mount/*.3MF` in the companion repository, with `mount/README.md`; the system photograph
+  (Figure 1) shows the assembled stack, and an annotated version labelling cap, mount and
+  taper exists and should replace or accompany it.
 - **Future work worth a line in the limitations paragraph.** Every pose statement about the
   cohort is currently inferred from the error it explains, because those frames carry no
   measured angle. A segmentation mask would break that: yaw foreshortens length by
