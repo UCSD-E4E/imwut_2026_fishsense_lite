@@ -10,6 +10,11 @@ From the housing up:
 
 **cold shoe → taper → mount → cap → pointer**
 
+![The assembled mount on the camera housing, with the cap, mount and taper labelled](assembly.jpg)
+
+The taper is the yellow post standing in the housing's cold shoe; the mount
+sits on it and carries the cradle; the cap clamps the pointer onto the cradle.
+
 | file | part | what it does |
 |---|---|---|
 | `taper.3MF` | the taper, a wedge | Seats into the housing's cold-shoe channel and into a recess in the mount body at the same time. A screw passes down through the mount into a nut captured in the taper; tightening it drives the wedge into both and forces the mount flat against the shoe. It is there to take up the slack a cold shoe has natively, not to space or tilt the laser. |

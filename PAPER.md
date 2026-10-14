@@ -872,9 +872,9 @@ caught any of this in the field.
   the mount and forces the mount flat against the shoe, taking up the slack a cold shoe has
   natively. Two screws through the cap and mount ears, nutted underneath, close the clamp on
   the pointer (cradle radius 12.75 mm, a pointer about 25.5 mm across). The parts are
-  `mount/*.3MF` in the companion repository, with `mount/README.md`; the system photograph
-  (Figure 1) shows the assembled stack, and an annotated version labelling cap, mount and
-  taper exists and should replace or accompany it.
+  `mount/*.3MF` in the companion repository, with `mount/README.md`. The system photograph
+  (Figure 1) shows the assembled stack; `mount/assembly.jpg` is the same photograph with the
+  cap, mount and taper labelled, and can replace or accompany it.
 - **Future work worth a line in the limitations paragraph.** Every pose statement about the
   cohort is currently inferred from the error it explains, because those frames carry no
   measured angle. A segmentation mask would break that: yaw foreshortens length by
