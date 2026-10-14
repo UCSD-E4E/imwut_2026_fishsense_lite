@@ -2197,8 +2197,11 @@ def fig_flat_port_error_field(
     left and right edges it lies along a radius and at the top and bottom across
     one. Radial and tangential magnification differ, which is exactly why this
     is not a scale error a calibration could absorb: a horizontal fish reads
-    +23 % at the side of the frame and +6 % at the top, at the same distance
-    from the centre.
+    +23 % at the side of the frame and +6 % at the top. Those two are each the
+    furthest point ON ITS OWN AXIS where the target still fits (1631 px and
+    1500 px from the centre), not points at the same distance; at matched
+    radius, 1500 px, the side reads +19 % against the top's +6 %, so the
+    asymmetry stands. The worst point anywhere is in the corner, +29.5 %.
 
     Grey is where a target of this length would not fit in frame.
     """
