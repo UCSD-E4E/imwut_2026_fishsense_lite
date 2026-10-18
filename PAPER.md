@@ -47,10 +47,10 @@ after. It is only *barely* rather than not at all because a refit turns the lase
 as changing the baseline, so the correction factor varies a little with range instead of being
 exactly common to a fish's frames.) Over 25 such individuals — 97 of the 162 measurements — the
 within-fish coefficient of variation is **2.9 % (median; bootstrap 95 % CI 1.6–4.1 %), with a
-$p_{90}$ of 11.4 %**. The identical statistic on the pool cohort — repeat frames of one target
+$p_{90}$ of 9.0 %**. The identical statistic on the pool cohort — repeat frames of one target
 in one session, 30 cells — is **1.4 % (95 % CI 1.2–2.1 %), $p_{90}$ 3.2 %**. So a repeat
 measurement of a wild fish varies about 2.1× as much as a repeat measurement of a posed model,
-and its tail about 3.6× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
+and its tail about 2.8× as badly. The two bootstrap intervals overlap at the margin (1.6–4.1 %
 against 1.2–2.0 %), so this is a difference in point estimate rather than a cleanly separated
 one; with 25 field individuals it is the sample size and not the effect that limits the claim.
 That penalty is what the field adds: the animal moves between frames, the water is turbid, and
@@ -97,14 +97,14 @@ range check of Appendix A cannot be applied to them: it needs one rigid object
 measured repeatedly
 across a wide range spread, and the best-spanned wild individual in the set covers only
 1.9× — 1.6× among those with the three frames the repeatability needs, and 1.04× for the one
-fish with eight. The per-unit sample is 4 to 18 fish, and with the 18 % between-fish size
+fish with eight. The per-unit sample is 4 to 17 fish, and with the 19 % between-fish size
 spread observed among hogfish the standard error on a unit's median length is 7 % at ten
-fish and 13 % at three — larger than any bias worth detecting. A one-way variance-components
-fit on 33 hogfish finds **no detectable unit effect** ($F = 1.03$ across the six camera
-units, $p = 0.42$; $F = 1.55$, $p = 0.20$ if the seven deployments are taken separately),
-with a point estimate of 1.5 % between cameras against 18 % between fish. What it cannot do
-is bound that tightly: a nonparametric bootstrap over individuals puts the 95 % upper limit
-at 13 % between cameras and 16 % between deployments, and the $F$-based interval is
+fish and 14 % at three — larger than any bias worth detecting. A one-way variance-components
+fit on 32 hogfish finds **no detectable unit effect** ($F = 0.98$ across the six camera
+units, $p = 0.45$; $F = 1.47$, $p = 0.23$ if the seven deployments are taken separately),
+with a point estimate of zero between cameras — $F$ is below 1 — against 19 % between fish.
+What it cannot do is bound that tightly: a nonparametric bootstrap over individuals puts the
+95 % upper limit at 14 % between cameras and 16 % between deployments, and the $F$-based interval is
 degenerate at these sample sizes. A unit-to-unit bias of order the fish spread itself is
 therefore not excluded, which is a statement about the sample and not about the instrument.
 
@@ -208,18 +208,18 @@ instrument those are not separable. The mean difference spans zero — −6.7 % 
 
 **The two comparisons disagree about the sign of our bias, and that is worth
 stating numerically because it bounds what any correction could do.** Over the
-four species with enough of our animals, our medians sit **−15.4 %** against the
+four species with enough of our animals, our medians sit **−13.1 %** against the
 archive; over the seven paired individuals we read **+3.5 %** long. A candidate
 range correction fitted on the pool cohort — the pool's own near-field trend,
 $-0.56 - 2.40/z$ per cent, which flattens that trend from a 1.40 pp spread of
 binned medians to 0.50 — adds between 1.2 % and 6.2 % at field ranges, median
 2.2 %. Applied to our side it moves the population comparison from a median
-absolute offset of 15.4 % to 14.4 %, and the paired comparison from 8.6 % to
+absolute offset of 13.1 % to 12.0 %, and the paired comparison from 8.6 % to
 10.9 %: it helps the one that says we read short and hurts the one that says we
 read long, because it only ever adds length. Two things follow. The correction is
-**a tenth of the disagreement it would have to explain**, so neither result
+**about an eighth of the disagreement it would have to explain**, so neither result
 licenses it and it is not applied. And a population comparison that a
-same-individual comparison contradicts by nineteen points is not a weak
+same-individual comparison contradicts by seventeen points is not a weak
 measurement of a bias, it is a measurement of something else — which is the
 caution the preceding paragraphs give, here with a number on it.
 
@@ -302,23 +302,23 @@ the median across animals: a $p_{90}$ there would name the ninetieth-percentile 
 which is a different quantity.
 
 It is an upper quantile, and we are careful not to read it as a recovery of the true
-length. A quantile sits above the centre of whatever distribution it is given, pose or no
-pose: on Gaussian noise at the within-cell spread we measure (1.3 %), the expected
-$p_{90}$ is $+1.6\,\%$ with no foreshortening present at all. The angle experiment makes
-the same point with real frames — at a *measured* $0°$ the median is $-3.8\,\%$ and the
+length. A quantile sits above the center of whatever distribution it is given, pose or no
+pose. The angle experiment shows this with real frames — at a *measured* $0°$ the median is $-3.8\,\%$ and the
 $p_{90}$ is $+0.6\,\%$, a gap of 4.4 points containing no foreshortening whatever. So a
 $p_{90}$ near zero does not establish that the instrument is unbiased at broadside; it
 says the pose tail and the measurement spread are of comparable size. What the statistic
 is good for is comparison — between targets, between sessions, and against the same
 statistic computed by the deployed pipeline — not as an absolute accuracy.
 
-Over the cohort the median frame error is −2.0 % and the $p_{90}$ is +0.36 %; 80 % of
+Over the cohort the median frame error is −2.0 % and the $p_{90}$ is +0.37 %; 80 % of
 frames are within 5 % of the reference, 98 % within 10 % and 99 % within 15 %. The
-per-target $p_{90}$ — Box +0.7 %, Purple Angelfish +0.9 %, Rainbow Trout −1.0 %,
+per-target $p_{90}$ — Box +0.6 %, Purple Angelfish +0.8 %, Rainbow Trout −1.0 %,
 Grouper +0.9 %, Snook −1.2 % — shows no trend with size across a three-fold range of
-lengths. The median is the more informative number about the divers: −2.0 % is what a
-typical pose of 11.5° costs, so the corpus corroborates the 15° presentation guidance of
-§4.4 from the other direction — the divers were inside it.
+lengths. **[FLAG 2026-10-16: the next sentence is cut from the manuscript. Kept here
+because the argument may appear elsewhere; check before deleting.]** The median is the more
+informative number about the divers: −2.0 % is what a typical pose of 11.5° costs, so the
+corpus corroborates the 15° presentation guidance of §4.4 from the other direction — the
+divers were inside it.
 
 A sixth target, a printed measuring board, is **held out**, and why is worth one sentence
 because it is the estimator's one failure mode. Its six frames were all shot with the
@@ -365,9 +365,9 @@ thickness on this evidence.
 
 Figure 3 plots error against laser range. Triangulation conditioning degrades as $Z^2$
 (Eq. 5), so a range dependence surviving into the delivered length would appear as a
-widening band; instead the interquartile range is 3.0 to 4.2 points in every bin beyond
-0.81 m and does not grow with distance, and the binned median is flat between −2.4 % and
-−1.4 % from 0.81 m out to 5.1 m. The one departure is the nearest bin, where the median is
+widening band; instead the interquartile range is 2.9 to 4.1 points in every bin beyond
+0.81 m and does not grow with distance, and the binned median stays between −2.5 % and
+−1.5 % from 0.81 m out to 5.1 m, settling to −1.9 % to −1.5 % past 1.2 m. The one departure is the nearest bin, where the median is
 −5.3 %. Only two targets reach those ranges and they disagree — over the same frames the
 trout reads −7.0 % and the box −1.8 % — so the departure follows the target, not the range,
 and falls to the paragraph above. It is also below the working range of a diver measuring
@@ -380,9 +380,9 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
 
 | selection | sessions | frames | median | $p_{90}$ | mean \|err\| |
 |---|---|---|---|---|---|
-| accuracy cohort (rule) | 19 | 995 | −2.00 % | +0.36 % | 3.08 % |
+| accuracy cohort (rule) | 19 | 995 | −2.00 % | +0.37 % | 3.08 % |
 | every session except the angle experiment | 26 | 1,371 | −3.30 % | +0.08 % | 4.42 % |
-| every session | 31 | 2,799 | −5.84 % | −0.56 % | 9.03 % |
+| every session | 31 | 2,799 | −5.84 % | −0.55 % | 9.03 % |
 
 ```latex
 \begin{table}[t]
@@ -395,9 +395,9 @@ $p_{90}$ stays within ±0.6 % of zero throughout.
     \toprule
     selection & sessions & frames & median & $p_{90}$ & mean $|$err$|$ \\
     \midrule
-    accuracy cohort (rule)               & 19 & 995     & $-2.00$ & $+0.36$ & 3.08 \\
+    accuracy cohort (rule)               & 19 & 995     & $-2.00$ & $+0.37$ & 3.08 \\
     all but the angle experiment         & 26 & 1{,}371 & $-3.30$ & $+0.08$ & 4.42 \\
-    every session                        & 31 & 2{,}799 & $-5.84$ & $-0.56$ & 9.03 \\
+    every session                        & 31 & 2{,}799 & $-5.84$ & $-0.55$ & 9.03 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -476,8 +476,8 @@ The angle also moves. Across those seven sessions it spans 0.27°, against a sen
 $-2.0\,\%$ in length per 0.15° at 0.9 m and $-4.5\,\%$ at 2.0 m, so the between-session
 spread by itself exceeds the accuracy we report. The corpus spans seventeen days, which
 makes this drift under a fortnight of ordinary handling rather than ageing over years. A
-session is no safer a unit. In one session two calibrations of the same rig, taken seven
-minutes apart, differ by 0.82°; the target frames shot between them agree with the earlier
+session is no safer a unit. In one session two calibrations of the same rig, taken 8.2
+minutes apart, differ by 0.85°; the target frames shot between them agree with the earlier
 fit, while frames from 25 minutes before agree with neither, putting the mount in a third
 state.
 
@@ -514,8 +514,8 @@ back from the calibrations, as below. Each pointer carries a mark to be lined up
 mount, but nothing recorded whether it was lined up at each dive, and we do not assume it
 was. The steps between calibrations hold both kinds of motion in similar amounts — a median
 of 0.53° vertically and 0.54° horizontally — and some are close to one kind alone: four days
-turned one unit 1.61° horizontally and 0.00° vertically, and eight minutes tilted another
-0.77° vertically and 0.30° horizontally. No single source accounts for the drift, and the
+turned one unit 1.61° horizontally and 0.00° vertically, while the 8.2-minute step within
+one session described above was 0.77° vertical and 0.30° horizontal. No single source accounts for the drift, and the
 calibrations cannot apportion it among them, or the unrecorded mount replacements above:
 with three to six fits per unit, and origin and angle trading off inside each fit, the
 attribution is underdetermined. This paper does not need it. Every source acts between dives
@@ -798,8 +798,8 @@ Of the three parameters this leaves, two are not delicate: neither the 0.8 m flo
 (0.6–1.0 m) nor the eight-frame minimum (6–12) changes which sessions are rejected. The
 trend bound does. Widening it from 2 to 4 % per metre admits three more sessions, 19 to
 22, and readers should take the stability claim to be about the reported statistic rather
-than about cohort membership: $p_{90}$ holds between +0.36 % and +0.15 % across that
-range, while the median drifts from −2.06 % to −2.89 %.
+than about cohort membership: $p_{90}$ holds between +0.37 % and +0.16 % across that
+range, while the median drifts from −2.00 % to −2.85 %.
 
 ##### Sessions the rule rejects
 
@@ -828,8 +828,8 @@ sessions no reference-based test had flagged.
 The instructive case is one the rule no longer rejects, and it is worth following because
 the same movement still rejects two others. One session read 14 % short with correct labels
 and a calibration that reproduced its own checkerboard perfectly: its folder held a board
-burst shot five minutes *after* its target frames, and the laser had rotated 0.82° in the
-plane reprojection cannot see. Re-measured under the burst that preceded the frames by nine
+burst shot five minutes *after* its target frames, and the laser had rotated in the
+plane reprojection cannot see (the 8.2-minute step of §4.3). Re-measured under the burst that preceded the frames by nine
 seconds it reads −1.7 %, and it is now a cohort member. But two sessions shot minutes
 earlier still borrow the *later* burst — the calibration from the far side of the movement
 — and read −5.5 % and −9.6 %, with range trends of −3.8 and −2.8 % per metre implying
@@ -859,8 +859,8 @@ caught any of this in the field.
   divers is 15° (Figure 8); the pooled median crosses the budget at 30°."
 - **Abstract / Conclusion**: the "<15 %" and "within our target margin of error of 20 %"
   claims hold in the form §4.4 establishes them: no measurement within 20° of broadside
-  leaves the 15 % budget, and the guidance given to divers is 15°. Over the cohort the $p_{90}$ is +0.36 % and 99 % of frames are within
-  15 %. Consider stating the broadside figure directly: "median −2.1 %, $p_{90}$ +0.36 %
+  leaves the 15 % budget, and the guidance given to divers is 15°. Over the cohort the $p_{90}$ is +0.37 % and 99 % of frames are within
+  15 %. Consider stating the broadside figure directly: "median −2.1 %, $p_{90}$ +0.37 %
   over 995 measurements of five targets at 0.27–5.0 m".
 - **Figure ?? (similar triangles)** in §3.3 is an unresolved reference.
 - **§3, the mount — the mechanical chain §4.3 refers to.** Three printed PLA parts, two
@@ -901,7 +901,7 @@ caught any of this in the field.
 
 - **Figure 1** — Measured against known length, accuracy cohort (19 sessions, 995 frames).
   Five targets separate along the abscissa by their own lengths; the diamond is the
-  $p_{90}$. $R^2 = 0.999$ about the 1:1 line on the five $p_{90}$ estimates, 0.976 on the
+  $p_{90}$. $R^2 = 0.999$ about the 1:1 line on the five $p_{90}$ estimates, 0.975 on the
   995 individual frames. That statistic and not Pearson $r^2$: it has no free slope or
   offset, so a scale error lowers it, where $r^2$ over targets spanning a factor of four
   in length would mostly certify that the targets are different sizes.
@@ -935,7 +935,7 @@ caught any of this in the field.
   across five of the seven units. Unit 1 contributed a single non-angle session, so its
   marker and median coincide.
 - **Figure 10b** *(repository only; no section references it)* — The frame-level companion
-  to Figure 10: percent error per camera unit over the cohort, each target centred on its own
+  to Figure 10: percent error per camera unit over the cohort, each target centered on its own
   median so units that photographed different targets are comparable. One hue throughout —
   the question is whether the units differ and the answer is no. Kept for the record rather
   than the paper, alongside Figures 5, 6 and 7.
@@ -943,7 +943,7 @@ caught any of this in the field.
   Length error against **where in the frame the target sits** with no refraction
   correction, simulated for this camera at 2 m against a 300 mm target. **The abscissa is
   position, not pose** — Figure 8's is also in degrees and means the opposite thing, so the
-  upper axis repeats it in picture terms, centre of frame through to edge. The two are
+  upper axis repeats it in picture terms, center of frame through to edge. The two are
   independent: a fish held perfectly broadside in the corner has 0° of pose and 20° of
   frame position, and would read +17.7 % long. Ignoring the water's index expands the scene
   transversely by $n_w$ and shortens the laser range by $1/n_w$; on the optical axis these
@@ -953,16 +953,16 @@ caught any of this in the field.
   the frame itself reaches 25.4°, so the curve does not show the worst the port can do.
 - **Figure 9b** *(§4.5, and the better of the two — needs `figure*`, full width)* — The
   flat-port cost drawn on the frame it happens in, beside what the corrective optic leaves,
-  on one colour scale. Each panel **is** the 4014 × 3016 image, so "where in the picture"
+  on one color scale. Each panel **is** the 4014 × 3016 image, so "where in the picture"
   needs no translation into degrees and cannot be misread as the fish's pose. White contour:
-  the 15 % budget. Grey: a 300 mm target centred there would not fit in frame.
+  the 15 % budget. Gray: a 300 mm target centered there would not fit in frame.
   **Panel (a) is not radially symmetric, and that is the argument.** The port is
   rotationally symmetric but the target is not a point — held horizontal it lies *along* a
   radius at the left and right edges and *across* one at the top and bottom, and radial and
   tangential magnification differ. The same fish reads **+23 % at the side and +6 % at the top**, each at the furthest
-  point on its own axis where the target still fits (1631 px and 1500 px from centre); at
+  point on its own axis where the target still fits (1631 px and 1500 px from center); at
   *equal* radius the gap is still more than threefold, +19 % against +6 % at 1500 px. It
-  reads +0.1 % at the centre and **+29.5 %** in the corner, which is the worst the port
+  reads +0.1 % at the center and **+29.5 %** in the corner, which is the worst the port
   does anywhere a 300 mm target fits — at 2177 px, 37.4° off axis. No single scale factor
   is right at all of these, which is why a calibration cannot absorb this.
   **All of these are free-field bounds for a 300 mm target held horizontal at 2 m**,
@@ -972,7 +972,7 @@ caught any of this in the field.
   bounds on the same effect over different domains — **+55.6 %** (radial, at 2500 px,
   against its in-water calibration, and explicitly *not* reachable) and **1.2 %** (median
   over its reachable envelope of production lengths and ranges). Three numbers, three
-  domains, no contradiction — but only if each is labelled with what it bounds.
+  domains, no contradiction — but only if each is labeled with what it bounds.
   **What panel (b) is, and is not.** It is the same model with the index step removed
   — the air path the M52 lens restores at the port — and *not* a refraction correction; the
   Pinax model and the in-water single-viewpoint calibration are the companion paper's
@@ -992,18 +992,18 @@ caught any of this in the field.
   its longest frame (no animal has more than eight). Bar at the median for species with
   three or more animals. **No species is pooled**: four are represented by one animal, and a
   sparse tail is what a real deployment yields. **Descriptive only.** The species is a
-  labeller's judgement that nothing in the field data can check, so a per-species offset and
-  a systematic misidentification would look identical. Hollow points are the two animals
-  whose frames carry two species labels (animals 305 and 323), drawn under each label;
-  animal 323's two frames read 48.5 cm as a Nassau Grouper and 22.4 cm as a Hogfish, which
-  is almost certainly two animals grouped as one. The axis says length, not fork length:
-  groupers have a rounded to squared-off tail with no fork, so for them the labelled tail
+  labeler's judgment that nothing in the field data can check, so a per-species offset and
+  a systematic misidentification would look identical. Every animal carries one species
+  label. Two once carried two, from a grouping bug in the pipeline's first version that
+  joined a "part of previous group" frame to the wrong animal; three frames were regrouped in
+  production on 2026-10-14, with no length changed. The axis says length, not fork length:
+  groupers have a rounded to squared-off tail with no fork, so for them the labeled tail
   point is the end of the tail at the midline and the length is closer to a total length.
 - **Figure 13** — Hogfish fork length by camera unit, **one point per animal** at
   $p_{90}$, with the between-fish interquartile range shaded behind. Drawn to show that a
   unit effect is not resolvable on this sample, not that there is none: 2 to 10 fish per
-  unit against an 18 % between-fish spread, $F(5,27) = 1.10$, $p = 0.38$. Plotting all 74
-  measurements instead of the 33 animals returns $F(5,68) = 4.05$, $p = 0.004$ — an
+  unit against a 19 % between-fish spread, $F(5,26) = 1.01$, $p = 0.43$. Plotting all 74
+  measurements instead of the 32 animals returns $F(5,68) = 4.05$, $p = 0.003$ — an
   apparently significant unit effect that is entirely pseudo-replication.
 - **Figure 14** — Per-species median length, FishSense Lite against the independent
   stereo-video archive, with the 1:1 line. Bars are bootstrap intervals on each median; the
@@ -1021,7 +1021,7 @@ caught any of this in the field.
   across these five species because the samples do, and that asymmetry is the result: Nassau
   Grouper's median sits ±23.5 cm on a 49 cm fish (7 of our animals against 8 of theirs),
   while Stoplight Parrotfish's stereo median is pinned to ±2.0 cm by 391. Five species with
-  at least five of our fish: Hogfish (33 vs 119), Stoplight Parrotfish (16 vs 391),
+  at least five of our fish: Hogfish (32 vs 119), Stoplight Parrotfish (15 vs 391),
   Nassau Grouper (7 vs 8), Black Grouper (6 vs 51), Rainbow Parrotfish (5 vs 59). Medians
   differ by −21 % to +12 %.
 - **Figure 15** *(§4.1)* — The paired day: our per-frame lengths against the stereo
@@ -1044,16 +1044,16 @@ caught any of this in the field.
   from the same model as Figures 9 and 9b (Pinax geometry, salt water $n_w = 1.342$, the
   housing's fitted standoff). The sweep starts at 0.30 m because the pool corpus reaches
   0.28 — this is measured range, not extrapolation — and is sampled every 5 cm inside a
-  metre, where all of the structure is. **(a)** The reading against the truth: 0.21 m read
+  meter, where all of the structure is. **(a)** The reading against the truth: 0.21 m read
   at 0.30, 4.10 m at 5.50. **(b)** The same thing as an error, converging on
   $100\,(1/n_w - 1) = -25.5\,\%$ and reaching $-30.3\,\%$ at 0.30 m. **The two panels do
   not make the same claim, and (b) is the one to believe.** A line that looked like a pure
   scale would plot flat in (b), and this one moves 4.8 pp. What holds is narrower, and it
-  is what the shading marks: past a metre the ratio is constant to 0.42 pp — 0.7408 to
-  0.7450, a scale for any purpose here — while inside a metre it falls to 0.697 at 0.30 m.
+  is what the shading marks: past a meter the ratio is constant to 0.42 pp — 0.7408 to
+  0.7450, a scale for any purpose here — while inside a meter it falls to 0.697 at 0.30 m.
   So (a) is straight where the instrument is used and bends where the shading is, at a
   scale too small to see, and (b) is that bend magnified. **This is the
-  term Figure 9's cancellation runs on** — the pipeline gets a centred length right while
+  term Figure 9's cancellation runs on** — the pipeline gets a centered length right while
   its range is a quarter short, because the same $n_w$ expands the scene transversely by
   the same factor and the two divide out on axis. **The near-field rise is not a range
   dependence.** The laser sits 11.7 cm off the optical axis and runs parallel to it, so the
@@ -1068,7 +1068,7 @@ caught any of this in the field.
 - **Figure 17** *(§4.3)* — Fitted laser baseline per camera unit, split by the calibration
   object each fit used and, unavoidably, by the epoch it was shot in. Pale dots are the
   individual fits, set off the row line so a unit with one fit under a standard does not
-  hide it beneath its own mean; diamonds are the per-unit means and the grey rule between
+  hide it beneath its own mean; diamonds are the per-unit means and the gray rule between
   them is the difference. **Read the dates first.** Every checkerboard fit is 14–18 August
   2023 and every slate fit 29–31 August, with the cameras shipped in between, so no row
   compares two objects within one deployment. The +0.66 % of baseline (95 % bootstrap CI
@@ -1080,14 +1080,32 @@ caught any of this in the field.
   **Two fits are not on the axis**, and neither is in the estimate — dive 107, the 12.95 cm
   lever-arm failure this section dissects, and dive 436, a field dive that reaches the pool
   exports only as a borrow.
-- **Figure 18** *(repository only — the paper keeps Figure 4 and carries this in §4.3's
-  text)* — Every accepted calibration of every unit, August 2023 to December 2024, against
-  that unit's earliest calibration resting on at least ten frames: in-plane change (top, with
-  the 2 m budget band) and out-of-plane change (bottom). Colour is the calibration object,
-  because every unit swings positive exactly when the object changed and the cameras
-  shipped; hollow points rest on two or three frames, which leaves the fit nothing to check
-itself against. It is the fleet-wide version of
-  Figure 4, and the source of §4.3's 0.65° median step and its 3° change across the months
+- **Figure 21** *(§5.7)* — Median length error against laser range for the two targets
+  photographed inside 0.81 m, the Rainbow Trout (a solid model 58.7 mm deep) and the Box (a
+  flat face), over the accuracy cohort, in fixed range bins with each point at the target's
+  median range in its bin. Below 0.81 m the trout reads −7.0 % and the box −1.7 %; beyond
+  1.5 m the box holds within 0.7 % of zero while the trout stays 2–4 % short. Shaded: ranges
+  under 1 m, which the paper recommends against.
+- **Figure 20** *(§4.3 candidate; the same data as Figure 19, for comparison)* — Each row is
+  one pool session measured with its own calibration and, on the same frames, with the same
+  unit's next calibration, taken between 8 minutes and 15 days later. A neighboring
+  calibration moves 21 of 22 sessions further from their targets' known lengths, and the
+  median past the 15 % budget.
+- **Figure 19** *(§4.3; replaces Figure 18 there)* — Each line is one pool session, measured
+  first with its own calibration and then, on the same frames, with the next calibration of
+  the same camera unit, taken between 8 minutes and 15 days later. With its own calibration
+  the median session reads 3.1 % from its targets' known lengths; with the neighbor's it reads
+  25.2 %, beyond the 15 % budget, and 21 of the 22 sessions get worse. A calibration describes
+  the laser at the session it was taken in and not the next one. The known lengths score the
+  substitution and are fitted to nothing. *(Repository variant
+  `fig19_calibration_substitution_all`: neighbors at any interval, up to 412 days, 26 sessions,
+  3.2 % → 27.6 %, worse in 25; log axis, because four neighbors months away read 42–184 %.)*
+- **Figure 18** *(repository only — replaced in §4.3 by Figure 19)* — Every accepted calibration of every unit, August 2023 to
+  December 2024, against that unit's earliest calibration resting on at least ten frames:
+  in-plane change (top, with the 2 m budget band) and out-of-plane change (bottom). Color is
+  the calibration object, because every unit swings positive exactly when the object changed
+  and the cameras shipped; hollow points rest on two or three frames, which leaves the fit
+  nothing to check itself against. It is the fleet-wide version of Figure 4, and the source of §4.3's 0.65° median step and its 3° change across the months
   to the 2024 deployments.
 - **Figure 16** *(§4.2)* — How many frames the $p_{90}$ *estimate* needs to settle.
   Rarefaction: draw $n$ frames without replacement from each of the fifteen cohort cells
@@ -1156,8 +1174,8 @@ Figure 5 stays in the repository only.**
 
 *Revised 2026-09-13. This section previously recommended cutting both and keeping Figure 4's
 number as a single sentence in §3.3. Two things changed. The 490 → 527 split established
-that the mount can move* within *a session — two calibrations seven minutes apart differing
-by 0.82° — which is a qualitatively stronger claim than between-session drift and cannot be
+that the mount can move* within *a session — two calibrations 8.2 minutes apart differing
+by 0.85° — which is a qualitatively stronger claim than between-session drift and cannot be
 carried by one sentence. And the WUWNet analysis independently measured 0.378° across one
 session boundary from two direct beam fits, so the drift is now corroborated by a second
 observable rather than inferred from length errors alone. Calibration stability has become a
@@ -1178,8 +1196,8 @@ slate-borrowed sessions and the paper needed to explain why two of them were rep
    length to fix a calibration — which a reviewer will read as circular unless the
    scale-free ruler-at-two-ranges argument is also made. That is a different paper.
 3. **But the mount state is no longer a passing remark.** §4.3 now reports calibration
-   stability as a result: the angle spans 0.27° across seven sessions, 0.82° between two
-   calibrations seven minutes apart, and calibration state is the dominant reason a session
+   stability as a result: the angle spans 0.27° across seven sessions, 0.85° between two
+   calibrations 8.2 minutes apart, and calibration state is the dominant reason a session
    fails to be accuracy evidence (6 of 30). That is three quantities and a mechanism, and
    it is what justifies the cohort rule, the range check, and re-fitting the laser per dive.
    A sentence cannot carry it. Figure 4 as it stands — seven sessions, angle on the

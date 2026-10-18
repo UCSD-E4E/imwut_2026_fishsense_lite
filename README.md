@@ -16,7 +16,7 @@ are accuracy evidence, a designed foreshortening experiment, and the simulation 
 behind the reconstruction and calibration methods.
 
 **Headline.** Over the 19-session accuracy cohort (995 measurements, 0.28–5.06 m): median
-−2.00 %, $p_{90}$ +0.36 %, 80 / 98 / 99 % of frames within 5 / 10 / 15 %.
+−2.00 %, $p_{90}$ +0.37 %, 80 / 98 / 99 % of frames within 5 / 10 / 15 %.
 
 ## Reproducing this without database access
 

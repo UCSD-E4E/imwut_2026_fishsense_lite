@@ -339,7 +339,7 @@ def group_by_dive(rows: Sequence[dict]) -> dict[int, list[dict]]:
 #: HELD_OUT_MODELS note derives from the tick pitch by a different route.
 #:
 #: Effect is confined to six frames: the ruler's median moves -4.20 -> -3.66 %
-#: and its p90 -3.80 -> -3.27 %. The cohort median (-2.06 %) and p90 (+0.36 %)
+#: and its p90 -3.80 -> -3.27 %. The cohort median (-2.06 %) and interpolated p90 (+0.36 %)
 #: are unchanged at the precision they are quoted, and the cohort membership is
 #: untouched -- nothing in the selection rule reads a reference length.
 MEASURED_REFERENCES_M = {"Rainbow Trout": 0.313, "Ruler": 0.341}
@@ -394,7 +394,7 @@ ANGLE_TEST_KNOWN_M = 0.455
 # Dive 490 read every model ~14 % short with verified labels and a clean board
 # fit. Resolved 2026-09-12: its fish frames were shot nine seconds after the
 # PRECEDING board burst (dive 489) and five minutes before its own, and the
-# laser had rotated 0.82 deg in-plane in between. The fish frames were split
+# laser had rotated 0.85 deg in-plane in between (fitted beams, 8.2 min apart). The fish frames were split
 # into dive 527 (borrows 489) and re-measured at -1.7 % median; 490 now holds
 # only its board burst and no measurements. Nothing is unresolved any more, so
 # this is empty; it stays so the notebook's status column keeps its vocabulary.
@@ -659,7 +659,8 @@ def range_trend_flagged_dives(df, exclude: Sequence[int] = ANGLE_TEST_DIVES) -> 
 #: a session effect wants every cell it can get. It is the REPORTED set the six
 #: frames do not belong in. Dropping them leaves the cohort identical (nothing
 #: in the selection rule reads a held-out target) and moves the headline from
-#: -2.06 to -2.00 % median, p90 unchanged at +0.36 %.
+#: -2.06 to -2.00 % median, p90 unchanged at +0.36 % interpolated (+0.37 % by
+#: nearest rank, the paper's convention).
 #:
 #: That is established without assuming this instrument is accurate. A Wildco
 #: 118-E40 fish measuring board was photographed in dives 60 and 66, and all 29
@@ -1408,3 +1409,136 @@ def range_bins(df, depth_column: str = "depth_m", n_bins: int = 8):
                     "median": float(np.median(y[m])), "iqr": float(q3 - q1),
                     "p90": float(nearest_rank_p90(y[m]))})
     return pd.DataFrame(out)
+
+
+# --- a dive's own calibration, checked without known lengths --------------------
+
+def load_dive_timeline(path):
+    """`dive_timeline.csv`: one row per image with a live laser label, in shot order.
+
+    Adds `taken` (UTC timestamp), boolean `has_dot`/`measured`/`slate`, float
+    dot pixels, and `calib` -- a frame the calibration could have fitted: a
+    board frame (species label 'E4E Checkerboard') or a slate frame, with a dot.
+    """
+    import pandas as pd
+
+    t = pd.read_csv(path, sep="|", keep_default_na=False)
+    t["taken"] = pd.to_datetime(t.taken_utc)
+    for c in ("has_dot", "measured", "slate"):
+        t[c] = t[c] == "t"
+    for c in ("dot_x", "dot_y"):
+        t[c] = pd.to_numeric(t[c], errors="coerce")
+    t["calib"] = t.has_dot & (t.slate | t.content.str.contains("Checkerboard")
+                              | t.content.str.startswith("Slate"))
+    return t
+
+
+def beam_depth_m(xy, K, origin, axis) -> np.ndarray:
+    """Laser-triangulated depth (z) of each dot pixel under one fitted beam.
+
+    The point on the beam closest to the camera ray through the dot -- the
+    pipeline's own triangulation, which this reproduces to under a millimetre
+    on the corpus. Pixels are in the stored (undistorted pinhole) frame.
+    """
+    xy = np.atleast_2d(np.asarray(xy, float))
+    r = np.linalg.solve(np.asarray(K, float), np.c_[xy, np.ones(len(xy))].T).T
+    r /= np.linalg.norm(r, axis=1)[:, None]
+    p, a = np.asarray(origin, float), np.asarray(axis, float)
+    b, d, e = r @ a, r @ p, a @ p
+    t = (b * d - e) / (1 - b ** 2)
+    return (p + t[:, None] * a)[:, 2]
+
+
+def dot_line_residual_px(xy, K, origin, axis) -> np.ndarray:
+    """Signed perpendicular distance, in pixels, of each dot from the image line
+    the fitted beam projects to. Sees out-of-plane beam motion only: an in-plane
+    rotation slides the dot ALONG this line, which is why it cannot catch the
+    error that sets range."""
+    xy = np.atleast_2d(np.asarray(xy, float))
+    K = np.asarray(K, float)
+    P = np.array([np.asarray(origin, float) + s * np.asarray(axis, float) for s in (1.0, 5.0)])
+    q = (K @ P.T).T
+    q = q[:, :2] / q[:, 2:]
+    u = (q[1] - q[0]) / np.linalg.norm(q[1] - q[0])
+    return (xy - q[0]) @ np.array([-u[1], u[0]])
+
+
+# --- laser on/off: what the images record ------------------------------------
+
+def load_laser_state(path):
+    """`laser_state.csv`: every image of every calibrated or measured dive, in
+    shot order, with its laser label state ('dot' / 'empty' / 'none'), dot
+    pixels and the automated detector's confidence.
+
+    Adds `dark`: a frame the labeler marked empty AND the detector did not find
+    a dot in with confidence >= 0.5 -- two independent readers agreeing there is
+    no visible dot. That is still not a record of the laser being OFF: a dot
+    out of frame or washed out is dark too.
+    """
+    import pandas as pd
+
+    s = pd.read_csv(path, sep="|", keep_default_na=False)
+    s["taken"] = pd.to_datetime(s.taken_utc)
+    s["measured"] = s.measured == "t"
+    for c in ("dot_x", "dot_y", "pred_conf"):
+        s[c] = pd.to_numeric(s[c], errors="coerce")
+    s["dark"] = (s.label_state == "empty") & ~(s.pred_conf >= 0.5)
+    return s.sort_values(["dive_id", "taken", "image_id"]).reset_index(drop=True)
+
+
+def switch_candidates(g, min_dark: int = 2, gap_min: float = 2.0) -> list[tuple[int, str, float]]:
+    """Candidate laser-switch events in one dive's time-sorted images.
+
+    'dark': a run of frames without a dot, holding at least `min_dark` dark
+    frames, with a dot on both sides. 'gap': consecutive frames more than
+    `gap_min` minutes apart -- the camera stopped recording. Returns
+    `(index_of_first_frame_after, kind, size)`, size being dark frames or
+    minutes. Neither kind is a switch record; both are where one could hide.
+    """
+    st, dark = g.label_state.to_numpy(), g.dark.to_numpy()
+    ev, i = [], 0
+    while i < len(g):
+        if st[i] != "dot":
+            j = i
+            while j < len(g) and st[j] != "dot":
+                j += 1
+            if i > 0 and j < len(g) and dark[i:j].sum() >= min_dark:
+                ev.append((j, "dark", float(dark[i:j].sum())))
+            i = j
+        else:
+            i += 1
+    dt = g.taken.diff().dt.total_seconds().div(60).to_numpy()
+    for k in np.where(dt > gap_min)[0]:
+        if not any(e[0] == k for e in ev):
+            ev.append((int(k), "gap", float(dt[k])))
+    return sorted(ev)
+
+
+# --- working range, by target ------------------------------------------------------
+
+WORKING_RANGE_EDGES_M = (1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 3.5)
+TROUT_HALF_DEPTH_M = 0.0587 / 2          # calipered body depth 58.69 mm
+
+
+def target_range_medians(df, targets=("Rainbow Trout", "Box"), edges_m=WORKING_RANGE_EDGES_M):
+    """Median percent error per target in fixed range bins.
+
+    The first bin ends where the range figure's nearest equal-count bin ends
+    (`range_bins`, 0.81 m), so its values are the near-bin medians the text
+    quotes; the remaining edges are fixed so both targets share them. Returns one
+    row per (target, bin): `lo_m`, `hi_m`, `n`, `median`, and `z_m`, the target's
+    median range in the bin, where the figure places the point.
+    """
+    import pandas as pd
+
+    near = float(range_bins(df).hi_m.iloc[0])
+    edges = [float(df.depth_m.min()), near, *edges_m, float(df.depth_m.max())]
+    rows = []
+    for t in targets:
+        g = df[df.model_name == t]
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            m = (g.depth_m >= lo) & ((g.depth_m <= hi) if hi == edges[-1] else (g.depth_m < hi))
+            x = g[m]
+            rows.append(dict(target=t, lo_m=lo, hi_m=hi, n=len(x), median=float(x.pct_error.median()),
+                             z_m=float(x.depth_m.median())))
+    return pd.DataFrame(rows)

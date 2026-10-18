@@ -119,10 +119,20 @@ def test_the_two_repaired_dives_are_measured_under_their_refits(field):
 
 
 def test_the_field_repeatability_is_what_section_4_5_reports(field):
+    """Updated 2026-10-14 for the field regrouping (fishsense-services PR #72,
+    release v0.7.0): v1's stage 6.1 joined "Part of previous group" frames to
+    whatever cluster the database returned first. Three frames moved animal, no
+    length changed -- 101302 (305 -> 307), 129275 (330 -> 331), 111926
+    (323 -> new 575). field.csv is the v2 production extract.
+
+    The p90 moved 11.44 -> 9.01 %: mixed animal 305 (two fish of two species,
+    CV 15.37 %) left the >= 3-frame set and parrotfish 331 (CV 9.01 %) joined
+    it, so the 23rd of 25 CVs is now 331's own. Median and interval unchanged.
+    """
     result = rep.repeatability(rep.by_individual(field))
     assert result.n_groups == 25
     assert result.median_percent == pytest.approx(2.91, abs=0.01)
-    assert result.p90_percent == pytest.approx(11.44, abs=0.01)
+    assert result.p90_percent == pytest.approx(9.01, abs=0.01)
     lo, hi = result.ci_percent
     assert (lo, hi) == (pytest.approx(1.63, abs=0.01), pytest.approx(4.06, abs=0.01))
 
@@ -412,7 +422,8 @@ def test_nearest_rank_equals_n_below_ten_and_not_at_ten():
     # and in the code's own prose, where six copies survived the first fix
     root = Path(__file__).resolve().parents[1]
     for f in [*(root / "fishsense_imwut").glob("*.py"), *(root / "tests").glob("*.py"),
-              *(root / "fish_model_analysis").glob("*.py")]:
+              *(root / "fish_model_analysis").glob("*.py"),
+              *(root / "fish_model_analysis").glob("*.ipynb")]:   # notebook comments too
         stale = "every n <= " + "10"  # split, or this file matches itself
         assert stale not in f.read_text(), f"nearest-rank bound in {f.name}"
 
@@ -466,8 +477,19 @@ def test_section_4_1s_deployment_facts():
 
 
 def test_field_cohort_per_animal_description():
-    """Section 5's descriptive field result: species, per-animal p90 lengths,
-    and the two animals whose frames carry two species labels."""
+    """Section 5's descriptive field result: species and per-animal p90 lengths.
+
+    Updated 2026-10-14 for the field regrouping (fishsense-services PR #72,
+    release v0.7.0): v1's stage 6.1 joined "Part of previous group" frames to
+    whatever cluster the database returned first. Three frames moved animal, no
+    length changed -- 101302 (305 -> 307), 129275 (330 -> 331), 111926
+    (323 -> new 575). field.csv is the v2 production extract.
+
+    Before it, two animals (305, 323) carried two species labels and the
+    per-(animal, label) rows summed to 75; now no animal does and they are 73.
+    Hogfish 33 -> 32 animals, Stoplight Parrotfish 16 -> 15. The per-animal
+    length distribution did not move.
+    """
     from fishsense_imwut import calibration as cal
 
     root = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
@@ -479,10 +501,10 @@ def test_field_cohort_per_animal_description():
         [13.0, 19.3, 25.5, 32.4, 84.7]
 
     per = rep.field_per_animal(field)
-    assert len(per) == 75
-    assert set(per[per.conflicting_label].fish_id) == {305, 323}
+    assert len(per) == 73
+    assert not per.conflicting_label.any()
     counts = per.groupby("species").size().to_dict()
-    assert counts == {"Hogfish": 33, "Stoplight Parrotfish": 16, "Nassau Grouper": 7,
+    assert counts == {"Hogfish": 32, "Stoplight Parrotfish": 15, "Nassau Grouper": 7,
                       "Black Grouper": 6, "Rainbow Parrotfish": 5, "Other": 4,
                       "Midnight Parrotfish": 1, "Blue Parrotfish": 1,
                       "Goliath Grouper": 1, "Mutton Snapper": 1}
@@ -494,3 +516,27 @@ def test_field_cohort_per_animal_description():
     expected = {f"{c} ({n})" if n else "Other (Identifiable but Nontarget)"
                 for c, n in rep.SPECIES_SCIENTIFIC.items()}
     assert recorded == expected
+
+
+def test_section_4_1s_hogfish_unit_effect():
+    """Section 4.1's variance-components fit, pinned for the first time on the
+    2026-10-14 regrouping (fishsense-services PR #72), which took it from 33 to
+    32 hogfish: F 1.03 -> 0.98 by camera, 1.55 -> 1.47 by deployment, the
+    between-camera point estimate 1.5 % -> 0 (F < 1). It reduces each animal to
+    its median log length, NOT the p90 Figure 13 uses -- a difference the
+    paper should either state or remove."""
+    from fishsense_imwut import rig
+
+    root = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
+    h = rep.load_field(root / "field.csv")
+    h = h[h.species == "Hogfish"]
+
+    def fit(key):
+        per = h.groupby([key, "fish_id"]).length_m.median().reset_index()
+        return rig.one_way({k: np.log(g.length_m.to_numpy()) for k, g in per.groupby(key)})
+
+    cam, dive = fit("camera_id"), fit("dive_id")
+    assert cam["n"] == 32 and cam["df"] == (5, 26)
+    assert (round(cam["f"], 2), round(cam["p"], 2)) == (0.98, 0.45)
+    assert cam["between_sd"] == 0.0 and round(100 * cam["within_sd"]) == 19
+    assert (round(dive["f"], 2), round(dive["p"], 2)) == (1.47, 0.23)

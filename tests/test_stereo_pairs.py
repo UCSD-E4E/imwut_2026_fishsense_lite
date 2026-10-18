@@ -260,15 +260,18 @@ def test_the_range_correction_helps_one_comparison_and_hurts_the_other(pairs):
         mine = np.median(ours.groupby("fish_id").length_m.agg(nearest_rank_p90)) * 100
         ref = np.median(theirs.Length) / 10
         offsets.append(100 * (mine - ref) / ref)
+    # -15.4 % before the 2026-10-14 field regrouping (fishsense-services PR #72):
+    # one fewer Hogfish and one fewer Stoplight Parrotfish animal moved those two
+    # species' medians. The sign disagreement this test pins is unchanged.
     assert len(offsets) == 4
-    assert np.median(offsets) == pytest.approx(-15.4, abs=0.5)
+    assert np.median(offsets) == pytest.approx(-13.1, abs=0.5)
 
     # the correction is small against either, and a tenth of the disagreement
     added = 100 * (cal.correct_lengths(field.length_m, field.range_m, coef)
                    / field.length_m - 1)
     assert np.median(added) == pytest.approx(2.2, abs=0.2)
     disagreement = abs(np.median([p.p90_diff_pct for p in pairs]) - np.median(offsets))
-    assert disagreement > 18.0
+    assert disagreement > 16.0                            # 18.9 before the regrouping
     assert np.median(added) < 0.15 * disagreement
 
 

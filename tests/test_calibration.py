@@ -12,6 +12,7 @@ import pandas as pd
 import pytest
 
 from fishsense_imwut import calibration as cal
+from fishsense_imwut import pubfig
 
 DATA = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "data"
 
@@ -339,7 +340,8 @@ def test_holding_out_the_ruler_leaves_the_cohort_and_p90_alone():
     assert sorted(a.model_name.unique()) == [
         "Box", "Grouper", "Purple Angelfish", "Rainbow Trout", "Snook"]
     assert np.median(a.pct_error) == pytest.approx(-2.00, abs=0.01)
-    assert np.percentile(a.pct_error, 90) == pytest.approx(0.36, abs=0.01)
+    # nearest rank, the paper's convention; numpy's interpolated default gives +0.36
+    assert pubfig.nearest_rank_p90(a.pct_error) == pytest.approx(0.37, abs=0.005)
 
 
 def test_the_shark_is_held_out_rather_than_corrected():
@@ -976,14 +978,20 @@ def test_laser_colour_by_cohort():
     pool = c[c.dive_id.isin({int(r["dive_id"]) for r in rows})]
     assert pool.colour.value_counts().to_dict() == {"Red": 2924, "Green": 2}
 
+    # Matched on the IMAGE, not the measurement: field.csv now comes from the
+    # v2 production database (fishsense-services PR #72 regrouped three frames
+    # and gave them new measurement ids), while laser_colour.csv comes from the
+    # legacy database, which still carries the old ids. The frames are the same.
     field = rep.load_field(_data() / "field.csv")
-    f = c[c.measurement_id.isin(field.measurement_id)]
+    f = c[c.image_id.isin(field.image_id)]
+    assert len(f) == len(field) == 162
     assert f.colour.value_counts().to_dict() == {"Green": 120, "Red": 42}
     per_dive = f.groupby("dive_id").colour.agg(lambda s: "/".join(sorted(set(s)))).to_dict()
     assert per_dive == {279: "Red", 341: "Red", 347: "Green", 349: "Green",
                         383: "Red", 465: "Green", 471: "Green"}  # each deployment one colour
-    animals = f.merge(field[["measurement_id", "fish_id"]]).groupby("fish_id").colour.first()
-    assert animals.value_counts().to_dict() == {"Green": 53, "Red": 20}
+    animals = f.merge(field[["image_id", "fish_id"]]).groupby("fish_id").colour.first()
+    # 53 / 20 before the regrouping: 330 merged into green 331, 575 split from red 323
+    assert animals.value_counts().to_dict() == {"Green": 52, "Red": 21}
 
     stereo = pd.read_csv(_data() / "stereo_pairs.csv", sep="|")
     assert set(c[c.image_id.isin(stereo.image_id)].colour) == {"Red"}
@@ -1055,3 +1063,124 @@ def test_why_the_range_figure_bins_by_median():
     assert round(b["median"].iloc[1], 1) == -2.5          # 0.81-1.21 m
     assert round(b.p90.iloc[0], 1) == -1.2 and round(b.p90.iloc[-1], 1) == 2.0
     assert round(b["median"].iloc[0], 1) == -5.3          # the near bin, below 0.81 m
+    # section 4.2's working range: beyond 0.81 m the binned median runs -2.5 to
+    # -1.5 % (-1.9 to -1.5 % past 1.2 m) and the IQR 2.9 to 4.1 points. The
+    # widest IQR is 4.149 (2.13-2.47 m): 4.1 at one decimal, not 4.2.
+    far = b[b.lo_m >= 0.8]
+    assert len(far) == 7
+    assert (round(far["median"].min(), 1), round(far["median"].max(), 1)) == (-2.5, -1.5)
+    assert (round(beyond["median"].min(), 1), round(beyond["median"].max(), 1)) == (-1.9, -1.5)
+    assert (round(far.iqr.min(), 1), round(far.iqr.max(), 1)) == (2.9, 4.1)
+
+
+def test_the_trend_bound_moves_membership_not_the_p90():
+    """Appendix A: widening the range-trend bound from 2 to 4 % per metre admits
+    three sessions (19 -> 22); the nearest-rank p90 holds +0.37 to +0.16 % while
+    the median drifts -2.00 to -2.85 %."""
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    base = cal.RANGE_TREND_FLAG_PCT_PER_M
+    out = {}
+    try:
+        for thr in (2.0, 4.0):
+            cal.RANGE_TREND_FLAG_PCT_PER_M = thr
+            keep = cal.accuracy_cohort(df)
+            e = df[df.dive_id.isin(keep) & ~df.model_name.isin(cal.HELD_OUT_MODELS)].pct_error
+            out[thr] = (len(keep), round(np.median(e), 2), round(pubfig.nearest_rank_p90(e), 2))
+    finally:
+        cal.RANGE_TREND_FLAG_PCT_PER_M = base
+    assert out == {2.0: (19, -2.00, 0.37), 4.0: (22, -2.85, 0.16)}
+
+
+def test_table_1s_wider_selections():
+    """Table 1's other two rows, nearest-rank p90."""
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES]
+    df = cal.to_frame(rows)
+    ho = ~df.model_name.isin(cal.HELD_OUT_MODELS)
+    for keep, n, med, p90, mae in (
+            (~df.dive_id.isin(cal.ANGLE_TEST_DIVES), 1371, -3.30, 0.08, 4.42),
+            (df.dive_id.notna(), 2799, -5.84, -0.55, 9.03)):
+        e = df[keep & ho].pct_error
+        assert (len(e), round(np.median(e), 2), round(pubfig.nearest_rank_p90(e), 2),
+                round(e.abs().mean(), 2)) == (n, med, p90, mae)
+
+
+# Every value Figure 19 draws: (dive, own median |err| %, next calibration's).
+_FIG19_NEXT = {
+    58: (1.60, 115.28), 59: (2.22, 12.15), 60: (3.68, 1.99), 61: (1.29, 3.27),
+    87: (10.10, 72.69), 94: (9.14, 42.30), 114: (11.22, 183.65), 491: (5.47, 25.44),
+    492: (9.58, 33.51), 494: (12.36, 24.22), 495: (3.91, 16.88), 497: (1.01, 31.99),
+    498: (3.52, 34.51), 500: (1.17, 26.97), 501: (5.02, 24.87), 503: (1.02, 30.87),
+    504: (2.98, 38.45), 505: (2.58, 58.34), 506: (1.37, 38.73), 507: (3.14, 37.89),
+    509: (7.28, 20.22), 519: (0.85, 3.70), 520: (4.79, 7.60), 521: (2.52, 14.89),
+    522: (3.35, 17.02), 527: (2.31, 28.26),
+}
+
+
+def test_figure_19_draws_these_values():
+    """The slope chart of the substitution check, both versions. The paper's
+    version keeps neighbours within 60 days (22 sessions, 3.06 -> 25.16 %,
+    worse in 21); the any-interval version adds 58, 87, 94 and 114, whose next
+    calibration is 195-412 days later. The one line that does not climb is
+    dive 60, in both."""
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES and r["model"] not in cal.HELD_OUT_MODELS]
+    fits = _fits()
+    when = dict(zip(fits.dive_id, pd.to_datetime(fits.dive_datetime)))
+    r = cal.reuse_cost_on_known_lengths(rows, fits, "next")
+    drawn = {int(d): (round(a, 2), round(b, 2))
+             for d, a, b in zip(r.dive_id, r.own_abs_pct, r.other_abs_pct)}
+    assert drawn == _FIG19_NEXT
+
+    gap = {int(d): abs((when[o] - when[c]).days)
+           for d, c, o in zip(r.dive_id, r.calibration_dive_id, r.other_dive_id)}
+    assert sorted(d for d, g in gap.items() if g >= 60) == [58, 87, 94, 114]
+    hours = {int(d): (when[o] - when[c]).total_seconds() / 3600
+             for d, c, o in zip(r.dive_id, r.calibration_dive_id, r.other_dive_id)}
+    near_h = [h for d, h in hours.items() if gap[d] < 60]
+    assert round(min(near_h) * 60, 1) == 8.2 and round(max(near_h) / 24, 1) == 14.8   # caption
+    assert max(gap.values()) == 411
+
+    for keep, n, own, other, worse in ((r, 26, 3.24, 27.61, 25),
+                                       (r[[gap[int(d)] < 60 for d in r.dive_id]], 22, 3.06, 25.16, 21)):
+        assert len(keep) == n
+        assert round(keep.own_abs_pct.median(), 2) == own
+        assert round(keep.other_abs_pct.median(), 2) == other
+        assert int((keep.other_abs_pct > keep.own_abs_pct).sum()) == worse
+        assert keep[keep.other_abs_pct <= keep.own_abs_pct].dive_id.tolist() == [60]
+
+
+def test_figure_20_draws_these_values():
+    """The dumbbell version of Figure 19's 60-day set: 22 rows, top to bottom
+    by error under the unit's NEXT calibration, so the open markers form one
+    rising curve; 16 rows end past the 15 % budget. A medians row of 3.06 and
+    25.16 %; 21 sessions worse, and dive 60 -- the top row -- the one bar
+    running backward. Dive 505's row rests on two known-length frames (two
+    trout frames in its own calibration dive); its substitute, dive 518, on 68
+    board frames."""
+    rows = [r for r in cal.load_rows(_data() / "corpus.csv")
+            if int(r["dive_id"]) not in cal.NON_POOL_DIVES and r["model"] not in cal.HELD_OUT_MODELS]
+    fits = _fits()
+    when = dict(zip(fits.dive_id, pd.to_datetime(fits.dive_datetime)))
+    r = cal.reuse_cost_on_known_lengths(rows, fits, "next")
+    near = r[[abs((when[o] - when[c]).days) < 60
+              for c, o in zip(r.calibration_dive_id, r.other_dive_id)]]
+    drawn = [(int(d), round(a, 2), round(b, 2)) for d, a, b in
+             near.sort_values("other_abs_pct")[["dive_id", "own_abs_pct", "other_abs_pct"]].itertuples(index=False)]
+    assert drawn == [
+        (60, 3.68, 1.99), (61, 1.29, 3.27), (519, 0.85, 3.70), (520, 4.79, 7.60),
+        (59, 2.22, 12.15), (521, 2.52, 14.89), (495, 3.91, 16.88), (522, 3.35, 17.02),
+        (509, 7.28, 20.22), (494, 12.36, 24.22), (501, 5.02, 24.87), (491, 5.47, 25.44),
+        (500, 1.17, 26.97), (527, 2.31, 28.26), (503, 1.02, 30.87), (497, 1.01, 31.99),
+        (492, 9.58, 33.51), (498, 3.52, 34.51), (507, 3.14, 37.89), (504, 2.98, 38.45),
+        (506, 1.37, 38.73), (505, 2.58, 58.34)]
+    assert int((near.other_abs_pct > 15).sum()) == 16
+    assert (round(near.own_abs_pct.median(), 2), round(near.other_abs_pct.median(), 2)) == (3.06, 25.16)
+    assert int((near.other_abs_pct > near.own_abs_pct).sum()) == 21
+    assert near[near.other_abs_pct <= near.own_abs_pct].dive_id.tolist() == [60]
+    assert near.set_index("dive_id").loc[505, "n"] == 2
+    assert near.set_index("dive_id").loc[505, "other_dive_id"] == 518
+    t = cal.load_dive_timeline(_data() / "dive_timeline.csv")
+    assert int((t[t.dive_id == 518].calib).sum()) == 68

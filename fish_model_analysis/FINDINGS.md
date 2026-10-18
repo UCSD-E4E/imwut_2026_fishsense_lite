@@ -402,7 +402,7 @@ the model effect stated.
 
 | dive | effect (pp) | what it is |
 |---|---|---|
-| 490 | — | **Resolved 2026-09-12**: the laser rotated 0.82° in-plane between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error. Prod fixed and the corpus re-pulled 2026-09-12: its fish frames are now dive 527 borrowing 489, and 490 itself has no rows and no dive effect. See `post_labeling_analysis/HANDOFF.md` §5. |
+| 490 | — | **Resolved 2026-09-12**: the laser rotated 0.85° in-plane (fitted beams, §4.3's measure) between its fish frames (19:00–19:02) and its own board burst (19:07–19:08); under the preceding burst's calibration (dive 489, 9 s earlier) it reads −1.7 % median. A pointing error, not a scale error. Prod fixed and the corpus re-pulled 2026-09-12: its fish frames are now dive 527 borrowing 489, and 490 itself has no rows and no dive effect. See `post_labeling_analysis/HANDOFF.md` §5. |
 | 492 | −5.8 | borrows 490's row, shot 25 min before either of that rig's bursts; 0.25° from its true state |
 | 494 | −3.5 | borrows 493 |
 | 509 | −2.8 | self-calibrated; flagged on its Box cell (−4.1 %/m) while its Weasly cell is flat (+0.06, CI [−0.79, +1.39]) — the two disagree, so the flag is not by itself a calibration finding; the polish band excludes it anyway |
@@ -776,14 +776,17 @@ median 2.2 %.
 
 | comparison | before | after | |
 |---|---|---|---|
-| population, 4 species (Fig 14) | 15.37 % | 14.41 % | 3 of 4 closer |
+| population, 4 species (Fig 14) | 13.10 % | 12.00 % | 3 of 4 closer |
 | paired, 7 individuals (Fig 15) | 8.60 % | 10.87 % | 3 of 7 closer |
 
 **It helps one and hurts the other, because the two do not agree on the SIGN of our bias:**
-the population comparison has our species medians **−15.4 %** against the archive, the
-paired individuals **+3.5 %** long — a **18.8 point** disagreement. A correction that only
-ever adds length helps the first and hurts the second by construction, and at 2.2 % it is a
-tenth of the thing it would have to explain. Neither result licenses it.
+the population comparison has our species medians **−13.1 %** against the archive, the
+paired individuals **+3.5 %** long — a **16.6 point** disagreement. A correction that only
+ever adds length helps the first and hurts the second by construction, and at 2.2 % it is
+about an eighth of the thing it would have to explain. Neither result licenses it.
+*(Updated 2026-10-14 for the field regrouping, fishsense-services PR #72: one fewer Hogfish
+and one fewer Stoplight Parrotfish animal. Before it the table read 15.37 → 14.41 % and the
+disagreement 18.8 points; the sign disagreement and the conclusion are unchanged.)*
 
 Believe the paired one: same named individuals, one shared calibration, no assumption that
 our fish and theirs are drawn from one population. §8 already says the population
@@ -1251,8 +1254,8 @@ describe the frames 466 would measure. `check_calibration_describes_dive` refuse
 correctly and for the right reason.
 
 This is also the strongest single piece of evidence in the corpus for PAPER.md §4.2's claim
-that a session is not a safe unit: stronger than the dive-490 example (two calibrations 7
-minutes apart differing by 0.82°), because here one dive contains three states separated by
+that a session is not a safe unit: stronger than the dive-490 example (two calibrations 8.2
+minutes apart differing by 0.85°), because here one dive contains three states separated by
 52 minutes, each self-consistent, with the disagreement measured against the dive's own
 fish dots rather than against another fit.
 
@@ -1510,7 +1513,8 @@ measured under extrinsics 54 and 55 — their refits, not the retired fits.
 **What was wrong:**
 
 1. **The $p_{90}$ was interpolated, not nearest-rank: 9.1 % where the paper's own
-   convention gives 11.4 %.** §9.6 closes with "Do not mix them", and §4.5 was mixing them
+   convention gives 11.4 %.** *(9.0 % after the 2026-10-14 field regrouping, fishsense-services
+   PR #72, which moved mixed animal 305 out of the ≥ 3-frame set.)* §9.6 closes with "Do not mix them", and §4.5 was mixing them
    — because §4.5's figure came down a computation path with no `pubfig` call in it, so the
    convention was never applied. A convention stated in prose does not propagate; only a
    shared function does, which is the reason the estimator is now a module.
@@ -1728,7 +1732,7 @@ estimator, so the figure and the text quote one number:
 | Figure 15, per-fish $p_{90}$ | 7 | 0.807 | 0.838 | 3.0 cm |
 | Figure 15, per frame | 39 | 0.786 | 0.859 | 3.5 cm |
 | Figure 1, per-model $p_{90}$ | 5 | 0.999 | 0.999 | 3.2 mm |
-| Figure 1, per frame | 995 | 0.976 | 0.986 | 15.4 mm |
+| Figure 1, per frame | 995 | 0.975 | 0.986 | 15.4 mm |
 
 Two traps, both of which caught a draft sentence before this section existed.
 

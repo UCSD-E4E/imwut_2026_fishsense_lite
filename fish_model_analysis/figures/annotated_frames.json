@@ -1,0 +1,128 @@
+{
+ "stereo_parrotfish_P8030086": {
+  "note": "Stereo-day frame, 2023-08-03 09:24:35, dive 25, unit 1, image 1380 (P8030086), measurement 4143, animal 383, Blue Parrotfish, 46.1 cm. One of the 41 stereo-day frames; NOT one of the 162 field measurements. Labels: current (non-superseded) laserlabel and headtaillabel rows, read 2026-10-14 from the legacy production database. The manuscript's parrotfish.JPG is byte-identical to the camera's P8030086.JPG (sha256 56da3fbb...).",
+  "image_id": 1380,
+  "dot": [
+   1946.0577039235586,
+   1371.5896063029948
+  ],
+  "snout": [
+   1633.9090355038177,
+   1317.278816580976
+  ],
+  "fork": [
+   2313.2659847885525,
+   1361.5160132785866
+  ],
+  "K": [
+   [
+    2832.6628438838216,
+    0.0,
+    1968.0272553880557
+   ],
+   [
+    0.0,
+    2855.8825480621545,
+    1452.810040656435
+   ],
+   [
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "dist": [
+   -0.12100428903752407,
+   -0.054716493247621914,
+   -0.0033433024221579243,
+   -6.011803399688542e-06,
+   0.045781926585394796
+  ],
+  "output": "figures/frame_stereo_parrotfish_P8030086.png",
+  "source": "figures/parrotfish_P8030086.jpg -- the manuscript's Images/parrotfish.JPG with its EXIF segment (GPS, camera maker notes) removed losslessly; pixels identical. Original: camera JPEG P8030086.JPG, NAS 2023.08.03.FishSense.FSL-01D/BlueParrot01_MolHITW_0924_080323/"
+ },
+ "field_hogfish_P3140142": {
+  "dot": [
+   1940.5931396390295,
+   1403.5227640682738
+  ],
+  "snout": [
+   1787.0166433522882,
+   1476.696387919855
+  ],
+  "fork": [
+   2181.159036746356,
+   1315.2941861001125
+  ],
+  "K": [
+   [
+    2825.1480807147805,
+    0.0,
+    2061.852601572974
+   ],
+   [
+    0.0,
+    2850.606508156248,
+    1458.5627645450384
+   ],
+   [
+    0,
+    0,
+    1
+   ]
+  ],
+  "dist": [
+   -0.09747574682920097,
+   -0.13276029739730982,
+   -0.0029275610442781445,
+   0.0005606131205602907,
+   0.13559718374741433
+  ],
+  "note": "Field cohort, the recommended frame: dive 349, unit 6, 2024-03-14, image 102562, Hogfish (animal 310), 18.3 cm at 1.21 m; the animal's longest frame, its three frames within 1 %. Green laser.",
+  "image_id": 102562,
+  "source": "REEF/data/2025-02-10 REEF Data Dump SMILE 6/031424_Alligator_FSL06/031424_Alligator0_FSL06/P3140142.JPG",
+  "output": "figures/frame_field_hogfish_P3140142.png"
+ },
+ "field_offbroadside_hogfish_PC100025": {
+  "dot": [
+   2068.7510589553185,
+   1558.8603813421716
+  ],
+  "snout": [
+   2192.6644850873,
+   1737.2086892330535
+  ],
+  "fork": [
+   1894.8472161249788,
+   1417.129004924661
+  ],
+  "K": [
+   [
+    2832.88718694667,
+    0.0,
+    2027.3101376941806
+   ],
+   [
+    0.0,
+    2857.5529688242154,
+    1492.5272084030742
+   ],
+   [
+    0,
+    0,
+    1
+   ]
+  ],
+  "dist": [
+   -0.12725704527417409,
+   -0.02928287723648356,
+   -0.003002611873808373,
+   -0.0008914728701532138,
+   0.02515944404058419
+  ],
+  "note": "Field cohort, a poor frame: dive 471, unit 3, 2024-12-10, image 129421, Hogfish (animal 355), 24.2 cm at 1.58 m against the same animal's longest frame of 30.3 cm (20 % short, cos-equivalent ~37 deg). Fish nose-down and turned. Green laser.",
+  "image_id": 129421,
+  "source": "REEF/data/2025-03-13 Reef Data Dump/121024_Alligator_FSL03/121024_Alligator2_FSL03/PC100025.JPG",
+  "output": "figures/frame_field_offbroadside_hogfish_PC100025.png"
+ }
+}

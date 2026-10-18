@@ -693,6 +693,18 @@ FIGURE_TITLES = {
         "Laser baseline per unit, by calibration object and mount epoch",
     "fig18_laser_drift":
         "Laser beam change per unit, August 2023 to December 2024 (repository only)",
+    "fig19_calibration_substitution":
+        "Pool sessions: own calibration against the next",
+    "fig21_working_range":
+        "Median length error against laser range, trout and box",
+    "fig21_working_range_prediction":
+        "Median length error against laser range, trout and box, with the body-depth prediction",
+    # Preview title only: the PDF goes into the paper untitled
+    # (save_figure(..., title_in_pdf=False)); the caption carries it there.
+    "fig20_calibration_substitution_dumbbell":
+        "Pool sessions: own calibration against the next",
+    "fig19_calibration_substitution_all":
+        "Pool sessions: own calibration against the next, any interval",
     "figD2_p90_budget":
         "Reported length error against frames per fish, with the error budget marked",
 }
@@ -1174,7 +1186,7 @@ def fig_flat_port_cost(
             fontsize=6, color=INK_SECONDARY, ha="left", va="bottom",
         )
 
-    ax.set_xlabel("Target's distance from the image centre (degrees off axis)")
+    ax.set_xlabel("Target's distance from the image center (degrees off axis)")
     ax.set_ylabel("Length error (%)")
 
     if half_frame_m is not None and depth_m is not None:
@@ -1196,7 +1208,7 @@ def fig_flat_port_cost(
 
         top = ax.secondary_xaxis("top", functions=(_to_frac, _to_deg))
         top.set_xticks([0.0, 0.25, 0.5, 0.75, 1.0])
-        top.set_xticklabels(["centre", "\u00bc", "\u00bd", "\u00be", "edge"])
+        top.set_xticklabels(["center", "\u00bc", "\u00bd", "\u00be", "edge"])
         top.set_xlabel("Position across the frame", labelpad=2)
         top.tick_params(length=2.5, width=0.6)
     else:
@@ -1361,7 +1373,7 @@ def fig_error_by_camera(
     ax.set_xticklabels([f"{c}\nn={len(per_camera[c])}" for c in cams])
     ax.set_xlim(-0.6, len(cams) - 0.4)
     ax.set_xlabel("Camera unit")
-    ax.set_ylabel("Target-centred error (%)")
+    ax.set_ylabel("Target-centered error (%)")
 
     if span_note:
         ax.annotate(span_note, xy=(0.015, 0.985), xycoords="axes fraction",
@@ -1474,11 +1486,14 @@ def fig_field_species(
     ax.set_xlabel("Length per animal, $p_{90}$ (cm)")
     ax.set_xlim(left=0)
     from matplotlib.lines import Line2D
-    ax.legend(handles=[
-        Line2D([], [], marker="o", linestyle="none", markersize=4.5, markerfacecolor=SURFACE,
-               markeredgecolor=SERIES_1, markeredgewidth=1.2, label="Two species labels"),
-        Line2D([], [], marker="|", linestyle="none", markersize=9, markeredgewidth=2.0,
-               color=SERIES_2, label="Median (3+ animals)")],
+    handles = [Line2D([], [], marker="|", linestyle="none", markersize=9, markeredgewidth=2.0,
+                      color=SERIES_2, label="Median (3+ animals)")]
+    # a key for hollow points only when there are hollow points to explain
+    if per.conflicting_label.any():
+        handles.insert(0, Line2D([], [], marker="o", linestyle="none", markersize=4.5,
+                                 markerfacecolor=SURFACE, markeredgecolor=SERIES_1,
+                                 markeredgewidth=1.2, label="Two species labels"))
+    ax.legend(handles=handles,
         # above the axes, as the other figures do it, so no row is covered
         loc="lower left", bbox_to_anchor=(0.0, 1.0), ncols=2, frameon=False, fontsize=6,
         handletextpad=0.3, columnspacing=1.2, borderaxespad=0.2)
@@ -1497,9 +1512,10 @@ def fig_field_by_camera(
 
     **One point per ANIMAL, not per measurement**, and the distinction decides
     what the figure says. Repeat frames of one fish are not independent, and
-    plotting all 74 hogfish measurements returns F(5,68) = 4.05, p = 0.004 --
+    plotting all 74 hogfish measurements returns F(5,68) = 4.05, p = 0.003 --
     an apparently significant unit effect that is pseudo-replication. Collapsed
-    to the 33 individuals §4.6 actually tests, it is F(5,27) = 1.10, p = 0.38.
+    to the 32 individuals §4.6 actually tests, it is F(5,26) = 1.01, p = 0.43
+    (33 and F(5,27) = 1.10 before the 2026-10-14 field regrouping).
 
     An animal's frames reduce through `nearest_rank_p90`, the one estimator the
     paper reports anywhere a set of frames becomes a length -- Figures 1, 14 and
@@ -1509,10 +1525,10 @@ def fig_field_by_camera(
     not an accident of the sample. The single-depth back-projection can only
     read short, so the longest frame is the one least corrupted by pose; it is
     also why the choice barely moves this figure (a per-animal mean gives
-    F = 1.17, p = 0.35) while keeping one convention across the paper.
+    F = 1.09, p = 0.39) while keeping one convention across the paper.
 
     The figure is drawn to show that a unit effect is *not resolvable* here, not
-    that there is none: with 4 to 18 fish per unit and an 18 % between-fish size
+    that there is none: with 2 to 10 fish per unit and a 19 % between-fish size
     spread, the standard error on a unit's median is larger than any bias worth
     detecting. The band behind the points is the between-fish interquartile
     range, so the reader can see what the units are being compared against.
@@ -1850,7 +1866,7 @@ def fig_flat_port_range(
     # its secondary axis, so two equal pads render at two different heights.
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
     for ax, label in ((left, "(a) the reading, a near-constant fraction"),
-                      (right, "(b) the fraction, constant only past a metre")):
+                      (right, "(b) the fraction, constant only past a meter")):
         fig.text(ax.get_position().x0, 0.995, label, fontsize=7,
                  color=INK_SECONDARY, ha="left", va="top")
     return fig
@@ -2241,7 +2257,7 @@ def fig_flat_port_error_field(
     for xy, text, va, ha in (
         ((0.985 * W, H / 2), f"side\n{side:+.0f} %", "center", "right"),
         ((W / 2, 0.02 * H), f"top {top:+.0f} %", "top", "center"),
-        ((W / 2, H / 2), "centre +0.1 %", "bottom", "center"),
+        ((W / 2, H / 2), "center +0.1 %", "bottom", "center"),
     ):
         ax.annotate(text, xy=xy, xytext=(0, 5 if va == "bottom" else 0),
                     textcoords="offset points", fontsize=6,
@@ -2538,3 +2554,185 @@ def fig_laser_drift(drift, budget_deg, figsize=(FULL_WIDTH, 4.2)) -> plt.Figure:
                       borderaxespad=0.0)
     fig.align_ylabels(axes[:, 0])
     return fig
+
+
+def fig_calibration_substitution(reuse, budget_pct: float = 15.0, log: bool = False,
+                                 figsize=(COL_WIDTH, 2.6)) -> plt.Figure:
+    """The substitution check as a slope chart: one line per pool session, from
+    its median |length error| under its own calibration to the same frames
+    under the unit's next calibration (`cal.reuse_cost_on_known_lengths`).
+
+    Deliberately one encoding: every session in one neutral ink, the two
+    medians as the one heavy line. A session that does not get worse is the
+    line that does not climb, and needs no color or legend to be found.
+    `log=True` is for the any-interval set, where a few calibrations months
+    away read 100-180 % and would flatten every other line onto the floor.
+    """
+    own = np.asarray(reuse["own_abs_pct"], float)
+    other = np.asarray(reuse["other_abs_pct"], float)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="y")
+    for a, b in zip(own, other):
+        ax.plot([0, 1], [a, b], color=INK_MUTED, linewidth=0.7, alpha=0.75,
+                solid_capstyle="round", zorder=3)
+    m0, m1 = float(np.median(own)), float(np.median(other))
+    ax.plot([0, 1], [m0, m1], color=INK_PRIMARY, linewidth=2.0, marker="o",
+            markersize=4, solid_capstyle="round", zorder=5)
+    for x, v, ha, dx in ((0, m0, "right", -6), (1, m1, "left", 6)):
+        ax.annotate(f"median {v:.1f} %", xy=(x, v), xytext=(dx, 0),
+                    textcoords="offset points", ha=ha, va="center",
+                    fontsize=6.5, color=INK_PRIMARY)
+
+    ax.axhline(budget_pct, color=INK_SECONDARY, linestyle=":", linewidth=1.0, zorder=4)
+    # labeled on the line, in the left margin where no session line runs
+    ax.annotate(f"{budget_pct:g} % budget", xy=(-0.53, budget_pct), xytext=(0, 2),
+                textcoords="offset points", ha="left", va="bottom", fontsize=6.5,
+                color=INK_SECONDARY, zorder=6)
+
+    if log:
+        ax.set_yscale("log")
+        ax.set_ylim(0.5, 300)
+        ax.set_yticks([1, 3, 10, 30, 100])
+        ax.set_yticklabels(["1", "3", "10", "30", "100"])
+        ax.minorticks_off()
+    else:
+        ax.set_ylim(0, max(60.0, float(np.ceil(other.max() / 10) * 10)))
+
+    ax.set_xlim(-0.55, 1.55)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(["Own calibration", "Next calibration"])
+    ax.tick_params(axis="x", length=0)
+    ax.set_ylabel("Median length error, ignoring sign (%)")
+    fig.tight_layout()
+    return fig
+
+
+def fig_calibration_substitution_dumbbell(reuse, budget_pct: float = 15.0, xmax: float = 60.0,
+                                          figsize=(COL_WIDTH, 3.0)) -> plt.Figure:
+    """The substitution check as a dumbbell plot: one row per pool session,
+    sorted by its error under the unit's NEXT calibration (smallest at the
+    top), with the same frames under the session's own calibration on the same
+    row.
+
+    Figure 19's slope chart draws the same values; there the lines cross at the
+    budget, exactly where the eye reads. Rows cannot cross, and sorted by the
+    substitute the open markers form one rising curve whose crossing of the
+    budget line counts the sessions that leave it. The two markers are told
+    apart by fill -- solid ink for the session's own calibration, open orange
+    for the substitute -- and named in a frameless legend in the empty upper
+    right, where the smallest-valued top rows leave the plot clear. The medians are a last row set apart,
+    their values beside their markers. A session that does better on the
+    substitute is a bar that runs backward.
+
+    Drawn at 3.33 x 3.0 in, it crops to 3.13 x 2.80 in with a row pitch of
+    0.090 in (6.5 pt). The manuscript places it at 0.7 of acmart's 5.95 in
+    `manuscript` column, a 1.33x enlargement: 3.73 in tall, just under half
+    the 7.7 in text height, at 8.6 pt per row.
+    """
+    d = reuse.sort_values("other_abs_pct").reset_index(drop=True)
+    own = d.own_abs_pct.to_numpy(float)
+    other = d.other_abs_pct.to_numpy(float)
+    n = len(d)
+    y = np.arange(n, dtype=float)                 # row 0 at the top (axis inverted)
+    y_med = n + 1.5
+
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="x")
+
+    def _row(yy, a, b, size):
+        ax.plot([a, b], [yy, yy], color=BASELINE, linewidth=1.4, solid_capstyle="butt", zorder=2)
+        ax.plot([a], [yy], marker="o", markersize=size, color=INK_PRIMARY,
+                markeredgewidth=0, zorder=4)
+        ax.plot([b], [yy], marker="o", markersize=size, markerfacecolor=SURFACE,
+                markeredgecolor=SERIES_2, markeredgewidth=1.0, zorder=4)
+
+    for yy, a, b in zip(y, own, other):
+        _row(yy, a, b, 3.2)
+    m0, m1 = float(np.median(own)), float(np.median(other))
+    _row(y_med, m0, m1, 4.2)
+    ax.axhline(n + 0.5, color=BASELINE, linewidth=0.6, zorder=1)
+
+    # The budget line starts below the top row, so the marker names beside that
+    # row stay clear of it, and is labeled at the foot of the sessions, between
+    # the last row and the medians.
+    ax.plot([budget_pct, budget_pct], [0.5, y_med + 0.9], color=INK_SECONDARY,
+            linestyle=":", linewidth=1.0, zorder=3)
+    ax.annotate(f"{budget_pct:g} % budget", xy=(budget_pct, n - 0.2), xytext=(3, 0),
+                textcoords="offset points", ha="right" if other[-1] < budget_pct else "left",
+                va="center", fontsize=6.5, color=INK_SECONDARY)
+
+    # the two markers named in a legend, in the empty upper right: the top
+    # rows are the sessions with the smallest values, so nothing is drawn there
+    from matplotlib.lines import Line2D
+    ax.legend(handles=[
+        Line2D([], [], linestyle="none", marker="o", markersize=3.2, color=INK_PRIMARY,
+               markeredgewidth=0, label="Own calibration"),
+        Line2D([], [], linestyle="none", marker="o", markersize=3.2, markerfacecolor=SURFACE,
+               markeredgecolor=SERIES_2, markeredgewidth=1.0, label="Next calibration")],
+        loc="upper right", frameon=False, fontsize=mpl.rcParams["axes.labelsize"],
+        handletextpad=0.3, borderaxespad=0.3, labelspacing=0.3)
+
+    # median values beside their markers: own just right of its dot, above the
+    # bar; next to the right of its circle
+    ax.annotate(f"{m0:.1f} %", xy=(m0, y_med), xytext=(4, 2), textcoords="offset points",
+                ha="left", va="bottom", fontsize=6.5, color=INK_PRIMARY)
+    ax.annotate(f"{m1:.1f} %", xy=(m1, y_med), xytext=(5, 0), textcoords="offset points",
+                ha="left", va="center", fontsize=6.5, color=INK_PRIMARY)
+
+    ax.set_xlim(0, xmax)
+    ax.set_ylim(y_med + 1.0, -1.2)
+    ax.set_yticks([y_med])
+    ax.set_yticklabels(["Median"])
+    ax.tick_params(axis="y", length=0)
+    ax.set_ylabel("Pool sessions")
+    ax.yaxis.set_label_coords(-0.03, 1 - (n / 2 + 1.2) / (y_med + 2.2))
+    ax.spines["left"].set_visible(False)
+    ax.set_xlabel("Median length error, ignoring sign (%)")
+    fig.tight_layout()
+    return fig
+
+
+def fig_working_range(medians, half_depth_m=None, recommended_min_m=1.0,
+                      figsize=(COL_WIDTH, 2.4)) -> plt.Figure:
+    """Median length error against laser range for the thick trout and the flat
+    box, the only two targets photographed inside 0.81 m (`cal.target_range_medians`).
+
+    Two series, direct labels at their right ends, a zero line, and the range the
+    paper recommends against shaded. With `half_depth_m`, a dashed curve: the
+    box's median shifted by half the trout's body depth as a fraction of range,
+    which is what body depth alone would make the trout read.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    _grid(ax, axis="y")
+    _zero_line(ax, orientation="h")
+    xmax = float(medians.z_m.max()) * 1.04
+    ax.axvspan(0.0, recommended_min_m, color=INK_MUTED, alpha=0.10, zorder=0, linewidth=0)
+    # set vertically inside the band: the band is too narrow for the words
+    # across, and left of the nearest points nothing is drawn
+    ax.text(0.27 * recommended_min_m, 0.5 * (float(medians["median"].min()) - 0.6) + 0.3,
+            "not recommended below 1 m", rotation=90, ha="center", va="center",
+            fontsize=6, color=INK_SECONDARY)
+
+    style = {"Rainbow Trout": (SERIES_2, "Rainbow Trout (thick)"), "Box": (SERIES_1, "Box (flat)")}
+    for target, (colour, label) in style.items():
+        g = medians[medians.target == target].sort_values("z_m")
+        ax.plot(g.z_m, g["median"], color=colour, linewidth=1.6, marker="o", markersize=3.2, zorder=4)
+        ax.annotate(label, xy=(g.z_m.iloc[-1], g["median"].iloc[-1]), xytext=(5, 0), textcoords="offset points",
+                    ha="left", va="center", fontsize=6.5, color=INK_PRIMARY)
+    if half_depth_m is not None:
+        box = medians[medians.target == "Box"].sort_values("z_m")
+        trout = medians[medians.target == "Rainbow Trout"].sort_values("z_m")
+        pred = box["median"].to_numpy() - 100 * half_depth_m / trout.z_m.to_numpy()
+        ax.plot(trout.z_m, pred, color=SERIES_2, linewidth=1.0, linestyle=(0, (3, 2)), zorder=3)
+        ax.annotate("box minus half\nthe trout's depth", xy=(trout.z_m.iloc[-1], pred[-1]), xytext=(5, 0),
+                    textcoords="offset points", ha="left", va="center", fontsize=6, color=INK_SECONDARY)
+
+    ax.set_xlim(0.0, xmax)
+    lo = float(medians["median"].min())
+    ax.set_ylim(lo - 0.6, 0.6)
+    ax.set_xlabel("Laser range (m)")
+    ax.set_ylabel("Median length error (%)")
+    fig.tight_layout()
+    return fig
+

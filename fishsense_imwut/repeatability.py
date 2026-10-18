@@ -323,11 +323,12 @@ SPECIES_SCIENTIFIC = {
 def field_per_animal(field):
     """One row per (animal, species label): frames, per-animal p90 length.
 
-    Grouped by species label as well as animal because two animals in the
-    deployment carry two species labels each (animals 305 and 323). Grouping
-    on the animal alone would put each under one arbitrary name; this keeps
-    both labels visible and flags the animal, and `conflicting_label` lets a
-    figure draw them differently. Every animal here has at most eight frames,
+    Grouped by species label as well as animal so that an animal carrying two
+    species labels is kept visible under both and flagged (`conflicting_label`)
+    rather than filed under one arbitrary name. None does now: animals 305 and
+    323 did until the 2026-10-14 production regrouping (fishsense-services
+    PR #72) fixed the v1 grouping bug that caused it. The flag stays so a future
+    grouping error shows up instead of hiding. Every animal here has at most eight frames,
     so p90 is each group's longest frame (nearest rank, n <= 9).
     """
     from .pubfig import nearest_rank_p90
