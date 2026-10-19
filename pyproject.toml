@@ -21,6 +21,7 @@ fishsense-meta = { git = "https://github.com/UCSD-E4E/fishsense-core.git" }
 [dependency-groups]
 dev = [
     "black>=25.12.0",
+    "pypdf>=6.21.1",
     "pytest>=9.1.1",
 ]
 # The simulation notebooks' dependency, and the ONLY thing here that needs a

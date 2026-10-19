@@ -8,7 +8,7 @@ cannot run it.
 
 ```bash
 uv sync                       # no `db` group: no DB client, no Rust/C toolchain
-uv run pytest -q tests        # 251 tests, all against these files
+uv run pytest -q tests        # 283 tests, all against these files
 uv run jupyter lab            # fish_model_analysis/fish_model_measurements.ipynb
 ```
 

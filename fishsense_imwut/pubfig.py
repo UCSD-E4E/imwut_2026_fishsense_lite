@@ -656,6 +656,29 @@ def fig_error_by_dive(
 #: choose and will not survive a reordering of the draft; a title that says
 #: "Fig 15" on a file that becomes Figure 11 is worse than no title at all.
 #: These name what the figure SHOWS, which does not change when it moves.
+#: The system's name in every drawn label. The paper is under double-blind review
+#: as "FishCamera"; set it here, once, so a re-render cannot bring the real name
+#: back. `tests/test_anonymized_figures.py` scans the paper's figures for it.
+SYSTEM_NAME = "FishCamera"
+
+#: The figure files the paper uses. `save_figure` always writes these PDFs without
+#: the stamped title, whatever the caller passes: the caption carries it.
+PAPER_FIGURES = frozenset({
+    "fig1_measured_vs_known", "fig2_error_by_model", "fig8_error_vs_angle",
+    "fig11_field_repeatability", "fig12_field_species", "fig15_paired_vs_stereo",
+    "fig16_p90_vs_sample_size", "fig20_calibration_substitution_dumbbell",
+    "fig21_working_range",
+})
+
+#: File metadata `save_figure` writes: none. Matplotlib otherwise stamps its own
+#: name, version and a creation date; a figure for double-blind review should say
+#: nothing about where or how it was made.
+CLEAN_METADATA = {
+    "pdf": {"Title": None, "Author": None, "Subject": None, "Keywords": None,
+            "Creator": None, "Producer": None, "CreationDate": None},
+    "png": {"Software": None},
+}
+
 FIGURE_TITLES = {
     "fig1_measured_vs_known": "Measured length against known length, pool cohort",
     "fig2_error_by_model": "Percent length error by target",
@@ -675,9 +698,9 @@ FIGURE_TITLES = {
     "fig12_field_species": "Length per animal by species, seven deployments",
     "fig13_field_by_camera": "Hogfish fork length by camera unit",
     "fig14_field_vs_stereo":
-        "FishSense Lite against underwater stereo video, per-species medians",
+        f"{SYSTEM_NAME} against underwater stereo video, per-species medians",
     "fig15_paired_vs_stereo":
-        "FishSense Lite against underwater stereo video, the same individuals",
+        f"{SYSTEM_NAME} against underwater stereo video, the same individuals",
     "fig16_p90_vs_sample_size":
         "Convergence of the $p_{90}$ estimate with frames per fish",
     "figA_all_dives_percent": "Percent length error for every session",
@@ -763,7 +786,7 @@ def save_figure(
     written = []
     for fmt in formats:
         path = outdir / f"{name}.{fmt}"
-        stamp = label is not None and (fmt != "pdf" or title_in_pdf)
+        stamp = label is not None and (fmt != "pdf" or (title_in_pdf and name not in PAPER_FIGURES))
         art = None
         if stamp:
             # wrap to the panel's own width: a 68-character title is 3.5 in at
@@ -780,7 +803,8 @@ def save_figure(
                            fontsize=size, color=INK_SECONDARY)
         # no bbox_inches/pad_inches here: use_publication_style already sets
         # them, and overriding would silently re-crop every typeset PDF
-        fig.savefig(path, dpi=300 if fmt == "png" else None)
+        fig.savefig(path, dpi=300 if fmt == "png" else None,
+                    metadata=CLEAN_METADATA.get(fmt))
         if art is not None:
             art.remove()
         written.append(path)
@@ -1659,7 +1683,7 @@ def fig_field_vs_stereo(
     ax.set_ylim(lo, hi)
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlabel("Stereo-video archive, median (cm)")
-    ax.set_ylabel("FishSense Lite, median (cm)")
+    ax.set_ylabel(f"{SYSTEM_NAME}, median (cm)")
     ax.legend(loc="upper left", frameon=False, fontsize=7)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
@@ -1749,7 +1773,7 @@ def fig_paired_vs_stereo(
     ax.set_ylim(*span)
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlabel("Stereo-video length, same individual (cm)")
-    ax.set_ylabel("FishSense Lite length (cm)")
+    ax.set_ylabel(f"{SYSTEM_NAME} length (cm)")
     ax.legend(loc="upper left", handletextpad=0.4, borderaxespad=0.2)
     _r2_annotation(ax, r2, r2_basis)
     fig.tight_layout()

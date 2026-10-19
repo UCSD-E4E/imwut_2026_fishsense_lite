@@ -659,7 +659,9 @@ def test_both_formats_carry_the_title_and_it_can_be_turned_off():
         {n: pubfig  # a stand-in shaped like a RarefactionPoint
          for n in ()} or _tiny_rarefaction())
     with tempfile.TemporaryDirectory() as tmp:
-        written = pubfig.save_figure(fig, "fig16_p90_vs_sample_size", tmp)
+        # a repository-only name: the paper's own figures are always written
+        # title-free (`pubfig.PAPER_FIGURES`), which is checked below
+        written = pubfig.save_figure(fig, "repo_only_check", tmp, title="A preview title")
         pdf = next(p for p in written if p.suffix == ".pdf")
         png = next(p for p in written if p.suffix == ".png")
         # The title is drawn above the figure rectangle and `bbox="tight"` grows
@@ -674,6 +676,11 @@ def test_both_formats_carry_the_title_and_it_can_be_turned_off():
         assert _pdf_height_pt(pdf) > _pdf_height_pt(
             next(p for p in bare if p.suffix == ".pdf")), \
             "the PDF must carry its title; title_in_pdf=False must drop it"
+        paper = pubfig.save_figure(pubfig.fig_p90_vs_sample_size(_tiny_rarefaction()),
+                                   "fig16_p90_vs_sample_size", tmp)
+        assert _pdf_height_pt(next(p for p in paper if p.suffix == ".pdf")) == pytest.approx(
+            _pdf_height_pt(next(p for p in bare if p.suffix == ".pdf"))), \
+            "a paper figure's PDF is written title-free whatever the caller passes"
 
     # and every committed figure has a title registered for its preview
     figures = Path(__file__).resolve().parents[1] / "fish_model_analysis" / "figures"
